@@ -1,0 +1,26 @@
+generator client {
+  provider     = "prisma-client"
+  // Change output to just ../generated to simplify imports
+  output       = "../generated" 
+  // IMPORTANT: Set this for NestJS compatibility
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+model User {
+  id            String   @id @default(uuid())
+  githubHandle  String   @unique
+  solanaWallet  String   @unique
+  contributions Contribution[]
+}
+
+model Contribution {
+  id         String   @id @default(uuid())
+  prId       String   @unique
+  amount     Float
+  status     String   @default("PENDING")
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+}
