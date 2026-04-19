@@ -1,16 +1,30 @@
+// packages/database/index.ts
+
 import { PrismaClient } from './generated/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
 import { neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
 
-// Required for Node.js environments
 neonConfig.webSocketConstructor = ws;
 
-// Pass the connection string inside a config object
-// This lets Prisma manage the pool internally and avoids the TS(2345) error
-const adapter = new PrismaNeon({ 
-  connectionString: process.env.DATABASE_URL 
-});
+// We create a variable to hold our singleton
+let prismaInstance: PrismaClient | null = null;
 
-export const prisma = new PrismaClient({ adapter });
-export * from './generated/client';
+// This function ensures we only create the client when we actually need it
+export const getPrisma = (): PrismaClient => {
+  if (prismaInstance) return prismaInstance;
+
+  const connectionString = process.env.DATABASE_URL;
+  
+  if (!connectionString) {
+    throw new Error('❌ DATABASE_URL is missing from environment variables!');
+  }
+
+  const adapter = new PrismaNeon({ connectionString });
+  prismaInstance = new PrismaClient({ adapter });
+  
+  return prismaInstance;
+};
+
+// Also export the type for the Oracle service
+export { PrismaClient } from './generated/client';
