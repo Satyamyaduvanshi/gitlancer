@@ -8,10 +8,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule,{ rawBody: true });
 
   app.enableCors({
-    origin: '*', // Allow all origins (required for wallets)
+    origin: '*', 
     methods: 'GET,POST,PUT,OPTIONS',
     allowedHeaders: [
       'Content-Type', 
@@ -24,7 +24,7 @@ async function bootstrap() {
     exposedHeaders: ['x-blockchain-ids', 'x-action-version'],
   });
 
-  // 🧪 Debug Log: This MUST show a string, not undefined
+  // debug log show a string, not undefined
   console.log('🔑 Database Check:', process.env.DATABASE_URL ? 'URL Found ✅' : 'URL Missing ❌');
   
   await app.listen(3000);

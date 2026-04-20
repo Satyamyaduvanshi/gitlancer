@@ -7,9 +7,12 @@ import { AiService } from './ai/ai.service';
 import { SolanaService } from './solana/solana.service';
 import { PrismaService } from './prisma/prisma.service';
 import { ActionsController } from './actions/actions.controller';
+import { UsersController } from './users/users.controller';
+import { UsersModule } from './users/users.module';
+import { GithubModule } from './github/github.module';
 @Module({
-  imports: [PrismaModule, WebhooksModule],
-  controllers: [AppController,ActionsController],
+  imports: [PrismaModule, WebhooksModule,UsersModule, GithubModule],
+  controllers: [AppController,ActionsController, UsersController],
   providers: [AppService, AiService, SolanaService, PrismaService],
 })
 export class AppModule {}
