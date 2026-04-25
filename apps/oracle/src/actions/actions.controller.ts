@@ -12,7 +12,6 @@ export class ActionsController {
   @Inject(PrismaService)
   private readonly prisma: PrismaService;
 
-  // Syncing with your .env
   private readonly baseUrl = process.env.BASE_URL || 'http://localhost:3000';
   private readonly webUrl = process.env.WEB_URL || 'http://localhost:3001';
 
@@ -29,7 +28,7 @@ export class ActionsController {
       const contribution = await this.prisma.client.contribution.findFirst({
         where: { userId: userId, status: 'AUDITED' },
         orderBy: { createdAt: 'desc' },
-        include: { user: true, vault: true } // Need vault to get the repo name
+        include: { user: true, vault: true }
       });
 
       if (!contribution) {
@@ -38,7 +37,6 @@ export class ActionsController {
         });
       }
 
-      // Check if wallet is linked
       if (!contribution.user?.solanaWallet) {
         return res.set(ACTIONS_CORS_HEADERS).json({
           type: "action",
@@ -96,21 +94,20 @@ export class ActionsController {
         throw new Error("Contribution record not found.");
       }
 
-      // 🛡️ Security Guard
       if (account !== contribution.user.solanaWallet) {
         return res.set(ACTIONS_CORS_HEADERS).status(HttpStatus.FORBIDDEN).json({
           message: "Unauthorized: Wallet mismatch. Please use your linked wallet."
         });
       }
 
-      // Build the transaction using our Smart Contract logic
+      // 🛡️ UPDATED: Pass the prId to the Solana Service
       const transaction = await this.solana.createClaimTransaction(
         contribution.vault.repositoryFullName, 
         account, 
-        contribution.amount
+        contribution.amount,
+        String(contribution.prId) // 👈 NEW
       );
 
-      // 💡 Move status update to AFTER the transaction is returned or use a 'CLAIMING' status
       await this.prisma.client.contribution.update({
         where: { id: contribution.id },
         data: { status: 'CLAIMED' }

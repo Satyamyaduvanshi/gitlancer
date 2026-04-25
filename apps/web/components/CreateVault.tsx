@@ -9,40 +9,62 @@ import axios from 'axios';
 import idl from '../src/idl/solux_program.json'; 
 
 const PROGRAM_ID = new PublicKey("JBnTbnqcvXTmw7nZ6TuLbGcY7U5b8Du7YPpK5G8nByyi");
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export default function CreateVault() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const { connection } = useConnection();
   const wallet = useWallet();
 
   const [mounted, setMounted] = useState(false);
   const [repos, setRepos] = useState<any[]>([]);
+  const [existingVaults, setExistingVaults] = useState<string[]>([]);
   const [selectedRepo, setSelectedRepo] = useState('');
   const [loadingRepos, setLoadingRepos] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+  
+  // 🛡️ Modern UI Alert State
+  const [status, setStatus] = useState<{ type: 'success' | 'error' | 'info', msg: string } | null>(null);
 
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    const fetchRepos = async () => {
+    const fetchReposAndVaults = async () => {
       const token = (session as any)?.accessToken;
-      if (token && mounted) {
+      const userId = (session as any)?.user?.id;
+      
+      if (token && userId && mounted) {
         setLoadingRepos(true);
         try {
-          const response = await axios.get('https://api.github.com/user/repos?per_page=100&sort=updated', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setRepos(response.data);
-        } catch (err) { console.error("Repo fetch failed", err); }
-        finally { setLoadingRepos(false); }
+          // Fetch GitHub repos and Existing DB Vaults simultaneously
+          const [repoRes, vaultRes] = await Promise.all([
+            axios.get('https://api.github.com/user/repos?per_page=100&sort=updated', {
+              headers: { Authorization: `Bearer ${token}` }
+            }),
+            axios.get(`${API_URL}/api/vaults/user/${userId}`)
+          ]);
+          
+          const registeredRepoNames = vaultRes.data.map((v: any) => v.repositoryFullName);
+          setExistingVaults(registeredRepoNames);
+          
+          // Filter out repos that are already initialized
+          const availableRepos = repoRes.data.filter((r: any) => !registeredRepoNames.includes(r.full_name));
+          setRepos(availableRepos);
+          
+        } catch (err) { 
+          console.error("Fetch failed", err); 
+        } finally { 
+          setLoadingRepos(false); 
+        }
       }
     };
-    fetchRepos();
+    fetchReposAndVaults();
   }, [session, mounted]);
 
   const handleInitialize = async () => {
     if (!wallet.publicKey || !wallet.signTransaction || !session?.user) return;
     setIsInitializing(true);
+    setStatus({ type: 'info', msg: 'Processing transaction on Solana...' });
 
     try {
       const provider = new AnchorProvider(connection, wallet as any, { preflightCommitment: 'processed' });
@@ -53,8 +75,6 @@ export default function CreateVault() {
         PROGRAM_ID
       );
 
-      console.log(`🏗️ Initializing/Verifying vault: ${selectedRepo}`);
-      
       try {
         await program.methods
           .initializeVault(selectedRepo)
@@ -71,8 +91,7 @@ export default function CreateVault() {
         }
       }
 
-      // 🚀 Send FULL user info so the backend can sync the identity
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/vaults/register`, {
+      await axios.post(`${API_URL}/api/vaults/register`, {
         repoFullName: selectedRepo,
         pdaAddress: vaultPda.toBase58(),
         maintainerId: (session.user as any).id,
@@ -81,22 +100,23 @@ export default function CreateVault() {
         vaultBump: bump,
       });
 
-      alert("🎉 Success! Vault is fully registered.");
+      setStatus({ type: 'success', msg: `🎉 Vault registered for ${selectedRepo}` });
+      setRepos(repos.filter(r => r.full_name !== selectedRepo)); // Remove from dropdown
       setSelectedRepo('');
     } catch (err: any) {
       console.error(err);
-      alert(`Error: ${err.response?.data?.message || err.message}`);
+      setStatus({ type: 'error', msg: `Error: ${err.response?.data?.message || err.message}` });
     } finally {
       setIsInitializing(false);
     }
   };
 
-  if (!mounted) return <div className="p-6 bg-gray-900 border border-gray-800 rounded-2xl h-64 animate-pulse" />;
+  if (!mounted) return <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl h-64 animate-pulse" />;
 
   return (
-    <div className="p-6 bg-gray-900 border border-gray-800 rounded-2xl shadow-xl text-white">
+    <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl text-white">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-purple-400">Manage Vaults</h2>
+        <h2 className="text-xl font-bold text-emerald-400">Initialize Vault</h2>
         <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700 !rounded-lg !h-10 !text-sm" />
       </div>
 
@@ -105,29 +125,45 @@ export default function CreateVault() {
           Login with GitHub
         </button>
       ) : !wallet.connected ? (
-        <div className="text-center py-10 border-2 border-dashed border-gray-800 rounded-xl">
-          <p className="text-gray-400 text-sm">Connect your Solana wallet to continue</p>
+        <div className="text-center py-10 border-2 border-dashed border-slate-800 rounded-xl">
+          <p className="text-slate-400 text-sm">Connect your Solana wallet to continue</p>
         </div>
       ) : (
         <div className="space-y-4">
           <select 
-            className="w-full bg-black border border-gray-700 rounded-lg p-3 outline-none focus:border-purple-500 transition"
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 outline-none focus:border-emerald-500 transition text-sm"
             value={selectedRepo}
-            onChange={(e) => setSelectedRepo(e.target.value)}
+            onChange={(e) => {
+              setSelectedRepo(e.target.value);
+              setStatus(null); // Clear alert on new selection
+            }}
           >
-            <option value="">-- Select a Repository --</option>
-            {repos.map((repo) => (
-              <option key={repo.id} value={repo.full_name}>{repo.full_name}</option>
-            ))}
+            <option value="">-- Select an Uninitialized Repository --</option>
+            {loadingRepos ? <option disabled>Loading...</option> : 
+              repos.map((repo) => (
+                <option key={repo.id} value={repo.full_name}>{repo.full_name}</option>
+              ))
+            }
           </select>
 
           <button
             onClick={handleInitialize}
             disabled={!selectedRepo || isInitializing}
-            className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 p-3 rounded-lg font-bold transition duration-200"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-800 p-3 rounded-lg font-bold transition duration-200"
           >
-            {isInitializing ? "Syncing..." : "Activate SOLUX Vault"}
+            {isInitializing ? "Syncing with Blockchain..." : "Activate SOLUX Vault"}
           </button>
+
+          {/* Modern Alert Box */}
+          {status && (
+            <div className={`p-3 rounded-lg text-xs font-mono border ${
+              status.type === 'success' ? 'bg-emerald-900/20 border-emerald-500/30 text-emerald-400' :
+              status.type === 'error' ? 'bg-red-900/20 border-red-500/30 text-red-400' :
+              'bg-blue-900/20 border-blue-500/30 text-blue-400'
+            }`}>
+              {status.msg}
+            </div>
+          )}
         </div>
       )}
     </div>

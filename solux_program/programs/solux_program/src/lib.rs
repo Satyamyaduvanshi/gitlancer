@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{self, TokenAccount, TokenInterface, Transfer};
+use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface, TransferChecked};
 
-//address 
+// Your program address
 declare_id!("JBnTbnqcvXTmw7nZ6TuLbGcY7U5b8Du7YPpK5G8nByyi");
 
 #[program]
@@ -15,15 +15,27 @@ pub mod solux_program {
         vault_state.repo_name = repo_name;
         vault_state.vault_bump = ctx.bumps.vault_state;
         
-        msg!("🏦 Vault Initialized for repo: {}", vault_state.repo_name);
+        msg!("Vault Initialized for repo: {}", vault_state.repo_name);
         Ok(())
     }
 
-    pub fn distribute_bounty(ctx: Context<DistributeBounty>, repo_name: String, amount: u64) -> Result<()> {
-        // 🛡️ Security: Ensure the transaction was signed by your NestJS Oracle
+    // PR ID added to arguments to prevent double-spending
+    pub fn distribute_bounty(
+        ctx: Context<DistributeBounty>, 
+        repo_name: String, 
+        amount: u64, 
+        pr_id: String
+    ) -> Result<()> {
+        
+        //  Ensure the transaction was signed by your NestJS Oracle
         let oracle_pubkey = "BckCM2MP2hv5fQXUCr52kKuxs4wFMcWXHfe6kBVdGBTF".parse::<Pubkey>().unwrap();
         require_keys_eq!(ctx.accounts.oracle.key(), oracle_pubkey, ErrorCode::UnauthorizedOracle);
 
+        //  Mark this exact PR as paid permanently on-chain
+        let bounty_record = &mut ctx.accounts.bounty_record;
+        bounty_record.is_paid = true;
+
+        //  Process the USDC Transfer using modern transfer_checked
         let repo_name_bytes = repo_name.as_bytes();
         let bump = &[ctx.accounts.vault_state.vault_bump];
         let seeds = &[
@@ -33,9 +45,9 @@ pub mod solux_program {
         ];
         let signer_seeds = &[&seeds[..]];
 
-        // CPI to Token Program using the Interface
-        let cpi_accounts = Transfer {
+        let cpi_accounts = TransferChecked {
             from: ctx.accounts.vault_token_account.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(), 
             to: ctx.accounts.contributor_token_account.to_account_info(),
             authority: ctx.accounts.vault_state.to_account_info(),
         };
@@ -43,9 +55,10 @@ pub mod solux_program {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
 
-        token_interface::transfer(cpi_ctx, amount)?;
+       
+        token_interface::transfer_checked(cpi_ctx, amount, 6)?;
 
-        msg!("💰 Bounty of {} distributed successfully!", amount);
+        msg!("Bounty of {} distributed successfully for PR #{}!", amount, pr_id);
         Ok(())
     }
 }
@@ -71,15 +84,28 @@ pub struct InitializeVault<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(repo_name: String)]
+#[instruction(repo_name: String, amount: u64, pr_id: String)]
 pub struct DistributeBounty<'info> {
     pub oracle: Signer<'info>, 
+
+    #[account(mut)]
+    pub contributor: Signer<'info>, 
 
     #[account(
         seeds = [b"vault", repo_name.as_bytes()],
         bump = vault_state.vault_bump,
     )]
     pub vault_state: Account<'info, VaultState>,
+
+    //  Double-Spend checkup
+    #[account(
+        init,
+        payer = contributor,
+        space = 8 + 1, 
+        seeds = [b"bounty", vault_state.key().as_ref(), pr_id.as_bytes()],
+        bump
+    )]
+    pub bounty_record: Account<'info, BountyRecord>,
 
     #[account(
         mut,
@@ -90,10 +116,14 @@ pub struct DistributeBounty<'info> {
     #[account(mut)]
     pub contributor_token_account: InterfaceAccount<'info, TokenAccount>,
 
-    pub token_program: Interface<'info, TokenInterface>, // 👈 Works with both Token & Token-2022
+    pub mint: InterfaceAccount<'info, Mint>, 
+
+    pub token_program: Interface<'info, TokenInterface>,
+    
+    pub system_program: Program<'info, System>, 
 }
 
-// --- STATE DEFINITIONS ---
+// STATE DEFINITIONS 
 
 #[account]
 pub struct VaultState {
@@ -102,7 +132,12 @@ pub struct VaultState {
     pub vault_bump: u8,
 }
 
-// --- CUSTOM ERRORS ---
+#[account]
+pub struct BountyRecord {
+    pub is_paid: bool,
+}
+
+//CUSTOM ERRORS 
 
 #[error_code]
 pub enum ErrorCode {

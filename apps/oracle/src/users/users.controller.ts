@@ -5,8 +5,11 @@ import {
   Inject,
   Post,
   Logger,
+  Headers,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import axios from 'axios';
 
 @Controller('api/users')
 export class UsersController {
@@ -17,6 +20,7 @@ export class UsersController {
 
   @Post('link')
   async linkWallet(
+    @Headers('authorization') authHeader: string, // 🛡️ Bearer token from frontend
     @Body() body: { 
       githubId: string;      
       githubHandle: string; 
@@ -24,18 +28,21 @@ export class UsersController {
       avatarUrl?: string;   
     },
   ) {
-    // 1. Validation
-    if (!body.githubId || !body.walletAddress) {
-      throw new BadRequestException('githubId and walletAddress are required');
-    }
-
-    // Basic Solana address length check (32-44 chars)
-    if (body.walletAddress.length < 32 || body.walletAddress.length > 44) {
-      throw new BadRequestException('Invalid Solana wallet address format');
-    }
+    if (!authHeader) throw new UnauthorizedException('Security token is missing');
+    if (!body.githubId || !body.walletAddress) throw new BadRequestException('Required fields missing');
 
     try {
-      // 2. Upsert: Create user if they don't exist, update wallet if they do
+      // 🛡️ SECURITY CHECK: Verify identity with GitHub API
+      const githubResponse = await axios.get('https://api.github.com/user', {
+        headers: { Authorization: authHeader },
+      });
+
+      // Cross-reference the token's owner with the githubId provided in the body
+      if (githubResponse.data.id.toString() !== body.githubId) {
+        throw new UnauthorizedException('Identity Mismatch: You cannot link a wallet to someone else\'s account.');
+      }
+
+      // 2. Identity is verified. Now link the wallet.
       const user = await this.prisma.client.user.upsert({
         where: { id: body.githubId },
         update: { 
@@ -51,17 +58,12 @@ export class UsersController {
         },
       });
 
-      this.logger.log(`🔗 Identity Linked: @${body.githubHandle} -> ${body.walletAddress.slice(0, 4)}...${body.walletAddress.slice(-4)}`);
-      
-      return {
-        success: true,
-        userId: user.id,
-        wallet: user.solanaWallet
-      };
+      this.logger.log(`🔗 Verified & Linked: @${body.githubHandle} -> ${body.walletAddress.slice(0, 8)}...`);
+      return { success: true, wallet: user.solanaWallet };
 
     } catch (error) {
-      this.logger.error(`❌ Failed to link wallet: ${error.message}`);
-      throw new BadRequestException('Database error occurred during identity linking.');
+      this.logger.error(`❌ Security/Linking Error: ${error.message}`);
+      throw new BadRequestException(error.response?.data?.message || 'Identity verification failed.');
     }
   }
 }

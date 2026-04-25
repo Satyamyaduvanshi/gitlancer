@@ -1,27 +1,25 @@
-import { Controller, Post, Body, Inject, Logger, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Inject, Logger, BadRequestException, Get, Param } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
-@Controller('api/vaults')
+@Controller('api') // 👈 CHANGE 1: We removed '/vaults' from here
 export class VaultsController {
   private readonly logger = new Logger(VaultsController.name);
 
   @Inject(PrismaService)
   private readonly prisma: PrismaService;
 
-  @Post('register')
+  @Post('vaults/register') // 👈 CHANGE 2: Added 'vaults/' here
   async registerVault(@Body() body: {
     repoFullName: string;
     pdaAddress: string;
     maintainerId: string;
-    githubHandle: string; // 👈 Added
-    avatarUrl: string;    // 👈 Added
+    githubHandle: string;
+    avatarUrl: string;
     vaultBump: number;
   }) {
     const { repoFullName, pdaAddress, maintainerId, githubHandle, avatarUrl, vaultBump } = body;
 
     try {
-      // 1. 🛡️ User Sync: Ensure the maintainer exists in the DB
-      // We use upsert so we don't need a separate "Link Wallet" step first
       const user = await this.prisma.client.user.upsert({
         where: { id: maintainerId },
         update: { githubHandle, avatarUrl },
@@ -32,7 +30,6 @@ export class VaultsController {
         },
       });
 
-      // 2. 🏦 Vault Creation
       const vault = await this.prisma.client.vault.upsert({
         where: { repositoryFullName: repoFullName },
         update: {
@@ -59,6 +56,30 @@ export class VaultsController {
           ? "This repository or PDA is already registered." 
           : "Database synchronization failed."
       );
+    }
+  }
+
+  @Get('vaults/user/:id') // 👈 CHANGE 3: Added 'vaults/' here
+  async getUserVaults(@Param('id') userId: string) {
+    try {
+      return await this.prisma.client.vault.findMany({
+        where: { maintainerId: userId },
+        orderBy: { createdAt: 'desc' }
+      });
+    } catch (error) {
+      throw new BadRequestException("Failed to fetch vaults");
+    }
+  }
+
+  @Get('bounties/user/:id') // 👈 Now this matches the frontend perfectly!
+  async getUserBounties(@Param('id') userId: string) {
+    try {
+      return await this.prisma.client.contribution.findMany({
+        where: { userId: userId },
+        orderBy: { createdAt: 'desc' }
+      });
+    } catch (error) {
+      throw new BadRequestException("Failed to fetch bounties");
     }
   }
 }

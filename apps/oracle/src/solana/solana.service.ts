@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, Transaction, SystemProgram } from '@solana/web3.js';
 import { Program, AnchorProvider, Wallet, Idl, BN } from '@coral-xyz/anchor';
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import * as fs from 'fs';
@@ -37,39 +37,47 @@ export class SolanaService implements OnModuleInit {
   /**
    * Builds the transaction for a Bounty Claim Blink
    */
-  async createClaimTransaction(repoFullName: string, contributorAddress: string, amountInUsdc: number) {
+  async createClaimTransaction(repoFullName: string, contributorAddress: string, amountInUsdc: number, prId: string) {
     const contributor = new PublicKey(contributorAddress);
     const amount = new BN(amountInUsdc * 1_000_000); // Handle USDC 6 decimals
 
-    // 1. Derive PDAs
+    // 1. Derive Vault PDA
     const [vaultStatePda] = PublicKey.findProgramAddressSync(
       [Buffer.from("vault"), Buffer.from(repoFullName)],
+      this.programId
+    );
+
+    // 2. 🛡️ Derive Anti-Double-Spend Bounty PDA
+    const [bountyPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("bounty"), vaultStatePda.toBuffer(), Buffer.from(prId)],
       this.programId
     );
 
     const vaultUsdcAccount = getAssociatedTokenAddressSync(this.usdcMint, vaultStatePda, true);
     const contributorUsdcAccount = getAssociatedTokenAddressSync(this.usdcMint, contributor);
 
-    // 2. Build the instruction from our Smart Contract
+    // 3. Build the upgraded instruction
     const instruction = await this.program.methods
-      .distributeBounty(repoFullName, amount)
+      .distributeBounty(repoFullName, amount, prId) 
       .accounts({
         oracle: this.oracleDelegate.publicKey,
+        contributor: contributor,                   
         vaultState: vaultStatePda,
+        bountyRecord: bountyPda,                    
         vaultTokenAccount: vaultUsdcAccount,
         contributorTokenAccount: contributorUsdcAccount,
+        mint: this.usdcMint,                       
         tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,     
       })
       .instruction();
 
-    // 3. Create Transaction
+    // 4. Create Transaction
     const transaction = new Transaction().add(instruction);
-    transaction.feePayer = contributor; // User pays the tiny gas fee to claim
+    transaction.feePayer = contributor;
     transaction.recentBlockhash = (await this.connection.getLatestBlockhash()).blockhash;
 
-    // 4. 🛡️ PARTIAL SIGN
-    // This is the most important part! Our Rust code says the Oracle MUST sign.
-    // We sign it here on the backend, then the user signs in their wallet.
+    // 5. PARTIAL SIGN by Oracle
     transaction.partialSign(this.oracleDelegate);
 
     return transaction;
