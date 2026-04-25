@@ -9,8 +9,10 @@ export class GithubService {
   private readonly logger = new Logger(GithubService.name);
   private readonly appId = process.env.GITHUB_APP_ID;
   private readonly privateKeyPath = path.resolve(process.env.GITHUB_PRIVATE_KEY_PATH || './blinky-key.pem');
+  
+  
+  private readonly baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 
-  // 🛡️ 1. Create a JWT to authenticate as the SOLUX App
   private generateJwt(): string {
     const privateKey = fs.readFileSync(this.privateKeyPath, 'utf8');
     const payload = {
@@ -21,23 +23,35 @@ export class GithubService {
     return jwt.sign(payload, privateKey, { algorithm: 'RS256' });
   }
 
-  // 🛡️ 2. Get a temporary token for the specific repo installation
   private async getInstallationToken(installationId: string): Promise<string> {
     const token = this.generateJwt();
     const response = await axios.post(
       `https://api.github.com/app/installations/${installationId}/access_tokens`,
       {},
-      { 
-        headers: { 
-          Authorization: `Bearer ${token}`, 
-          Accept: 'application/vnd.github+json' 
-        } 
-      }
+      { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' } }
     );
     return response.data.token;
   }
 
-  // 🛡️ 3. Generic method to post any comment to a PR
+
+  async getGithubUserInfo(installationId: string, username: string) {
+    try {
+      const token = await this.getInstallationToken(installationId);
+      const response = await axios.get(`https://api.github.com/users/${username}`, {
+        headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' }
+      });
+      
+      return {
+        avatarUrl: response.data.avatar_url,
+        name: response.data.name || username,
+      };
+    } catch (error) {
+      this.logger.error(`❌ Failed to fetch GitHub profile for ${username}: ${error.message}`);
+      return null;
+    }
+  }
+
+
   async postComment(
     owner: string, 
     repo: string, 
@@ -50,10 +64,7 @@ export class GithubService {
       const url = `https://api.github.com/repos/${owner}/${repo}/issues/${prNumber}/comments`;
       
       await axios.post(url, { body }, {
-        headers: { 
-          Authorization: `token ${token}`, 
-          Accept: 'application/vnd.github+json' 
-        }
+        headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' }
       });
       this.logger.log(`💬 Comment posted on PR #${prNumber}`);
     } catch (error) {

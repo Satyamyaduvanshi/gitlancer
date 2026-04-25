@@ -27,19 +27,25 @@ export type AggregateUser = {
 export type UserMinAggregateOutputType = {
   id: string | null
   githubHandle: string | null
+  avatarUrl: string | null
   solanaWallet: string | null
+  createdAt: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
   id: string | null
   githubHandle: string | null
+  avatarUrl: string | null
   solanaWallet: string | null
+  createdAt: Date | null
 }
 
 export type UserCountAggregateOutputType = {
   id: number
   githubHandle: number
+  avatarUrl: number
   solanaWallet: number
+  createdAt: number
   _all: number
 }
 
@@ -47,19 +53,25 @@ export type UserCountAggregateOutputType = {
 export type UserMinAggregateInputType = {
   id?: true
   githubHandle?: true
+  avatarUrl?: true
   solanaWallet?: true
+  createdAt?: true
 }
 
 export type UserMaxAggregateInputType = {
   id?: true
   githubHandle?: true
+  avatarUrl?: true
   solanaWallet?: true
+  createdAt?: true
 }
 
 export type UserCountAggregateInputType = {
   id?: true
   githubHandle?: true
+  avatarUrl?: true
   solanaWallet?: true
+  createdAt?: true
   _all?: true
 }
 
@@ -138,7 +150,9 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type UserGroupByOutputType = {
   id: string
   githubHandle: string
-  solanaWallet: string
+  avatarUrl: string | null
+  solanaWallet: string | null
+  createdAt: Date
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -165,15 +179,21 @@ export type UserWhereInput = {
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   id?: Prisma.StringFilter<"User"> | string
   githubHandle?: Prisma.StringFilter<"User"> | string
-  solanaWallet?: Prisma.StringFilter<"User"> | string
+  avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
+  solanaWallet?: Prisma.StringNullableFilter<"User"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   contributions?: Prisma.ContributionListRelationFilter
+  vaults?: Prisma.VaultListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   githubHandle?: Prisma.SortOrder
-  solanaWallet?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  solanaWallet?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   contributions?: Prisma.ContributionOrderByRelationAggregateInput
+  vaults?: Prisma.VaultOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -183,13 +203,18 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
+  avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   contributions?: Prisma.ContributionListRelationFilter
+  vaults?: Prisma.VaultListRelationFilter
 }, "id" | "githubHandle" | "solanaWallet">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   githubHandle?: Prisma.SortOrder
-  solanaWallet?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  solanaWallet?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -201,71 +226,97 @@ export type UserScalarWhereWithAggregatesInput = {
   NOT?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"User"> | string
   githubHandle?: Prisma.StringWithAggregatesFilter<"User"> | string
-  solanaWallet?: Prisma.StringWithAggregatesFilter<"User"> | string
+  avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  solanaWallet?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
 
 export type UserCreateInput = {
-  id?: string
+  id: string
   githubHandle: string
-  solanaWallet: string
+  avatarUrl?: string | null
+  solanaWallet?: string | null
+  createdAt?: Date | string
   contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
+  vaults?: Prisma.VaultCreateNestedManyWithoutMaintainerInput
 }
 
 export type UserUncheckedCreateInput = {
-  id?: string
+  id: string
   githubHandle: string
-  solanaWallet: string
+  avatarUrl?: string | null
+  solanaWallet?: string | null
+  createdAt?: Date | string
   contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
+  vaults?: Prisma.VaultUncheckedCreateNestedManyWithoutMaintainerInput
 }
 
 export type UserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubHandle?: Prisma.StringFieldUpdateOperationsInput | string
-  solanaWallet?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  solanaWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
+  vaults?: Prisma.VaultUpdateManyWithoutMaintainerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubHandle?: Prisma.StringFieldUpdateOperationsInput | string
-  solanaWallet?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  solanaWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
+  vaults?: Prisma.VaultUncheckedUpdateManyWithoutMaintainerNestedInput
 }
 
 export type UserCreateManyInput = {
-  id?: string
+  id: string
   githubHandle: string
-  solanaWallet: string
+  avatarUrl?: string | null
+  solanaWallet?: string | null
+  createdAt?: Date | string
 }
 
 export type UserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubHandle?: Prisma.StringFieldUpdateOperationsInput | string
-  solanaWallet?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  solanaWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubHandle?: Prisma.StringFieldUpdateOperationsInput | string
-  solanaWallet?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  solanaWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   githubHandle?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrder
   solanaWallet?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   githubHandle?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrder
   solanaWallet?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   githubHandle?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrder
   solanaWallet?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -275,6 +326,28 @@ export type UserScalarRelationFilter = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
+}
+
+export type UserCreateNestedOneWithoutVaultsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutVaultsInput, Prisma.UserUncheckedCreateWithoutVaultsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutVaultsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutVaultsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutVaultsInput, Prisma.UserUncheckedCreateWithoutVaultsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutVaultsInput
+  upsert?: Prisma.UserUpsertWithoutVaultsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutVaultsInput, Prisma.UserUpdateWithoutVaultsInput>, Prisma.UserUncheckedUpdateWithoutVaultsInput>
 }
 
 export type UserCreateNestedOneWithoutContributionsInput = {
@@ -291,16 +364,74 @@ export type UserUpdateOneRequiredWithoutContributionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutContributionsInput, Prisma.UserUpdateWithoutContributionsInput>, Prisma.UserUncheckedUpdateWithoutContributionsInput>
 }
 
-export type UserCreateWithoutContributionsInput = {
-  id?: string
+export type UserCreateWithoutVaultsInput = {
+  id: string
   githubHandle: string
-  solanaWallet: string
+  avatarUrl?: string | null
+  solanaWallet?: string | null
+  createdAt?: Date | string
+  contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutVaultsInput = {
+  id: string
+  githubHandle: string
+  avatarUrl?: string | null
+  solanaWallet?: string | null
+  createdAt?: Date | string
+  contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutVaultsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutVaultsInput, Prisma.UserUncheckedCreateWithoutVaultsInput>
+}
+
+export type UserUpsertWithoutVaultsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutVaultsInput, Prisma.UserUncheckedUpdateWithoutVaultsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutVaultsInput, Prisma.UserUncheckedCreateWithoutVaultsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutVaultsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutVaultsInput, Prisma.UserUncheckedUpdateWithoutVaultsInput>
+}
+
+export type UserUpdateWithoutVaultsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  githubHandle?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  solanaWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutVaultsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  githubHandle?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  solanaWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutContributionsInput = {
+  id: string
+  githubHandle: string
+  avatarUrl?: string | null
+  solanaWallet?: string | null
+  createdAt?: Date | string
+  vaults?: Prisma.VaultCreateNestedManyWithoutMaintainerInput
 }
 
 export type UserUncheckedCreateWithoutContributionsInput = {
-  id?: string
+  id: string
   githubHandle: string
-  solanaWallet: string
+  avatarUrl?: string | null
+  solanaWallet?: string | null
+  createdAt?: Date | string
+  vaults?: Prisma.VaultUncheckedCreateNestedManyWithoutMaintainerInput
 }
 
 export type UserCreateOrConnectWithoutContributionsInput = {
@@ -322,13 +453,19 @@ export type UserUpdateToOneWithWhereWithoutContributionsInput = {
 export type UserUpdateWithoutContributionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubHandle?: Prisma.StringFieldUpdateOperationsInput | string
-  solanaWallet?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  solanaWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  vaults?: Prisma.VaultUpdateManyWithoutMaintainerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutContributionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubHandle?: Prisma.StringFieldUpdateOperationsInput | string
-  solanaWallet?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  solanaWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  vaults?: Prisma.VaultUncheckedUpdateManyWithoutMaintainerNestedInput
 }
 
 
@@ -338,10 +475,12 @@ export type UserUncheckedUpdateWithoutContributionsInput = {
 
 export type UserCountOutputType = {
   contributions: number
+  vaults: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   contributions?: boolean | UserCountOutputTypeCountContributionsArgs
+  vaults?: boolean | UserCountOutputTypeCountVaultsArgs
 }
 
 /**
@@ -361,36 +500,53 @@ export type UserCountOutputTypeCountContributionsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.ContributionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountVaultsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.VaultWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   githubHandle?: boolean
+  avatarUrl?: boolean
   solanaWallet?: boolean
+  createdAt?: boolean
   contributions?: boolean | Prisma.User$contributionsArgs<ExtArgs>
+  vaults?: boolean | Prisma.User$vaultsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   githubHandle?: boolean
+  avatarUrl?: boolean
   solanaWallet?: boolean
+  createdAt?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   githubHandle?: boolean
+  avatarUrl?: boolean
   solanaWallet?: boolean
+  createdAt?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
   id?: boolean
   githubHandle?: boolean
+  avatarUrl?: boolean
   solanaWallet?: boolean
+  createdAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "githubHandle" | "solanaWallet", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "githubHandle" | "avatarUrl" | "solanaWallet" | "createdAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   contributions?: boolean | Prisma.User$contributionsArgs<ExtArgs>
+  vaults?: boolean | Prisma.User$vaultsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -400,11 +556,14 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     contributions: Prisma.$ContributionPayload<ExtArgs>[]
+    vaults: Prisma.$VaultPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     githubHandle: string
-    solanaWallet: string
+    avatarUrl: string | null
+    solanaWallet: string | null
+    createdAt: Date
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -800,6 +959,7 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   contributions<T extends Prisma.User$contributionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$contributionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContributionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  vaults<T extends Prisma.User$vaultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$vaultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VaultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -831,7 +991,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
 export interface UserFieldRefs {
   readonly id: Prisma.FieldRef<"User", 'String'>
   readonly githubHandle: Prisma.FieldRef<"User", 'String'>
+  readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly solanaWallet: Prisma.FieldRef<"User", 'String'>
+  readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
 }
     
 
@@ -1246,6 +1408,30 @@ export type User$contributionsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.ContributionScalarFieldEnum | Prisma.ContributionScalarFieldEnum[]
+}
+
+/**
+ * User.vaults
+ */
+export type User$vaultsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Vault
+   */
+  select?: Prisma.VaultSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Vault
+   */
+  omit?: Prisma.VaultOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VaultInclude<ExtArgs> | null
+  where?: Prisma.VaultWhereInput
+  orderBy?: Prisma.VaultOrderByWithRelationInput | Prisma.VaultOrderByWithRelationInput[]
+  cursor?: Prisma.VaultWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.VaultScalarFieldEnum | Prisma.VaultScalarFieldEnum[]
 }
 
 /**

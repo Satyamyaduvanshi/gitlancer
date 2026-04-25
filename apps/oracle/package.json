@@ -22,6 +22,7 @@
     "start:prod": "node dist/main"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "^0.32.1",
     "@gitlancer/db": "workspace:^",
     "@google/generative-ai": "^0.24.1",
     "@nestjs/common": "^11.0.1",

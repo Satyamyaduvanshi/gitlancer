@@ -45,6 +45,11 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
+ * Model Vault
+ * 
+ */
+export type Vault = Prisma.VaultModel
+/**
  * Model Contribution
  * 
  */

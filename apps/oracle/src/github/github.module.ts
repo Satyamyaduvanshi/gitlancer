@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { GithubController } from './github.controller';
 import { GithubService } from './github.service'; // 🚀 Import the service
 import { PrismaModule } from '../prisma/prisma.module'; // Ensure Prisma is accessible
-import { AiService } from 'src/ai/ai.service';
+import { AiService } from '../ai/ai.service';
 
 @Module({
   imports: [PrismaModule], // If you need Prisma inside GithubService/Controller

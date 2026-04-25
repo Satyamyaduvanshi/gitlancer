@@ -2,14 +2,16 @@ import { Module } from '@nestjs/common';
 import { WebhooksController } from './webhooks.controller';
 import { WebhooksService } from './webhooks.service';
 import { AiService } from '../ai/ai.service';
-import { SolanaService } from '../solana/solana.service'; // Added this
+import { PrismaModule } from '../prisma/prisma.module';
+import { GithubModule } from '../github/github.module'; // 👈 Essential for commenting
 
 @Module({
-  controllers: [WebhooksController],
-  providers: [
-    WebhooksService, 
-    AiService, 
-    SolanaService // Added this
+  imports: [
+    PrismaModule, 
+    GithubModule, 
   ],
+  controllers: [WebhooksController],
+  providers: [WebhooksService, AiService],
+  exports: [WebhooksService],
 })
 export class WebhooksModule {}

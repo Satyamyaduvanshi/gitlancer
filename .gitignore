@@ -36,3 +36,16 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Web3 Secrets & Keys
+*.json
+!package.json
+!tsconfig.json
+treasury.json
+oracle-key.json
+
+# Environment Variables
+.env
+.env.local
+.env.*
+oracle-delegate.json

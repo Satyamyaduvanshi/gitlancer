@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  Vault: 'Vault',
   Contribution: 'Contribution'
 } as const
 
@@ -74,10 +75,25 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const UserScalarFieldEnum = {
   id: 'id',
   githubHandle: 'githubHandle',
-  solanaWallet: 'solanaWallet'
+  avatarUrl: 'avatarUrl',
+  solanaWallet: 'solanaWallet',
+  createdAt: 'createdAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const VaultScalarFieldEnum = {
+  id: 'id',
+  repositoryFullName: 'repositoryFullName',
+  pdaAddress: 'pdaAddress',
+  vaultBump: 'vaultBump',
+  budgetLimit: 'budgetLimit',
+  maintainerId: 'maintainerId',
+  createdAt: 'createdAt'
+} as const
+
+export type VaultScalarFieldEnum = (typeof VaultScalarFieldEnum)[keyof typeof VaultScalarFieldEnum]
 
 
 export const ContributionScalarFieldEnum = {
@@ -85,7 +101,9 @@ export const ContributionScalarFieldEnum = {
   prId: 'prId',
   amount: 'amount',
   status: 'status',
-  userId: 'userId'
+  userId: 'userId',
+  vaultId: 'vaultId',
+  createdAt: 'createdAt'
 } as const
 
 export type ContributionScalarFieldEnum = (typeof ContributionScalarFieldEnum)[keyof typeof ContributionScalarFieldEnum]
@@ -105,4 +123,12 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

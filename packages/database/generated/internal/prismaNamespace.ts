@@ -385,6 +385,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
+  Vault: 'Vault',
   Contribution: 'Contribution'
 } as const
 
@@ -401,7 +402,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "contribution"
+    modelProps: "user" | "vault" | "contribution"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -476,6 +477,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
+        }
+      }
+    }
+    Vault: {
+      payload: Prisma.$VaultPayload<ExtArgs>
+      fields: Prisma.VaultFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VaultFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VaultPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VaultFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VaultPayload>
+        }
+        findFirst: {
+          args: Prisma.VaultFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VaultPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VaultFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VaultPayload>
+        }
+        findMany: {
+          args: Prisma.VaultFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VaultPayload>[]
+        }
+        create: {
+          args: Prisma.VaultCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VaultPayload>
+        }
+        createMany: {
+          args: Prisma.VaultCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VaultCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VaultPayload>[]
+        }
+        delete: {
+          args: Prisma.VaultDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VaultPayload>
+        }
+        update: {
+          args: Prisma.VaultUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VaultPayload>
+        }
+        deleteMany: {
+          args: Prisma.VaultDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VaultUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VaultUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VaultPayload>[]
+        }
+        upsert: {
+          args: Prisma.VaultUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VaultPayload>
+        }
+        aggregate: {
+          args: Prisma.VaultAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVault>
+        }
+        groupBy: {
+          args: Prisma.VaultGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VaultGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VaultCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VaultCountAggregateOutputType> | number
         }
       }
     }
@@ -595,10 +670,25 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const UserScalarFieldEnum = {
   id: 'id',
   githubHandle: 'githubHandle',
-  solanaWallet: 'solanaWallet'
+  avatarUrl: 'avatarUrl',
+  solanaWallet: 'solanaWallet',
+  createdAt: 'createdAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const VaultScalarFieldEnum = {
+  id: 'id',
+  repositoryFullName: 'repositoryFullName',
+  pdaAddress: 'pdaAddress',
+  vaultBump: 'vaultBump',
+  budgetLimit: 'budgetLimit',
+  maintainerId: 'maintainerId',
+  createdAt: 'createdAt'
+} as const
+
+export type VaultScalarFieldEnum = (typeof VaultScalarFieldEnum)[keyof typeof VaultScalarFieldEnum]
 
 
 export const ContributionScalarFieldEnum = {
@@ -606,7 +696,9 @@ export const ContributionScalarFieldEnum = {
   prId: 'prId',
   amount: 'amount',
   status: 'status',
-  userId: 'userId'
+  userId: 'userId',
+  vaultId: 'vaultId',
+  createdAt: 'createdAt'
 } as const
 
 export type ContributionScalarFieldEnum = (typeof ContributionScalarFieldEnum)[keyof typeof ContributionScalarFieldEnum]
@@ -626,6 +718,14 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
 
@@ -649,16 +749,16 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
- * Reference to a field of type 'Float'
+ * Reference to a field of type 'DateTime'
  */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
     
 
 
 /**
- * Reference to a field of type 'Float[]'
+ * Reference to a field of type 'DateTime[]'
  */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
     
 
 
@@ -673,6 +773,34 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ContributionStatus'
+ */
+export type EnumContributionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContributionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ContributionStatus[]'
+ */
+export type ListEnumContributionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContributionStatus[]'>
     
 
 /**
@@ -771,6 +899,7 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
+  vault?: Prisma.VaultOmit
   contribution?: Prisma.ContributionOmit
 }
 

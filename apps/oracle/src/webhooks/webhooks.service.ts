@@ -1,62 +1,64 @@
-import { Injectable, Inject } from '@nestjs/common'; // Add Inject here
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiService } from '../ai/ai.service';
-import { SolanaService } from 'src/solana/solana.service';
+import { GithubService } from '../github/github.service';
 
 @Injectable()
 export class WebhooksService {
-  constructor(
-    @Inject(PrismaService) // Explicitly inject Prisma
-    private readonly prisma: PrismaService,
-    
-    @Inject(AiService)     // Explicitly inject AI Service
-    private readonly ai: AiService,
+  private readonly logger = new Logger(WebhooksService.name);
 
-    @Inject(SolanaService)
-    private readonly solana: SolanaService
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(AiService) private readonly ai: AiService,
+    @Inject(GithubService) private readonly github: GithubService,
   ) {
-    // Self-test log to confirm the fix
-    console.log('👷 WebhooksService Ready. Prisma:', !!this.prisma, 'AI:', !!this.ai);
+    this.logger.log('🏗️ Blinky Webhook Service Ready (Claim Mode)');
   }
 
   async processMerge(githubHandle: string, diffUrl: string, payload: any) {
-    const user = await this.prisma.client.user.findUnique({ where: { githubHandle } });
-    if (!user) return { status: 'no_wallet' };
-
-    console.log(`🤖 Auditing PR for ${githubHandle}...`);
+    const repoFullName = payload.repository.full_name;
+    const userId = payload.pull_request.user.id.toString();
+    const installationId = payload.installation.id;
+  
+    const vault = await this.prisma.client.vault.findUnique({ where: { repositoryFullName: repoFullName } });
+    if (!vault) return;
+  
+    // 🧠 1. Always Run AI Audit (The Core Feature)
     const audit = await this.ai.auditPullRequest(diffUrl);
-
-    // 1. Create the contribution record
-    const contribution = await this.prisma.client.contribution.create({
-      data: {
-        prId: payload.pull_request.id.toString(),
-        amount: audit.bountyUSDC,
-        userId: user.id,
-        status: 'AUDITED',
-      },
-    });
-
-    // 2. Trigger the Real Payout 💸
-    console.log(`💸 Sending ${audit.bountyUSDC} USDC to ${user.solanaWallet}...`);
-    try {
-      const signature = await this.solana.sendUSDC(user.solanaWallet, audit.bountyUSDC);
-      
-      // 3. Update status to PAID and save the TX signature
-      await this.prisma.client.contribution.update({
-        where: { id: contribution.id },
-        data: { 
-          status: 'PAID',
-          // Assuming you have a txHash field in your schema
-          // txHash: signature 
+    const user = await this.prisma.client.user.findUnique({ where: { id: userId } });
+  
+    let commentBody = `### 🛡️ GitLancer Guardian Audit\n\n**Analysis:** ${audit.reasoning}\n\n`;
+  
+    // 2. 🎭 Messaging Logic based on Identity
+    if (userId === vault.maintainerId) {
+      // MAINTAINER PERSONA
+      commentBody += `👋 **Greetings, Maintainer @${githubHandle}!**\n\nThank you for the high-quality contribution to your own repository. Blinky has successfully audited your merge and verified it against the GitLancer standards. No bounty was issued as this is a self-merge, but the audit trail is now cryptographically secured.`;
+    } else {
+      // CONTRIBUTOR PERSONA
+      commentBody += `🔥 **Great work @${githubHandle}!**\n\nBlinky has valued your contribution at **${audit.bountyUSDC} USDC**.`;
+  
+      // Create the record so it exists in the DB
+      const contribution = await this.prisma.client.contribution.create({
+        data: {
+          userId,
+          vaultId: vault.id,
+          prId: payload.pull_request.number.toString(),
+          amount: audit.bountyUSDC,
+          status: 'AUDITED',
         },
       });
-
-      console.log(`✅ Payout Successful! TX: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
-    } catch (err) {
-      console.error('❌ Payout Failed:', err);
-    }
-
-    return audit;
-  }
   
+      const webUrl = process.env.WEB_URL || 'http://localhost:3001';
+      const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+  
+      if (user?.solanaWallet) {
+        commentBody += `\n\n🎁 [Claim your reward via Solana Blink](${baseUrl}/api/actions/claim/${userId})`;
+      } else {
+        commentBody += `\n\n⚠️ **Identity Gap Detected:** You haven't linked your Solana wallet to GitLancer yet.\n\n[Link Wallet to Claim](${webUrl}/link?githubId=${userId})`;
+      }
+    }
+  
+    // 3. Post to GitHub
+    await this.github.postComment(payload.repository.owner.login, payload.repository.name, payload.pull_request.number, installationId, commentBody);
+  }
 }

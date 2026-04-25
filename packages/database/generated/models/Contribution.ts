@@ -38,16 +38,20 @@ export type ContributionMinAggregateOutputType = {
   id: string | null
   prId: string | null
   amount: number | null
-  status: string | null
+  status: $Enums.ContributionStatus | null
   userId: string | null
+  vaultId: string | null
+  createdAt: Date | null
 }
 
 export type ContributionMaxAggregateOutputType = {
   id: string | null
   prId: string | null
   amount: number | null
-  status: string | null
+  status: $Enums.ContributionStatus | null
   userId: string | null
+  vaultId: string | null
+  createdAt: Date | null
 }
 
 export type ContributionCountAggregateOutputType = {
@@ -56,6 +60,8 @@ export type ContributionCountAggregateOutputType = {
   amount: number
   status: number
   userId: number
+  vaultId: number
+  createdAt: number
   _all: number
 }
 
@@ -74,6 +80,8 @@ export type ContributionMinAggregateInputType = {
   amount?: true
   status?: true
   userId?: true
+  vaultId?: true
+  createdAt?: true
 }
 
 export type ContributionMaxAggregateInputType = {
@@ -82,6 +90,8 @@ export type ContributionMaxAggregateInputType = {
   amount?: true
   status?: true
   userId?: true
+  vaultId?: true
+  createdAt?: true
 }
 
 export type ContributionCountAggregateInputType = {
@@ -90,6 +100,8 @@ export type ContributionCountAggregateInputType = {
   amount?: true
   status?: true
   userId?: true
+  vaultId?: true
+  createdAt?: true
   _all?: true
 }
 
@@ -183,8 +195,10 @@ export type ContributionGroupByOutputType = {
   id: string
   prId: string
   amount: number
-  status: string
+  status: $Enums.ContributionStatus
   userId: string
+  vaultId: string | null
+  createdAt: Date
   _count: ContributionCountAggregateOutputType | null
   _avg: ContributionAvgAggregateOutputType | null
   _sum: ContributionSumAggregateOutputType | null
@@ -214,9 +228,12 @@ export type ContributionWhereInput = {
   id?: Prisma.StringFilter<"Contribution"> | string
   prId?: Prisma.StringFilter<"Contribution"> | string
   amount?: Prisma.FloatFilter<"Contribution"> | number
-  status?: Prisma.StringFilter<"Contribution"> | string
+  status?: Prisma.EnumContributionStatusFilter<"Contribution"> | $Enums.ContributionStatus
   userId?: Prisma.StringFilter<"Contribution"> | string
+  vaultId?: Prisma.StringNullableFilter<"Contribution"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Contribution"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  vault?: Prisma.XOR<Prisma.VaultNullableScalarRelationFilter, Prisma.VaultWhereInput> | null
 }
 
 export type ContributionOrderByWithRelationInput = {
@@ -225,20 +242,26 @@ export type ContributionOrderByWithRelationInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  vaultId?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  vault?: Prisma.VaultOrderByWithRelationInput
 }
 
 export type ContributionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  prId?: string
   AND?: Prisma.ContributionWhereInput | Prisma.ContributionWhereInput[]
   OR?: Prisma.ContributionWhereInput[]
   NOT?: Prisma.ContributionWhereInput | Prisma.ContributionWhereInput[]
+  prId?: Prisma.StringFilter<"Contribution"> | string
   amount?: Prisma.FloatFilter<"Contribution"> | number
-  status?: Prisma.StringFilter<"Contribution"> | string
+  status?: Prisma.EnumContributionStatusFilter<"Contribution"> | $Enums.ContributionStatus
   userId?: Prisma.StringFilter<"Contribution"> | string
+  vaultId?: Prisma.StringNullableFilter<"Contribution"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Contribution"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "id" | "prId">
+  vault?: Prisma.XOR<Prisma.VaultNullableScalarRelationFilter, Prisma.VaultWhereInput> | null
+}, "id">
 
 export type ContributionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -246,6 +269,8 @@ export type ContributionOrderByWithAggregationInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  vaultId?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   _count?: Prisma.ContributionCountOrderByAggregateInput
   _avg?: Prisma.ContributionAvgOrderByAggregateInput
   _max?: Prisma.ContributionMaxOrderByAggregateInput
@@ -260,63 +285,78 @@ export type ContributionScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Contribution"> | string
   prId?: Prisma.StringWithAggregatesFilter<"Contribution"> | string
   amount?: Prisma.FloatWithAggregatesFilter<"Contribution"> | number
-  status?: Prisma.StringWithAggregatesFilter<"Contribution"> | string
+  status?: Prisma.EnumContributionStatusWithAggregatesFilter<"Contribution"> | $Enums.ContributionStatus
   userId?: Prisma.StringWithAggregatesFilter<"Contribution"> | string
+  vaultId?: Prisma.StringNullableWithAggregatesFilter<"Contribution"> | string | null
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Contribution"> | Date | string
 }
 
 export type ContributionCreateInput = {
   id?: string
   prId: string
   amount: number
-  status?: string
+  status: $Enums.ContributionStatus
+  createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutContributionsInput
+  vault?: Prisma.VaultCreateNestedOneWithoutContributionsInput
 }
 
 export type ContributionUncheckedCreateInput = {
   id?: string
   prId: string
   amount: number
-  status?: string
+  status: $Enums.ContributionStatus
   userId: string
+  vaultId?: string | null
+  createdAt?: Date | string
 }
 
 export type ContributionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutContributionsNestedInput
+  vault?: Prisma.VaultUpdateOneWithoutContributionsNestedInput
 }
 
 export type ContributionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  vaultId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ContributionCreateManyInput = {
   id?: string
   prId: string
   amount: number
-  status?: string
+  status: $Enums.ContributionStatus
   userId: string
+  vaultId?: string | null
+  createdAt?: Date | string
 }
 
 export type ContributionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ContributionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  vaultId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ContributionListRelationFilter = {
@@ -335,6 +375,8 @@ export type ContributionCountOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  vaultId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type ContributionAvgOrderByAggregateInput = {
@@ -347,6 +389,8 @@ export type ContributionMaxOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  vaultId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type ContributionMinOrderByAggregateInput = {
@@ -355,6 +399,8 @@ export type ContributionMinOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  vaultId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type ContributionSumOrderByAggregateInput = {
@@ -403,26 +449,68 @@ export type ContributionUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.ContributionScalarWhereInput | Prisma.ContributionScalarWhereInput[]
 }
 
-export type FloatFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type ContributionCreateNestedManyWithoutVaultInput = {
+  create?: Prisma.XOR<Prisma.ContributionCreateWithoutVaultInput, Prisma.ContributionUncheckedCreateWithoutVaultInput> | Prisma.ContributionCreateWithoutVaultInput[] | Prisma.ContributionUncheckedCreateWithoutVaultInput[]
+  connectOrCreate?: Prisma.ContributionCreateOrConnectWithoutVaultInput | Prisma.ContributionCreateOrConnectWithoutVaultInput[]
+  createMany?: Prisma.ContributionCreateManyVaultInputEnvelope
+  connect?: Prisma.ContributionWhereUniqueInput | Prisma.ContributionWhereUniqueInput[]
+}
+
+export type ContributionUncheckedCreateNestedManyWithoutVaultInput = {
+  create?: Prisma.XOR<Prisma.ContributionCreateWithoutVaultInput, Prisma.ContributionUncheckedCreateWithoutVaultInput> | Prisma.ContributionCreateWithoutVaultInput[] | Prisma.ContributionUncheckedCreateWithoutVaultInput[]
+  connectOrCreate?: Prisma.ContributionCreateOrConnectWithoutVaultInput | Prisma.ContributionCreateOrConnectWithoutVaultInput[]
+  createMany?: Prisma.ContributionCreateManyVaultInputEnvelope
+  connect?: Prisma.ContributionWhereUniqueInput | Prisma.ContributionWhereUniqueInput[]
+}
+
+export type ContributionUpdateManyWithoutVaultNestedInput = {
+  create?: Prisma.XOR<Prisma.ContributionCreateWithoutVaultInput, Prisma.ContributionUncheckedCreateWithoutVaultInput> | Prisma.ContributionCreateWithoutVaultInput[] | Prisma.ContributionUncheckedCreateWithoutVaultInput[]
+  connectOrCreate?: Prisma.ContributionCreateOrConnectWithoutVaultInput | Prisma.ContributionCreateOrConnectWithoutVaultInput[]
+  upsert?: Prisma.ContributionUpsertWithWhereUniqueWithoutVaultInput | Prisma.ContributionUpsertWithWhereUniqueWithoutVaultInput[]
+  createMany?: Prisma.ContributionCreateManyVaultInputEnvelope
+  set?: Prisma.ContributionWhereUniqueInput | Prisma.ContributionWhereUniqueInput[]
+  disconnect?: Prisma.ContributionWhereUniqueInput | Prisma.ContributionWhereUniqueInput[]
+  delete?: Prisma.ContributionWhereUniqueInput | Prisma.ContributionWhereUniqueInput[]
+  connect?: Prisma.ContributionWhereUniqueInput | Prisma.ContributionWhereUniqueInput[]
+  update?: Prisma.ContributionUpdateWithWhereUniqueWithoutVaultInput | Prisma.ContributionUpdateWithWhereUniqueWithoutVaultInput[]
+  updateMany?: Prisma.ContributionUpdateManyWithWhereWithoutVaultInput | Prisma.ContributionUpdateManyWithWhereWithoutVaultInput[]
+  deleteMany?: Prisma.ContributionScalarWhereInput | Prisma.ContributionScalarWhereInput[]
+}
+
+export type ContributionUncheckedUpdateManyWithoutVaultNestedInput = {
+  create?: Prisma.XOR<Prisma.ContributionCreateWithoutVaultInput, Prisma.ContributionUncheckedCreateWithoutVaultInput> | Prisma.ContributionCreateWithoutVaultInput[] | Prisma.ContributionUncheckedCreateWithoutVaultInput[]
+  connectOrCreate?: Prisma.ContributionCreateOrConnectWithoutVaultInput | Prisma.ContributionCreateOrConnectWithoutVaultInput[]
+  upsert?: Prisma.ContributionUpsertWithWhereUniqueWithoutVaultInput | Prisma.ContributionUpsertWithWhereUniqueWithoutVaultInput[]
+  createMany?: Prisma.ContributionCreateManyVaultInputEnvelope
+  set?: Prisma.ContributionWhereUniqueInput | Prisma.ContributionWhereUniqueInput[]
+  disconnect?: Prisma.ContributionWhereUniqueInput | Prisma.ContributionWhereUniqueInput[]
+  delete?: Prisma.ContributionWhereUniqueInput | Prisma.ContributionWhereUniqueInput[]
+  connect?: Prisma.ContributionWhereUniqueInput | Prisma.ContributionWhereUniqueInput[]
+  update?: Prisma.ContributionUpdateWithWhereUniqueWithoutVaultInput | Prisma.ContributionUpdateWithWhereUniqueWithoutVaultInput[]
+  updateMany?: Prisma.ContributionUpdateManyWithWhereWithoutVaultInput | Prisma.ContributionUpdateManyWithWhereWithoutVaultInput[]
+  deleteMany?: Prisma.ContributionScalarWhereInput | Prisma.ContributionScalarWhereInput[]
+}
+
+export type EnumContributionStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ContributionStatus
 }
 
 export type ContributionCreateWithoutUserInput = {
   id?: string
   prId: string
   amount: number
-  status?: string
+  status: $Enums.ContributionStatus
+  createdAt?: Date | string
+  vault?: Prisma.VaultCreateNestedOneWithoutContributionsInput
 }
 
 export type ContributionUncheckedCreateWithoutUserInput = {
   id?: string
   prId: string
   amount: number
-  status?: string
+  status: $Enums.ContributionStatus
+  vaultId?: string | null
+  createdAt?: Date | string
 }
 
 export type ContributionCreateOrConnectWithoutUserInput = {
@@ -458,36 +546,126 @@ export type ContributionScalarWhereInput = {
   id?: Prisma.StringFilter<"Contribution"> | string
   prId?: Prisma.StringFilter<"Contribution"> | string
   amount?: Prisma.FloatFilter<"Contribution"> | number
-  status?: Prisma.StringFilter<"Contribution"> | string
+  status?: Prisma.EnumContributionStatusFilter<"Contribution"> | $Enums.ContributionStatus
   userId?: Prisma.StringFilter<"Contribution"> | string
+  vaultId?: Prisma.StringNullableFilter<"Contribution"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Contribution"> | Date | string
+}
+
+export type ContributionCreateWithoutVaultInput = {
+  id?: string
+  prId: string
+  amount: number
+  status: $Enums.ContributionStatus
+  createdAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutContributionsInput
+}
+
+export type ContributionUncheckedCreateWithoutVaultInput = {
+  id?: string
+  prId: string
+  amount: number
+  status: $Enums.ContributionStatus
+  userId: string
+  createdAt?: Date | string
+}
+
+export type ContributionCreateOrConnectWithoutVaultInput = {
+  where: Prisma.ContributionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ContributionCreateWithoutVaultInput, Prisma.ContributionUncheckedCreateWithoutVaultInput>
+}
+
+export type ContributionCreateManyVaultInputEnvelope = {
+  data: Prisma.ContributionCreateManyVaultInput | Prisma.ContributionCreateManyVaultInput[]
+  skipDuplicates?: boolean
+}
+
+export type ContributionUpsertWithWhereUniqueWithoutVaultInput = {
+  where: Prisma.ContributionWhereUniqueInput
+  update: Prisma.XOR<Prisma.ContributionUpdateWithoutVaultInput, Prisma.ContributionUncheckedUpdateWithoutVaultInput>
+  create: Prisma.XOR<Prisma.ContributionCreateWithoutVaultInput, Prisma.ContributionUncheckedCreateWithoutVaultInput>
+}
+
+export type ContributionUpdateWithWhereUniqueWithoutVaultInput = {
+  where: Prisma.ContributionWhereUniqueInput
+  data: Prisma.XOR<Prisma.ContributionUpdateWithoutVaultInput, Prisma.ContributionUncheckedUpdateWithoutVaultInput>
+}
+
+export type ContributionUpdateManyWithWhereWithoutVaultInput = {
+  where: Prisma.ContributionScalarWhereInput
+  data: Prisma.XOR<Prisma.ContributionUpdateManyMutationInput, Prisma.ContributionUncheckedUpdateManyWithoutVaultInput>
 }
 
 export type ContributionCreateManyUserInput = {
   id?: string
   prId: string
   amount: number
-  status?: string
+  status: $Enums.ContributionStatus
+  vaultId?: string | null
+  createdAt?: Date | string
 }
 
 export type ContributionUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  vault?: Prisma.VaultUpdateOneWithoutContributionsNestedInput
 }
 
 export type ContributionUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
+  vaultId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ContributionUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
+  vaultId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ContributionCreateManyVaultInput = {
+  id?: string
+  prId: string
+  amount: number
+  status: $Enums.ContributionStatus
+  userId: string
+  createdAt?: Date | string
+}
+
+export type ContributionUpdateWithoutVaultInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  prId?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutContributionsNestedInput
+}
+
+export type ContributionUncheckedUpdateWithoutVaultInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  prId?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ContributionUncheckedUpdateManyWithoutVaultInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  prId?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.EnumContributionStatusFieldUpdateOperationsInput | $Enums.ContributionStatus
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -498,7 +676,10 @@ export type ContributionSelect<ExtArgs extends runtime.Types.Extensions.Internal
   amount?: boolean
   status?: boolean
   userId?: boolean
+  vaultId?: boolean
+  createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  vault?: boolean | Prisma.Contribution$vaultArgs<ExtArgs>
 }, ExtArgs["result"]["contribution"]>
 
 export type ContributionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -507,7 +688,10 @@ export type ContributionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   amount?: boolean
   status?: boolean
   userId?: boolean
+  vaultId?: boolean
+  createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  vault?: boolean | Prisma.Contribution$vaultArgs<ExtArgs>
 }, ExtArgs["result"]["contribution"]>
 
 export type ContributionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -516,7 +700,10 @@ export type ContributionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   amount?: boolean
   status?: boolean
   userId?: boolean
+  vaultId?: boolean
+  createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  vault?: boolean | Prisma.Contribution$vaultArgs<ExtArgs>
 }, ExtArgs["result"]["contribution"]>
 
 export type ContributionSelectScalar = {
@@ -525,30 +712,38 @@ export type ContributionSelectScalar = {
   amount?: boolean
   status?: boolean
   userId?: boolean
+  vaultId?: boolean
+  createdAt?: boolean
 }
 
-export type ContributionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "prId" | "amount" | "status" | "userId", ExtArgs["result"]["contribution"]>
+export type ContributionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "prId" | "amount" | "status" | "userId" | "vaultId" | "createdAt", ExtArgs["result"]["contribution"]>
 export type ContributionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  vault?: boolean | Prisma.Contribution$vaultArgs<ExtArgs>
 }
 export type ContributionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  vault?: boolean | Prisma.Contribution$vaultArgs<ExtArgs>
 }
 export type ContributionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  vault?: boolean | Prisma.Contribution$vaultArgs<ExtArgs>
 }
 
 export type $ContributionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Contribution"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    vault: Prisma.$VaultPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     prId: string
     amount: number
-    status: string
+    status: $Enums.ContributionStatus
     userId: string
+    vaultId: string | null
+    createdAt: Date
   }, ExtArgs["result"]["contribution"]>
   composites: {}
 }
@@ -944,6 +1139,7 @@ readonly fields: ContributionFieldRefs;
 export interface Prisma__ContributionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  vault<T extends Prisma.Contribution$vaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Contribution$vaultArgs<ExtArgs>>): Prisma.Prisma__VaultClient<runtime.Types.Result.GetResult<Prisma.$VaultPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -976,8 +1172,10 @@ export interface ContributionFieldRefs {
   readonly id: Prisma.FieldRef<"Contribution", 'String'>
   readonly prId: Prisma.FieldRef<"Contribution", 'String'>
   readonly amount: Prisma.FieldRef<"Contribution", 'Float'>
-  readonly status: Prisma.FieldRef<"Contribution", 'String'>
+  readonly status: Prisma.FieldRef<"Contribution", 'ContributionStatus'>
   readonly userId: Prisma.FieldRef<"Contribution", 'String'>
+  readonly vaultId: Prisma.FieldRef<"Contribution", 'String'>
+  readonly createdAt: Prisma.FieldRef<"Contribution", 'DateTime'>
 }
     
 
@@ -1376,6 +1574,25 @@ export type ContributionDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many Contributions to delete.
    */
   limit?: number
+}
+
+/**
+ * Contribution.vault
+ */
+export type Contribution$vaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Vault
+   */
+  select?: Prisma.VaultSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Vault
+   */
+  omit?: Prisma.VaultOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VaultInclude<ExtArgs> | null
+  where?: Prisma.VaultWhereInput
 }
 
 /**

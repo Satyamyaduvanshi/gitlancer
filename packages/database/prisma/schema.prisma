@@ -1,26 +1,57 @@
 generator client {
   provider     = "prisma-client"
-  // Change output to just ../generated to simplify imports
   output       = "../generated" 
-  // IMPORTANT: Set this for NestJS compatibility
   moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
 }
+
+
 model User {
-  id            String   @id @default(uuid())
-  githubHandle  String   @unique
-  solanaWallet  String   @unique
+  id            String         @id 
+  githubHandle  String         @unique
+  avatarUrl     String?        
+  solanaWallet  String?        @unique
+  
   contributions Contribution[]
+  vaults        Vault[]        
+  
+  createdAt     DateTime       @default(now())
+}
+
+model Vault {
+  id                 String   @id @default(uuid())
+  repositoryFullName String   @unique 
+  pdaAddress         String   @unique 
+  vaultBump          Int      // 👈 Added for Solana PDA verification
+  budgetLimit        Float    @default(100.0) 
+  
+  maintainerId       String
+  maintainer         User     @relation(fields: [maintainerId], references: [id])
+  
+  contributions      Contribution[]
+  createdAt          DateTime @default(now())
+}
+
+enum ContributionStatus {
+  PENDING_APPROVAL
+  AUDITED
+  CLAIMED
 }
 
 model Contribution {
-  id         String   @id @default(uuid())
-  prId       String   @unique
-  amount     Float
-  status     String   @default("PENDING")
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
+  id        String             @id @default(uuid())
+  prId      String
+  amount    Float
+  status    ContributionStatus 
+  
+  userId    String
+  user      User               @relation(fields: [userId], references: [id])
+  
+  vaultId   String?
+  vault     Vault?             @relation(fields: [vaultId], references: [id])
+  
+  createdAt DateTime           @default(now())
 }

@@ -1,10 +1,12 @@
 'use client';
 
+import { Suspense, useState, useSyncExternalStore } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { FolderGit, Wallet, Link as LinkIcon, CheckCircle, LogOut, ShieldCheck } from "lucide-react";
-import { useState, useSyncExternalStore } from "react";
+import { FolderGit, Wallet, Link as LinkIcon, CheckCircle, LogOut, ShieldCheck, AlertCircle } from "lucide-react";
+import axios from "axios";
 
 const emptySubscribe = () => () => {};
 
@@ -12,143 +14,148 @@ function useIsClient() {
   return useSyncExternalStore(emptySubscribe, () => true, () => false);
 }
 
-export default function LinkAccount() {
+function LinkContent() {
   const { data: session } = useSession();
   const { publicKey } = useWallet();
-  const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
   const walletUiReady = useIsClient();
-  const [Success,setSuccess] = useState(false);
 
-  // Define the username safely
-  const username = (session?.user as { username?: string } | undefined)?.username;
-
-  const handleLink = async () => {
-    console.log("🚀 Attempting to link handle:", username);
-    setSuccess(false);
+  // Primary identifiers from URL and Session
+  const githubIdFromUrl = searchParams.get("githubId");
   
-    if (!username) {
-      alert("Session error: Please 'Sign Out' and 'Sign In' again to capture your unique GitHub handle.");
-      return;
-    }
+  // Cast session to include the custom NextAuth properties we added
+  const sessionUser = session?.user as { id?: string; name?: string; image?: string; username?: string };
+  
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{ type: 'success' | 'error' | null; msg: string }>({ type: null, msg: "" });
 
-    if (!publicKey) {
-      alert("Please connect your Solana wallet first.");
-      return;
+  const handleLinkIdentity = async () => {
+    if (!githubIdFromUrl || !publicKey || !sessionUser) return;
+
+    // 🛡️ THE CRITICAL SECURITY GUARDRAIL
+    // Prevent hackers from linking their wallet to someone else's GitHub ID
+    if (sessionUser.id !== githubIdFromUrl) {
+      setStatus({ 
+        type: 'error', 
+        msg: `Security Violation: You are logged in as @${sessionUser.username}, but trying to link a wallet for GitHub ID ${githubIdFromUrl}.` 
+      });
+      return; 
     }
 
     setLoading(true);
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_ORACLE_URL}/api/users/link`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          githubHandle: username,
-          walletAddress: publicKey.toBase58(),
-        }),
-      });
+    setStatus({ type: null, msg: "" });
 
-      if (res.ok) {
-        alert(`Success! @${username} is now linked to ${publicKey.toBase58().slice(0, 8)}...`);
-      } else {
-        const err = await res.json();
-        alert(`Error: ${err.message || "Check Oracle logs"}`);
+    try {
+      const oracleUrl = process.env.NEXT_PUBLIC_ORACLE_URL || 'http://localhost:3000';
+      
+      const payload = {
+        githubId: githubIdFromUrl,
+        githubHandle: sessionUser.username || "Unknown",
+        walletAddress: publicKey.toBase58(),
+        avatarUrl: sessionUser.image || ""
+      };
+
+      const response = await axios.post(`${oracleUrl}/api/users/link`, payload);
+
+      if (response.status === 201 || response.status === 200) {
+        setStatus({ 
+          type: 'success', 
+          msg: `Identity Verified: @${payload.githubHandle} linked to ${payload.walletAddress.slice(0, 4)}...${payload.walletAddress.slice(-4)}` 
+        });
       }
-    } catch (e) {
-      console.error("Connection error:", e);
-      alert("Could not connect to Oracle. Ensure it is running on port 3000.");
+    } catch (error: any) {
+      const errorDetail = error.response?.data?.message || "Check Oracle connection and logs.";
+      setStatus({ type: 'error', msg: `Link Failed: ${errorDetail}` });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white p-4">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white p-4 font-sans">
       <div className="max-w-md w-full space-y-8 bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-2xl">
-        <div className="flex flex-col items-center gap-2">
-          <ShieldCheck className="text-purple-500 w-12 h-12" />
-          <h1 className="text-3xl font-extrabold text-center bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+        <header className="flex flex-col items-center gap-2">
+          <div className="p-3 bg-purple-500/10 rounded-full">
+            <ShieldCheck className="text-purple-500 w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-center">
             GitLancer Guardian
           </h1>
-          <p className="text-slate-400 text-sm text-center">
-            Link your GitHub identity to your Solana wallet to claim bounties.
+          <p className="text-slate-500 text-xs text-center px-4">
+            Cryptographically anchoring GitHub identities to the Solana blockchain.
           </p>
-        </div>
+        </header>
 
-        <div className="space-y-6">
-          {/* Step 1: GitHub Auth */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Step 1: GitHub</label>
-            <div className="flex items-center justify-between p-4 bg-slate-800 rounded-xl border border-slate-700">
+        <section className="space-y-4">
+          {/* GitHub Identity Mapping */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">GitHub Authentication</label>
+            <div className="flex items-center justify-between p-4 bg-slate-950/50 rounded-xl border border-slate-800">
               <div className="flex items-center gap-3">
-                <FolderGit className={username ? "text-green-400" : "text-slate-400"} />
-                <span className="font-medium">
-                  {username ? `@${username}` : "Not Connected"}
-                </span>
+                <FolderGit size={18} className={sessionUser ? "text-green-400" : "text-slate-600"} />
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{sessionUser ? `@${sessionUser.username}` : "Required"}</span>
+                  <span className="text-[10px] text-slate-500 font-mono">ID: {githubIdFromUrl || "Missing"}</span>
+                </div>
               </div>
               {!session ? (
                 <button 
                   onClick={() => signIn("github")} 
-                  className="text-sm bg-white text-black px-4 py-1.5 rounded-md font-bold hover:bg-slate-200 transition"
+                  className="text-[11px] bg-white text-black px-3 py-1.5 rounded font-bold hover:bg-slate-200 transition uppercase"
                 >
-                  Connect
+                  Sign In
                 </button>
               ) : (
-                <button 
-                  onClick={() => signOut()} 
-                  className="text-slate-400 hover:text-red-400 transition"
-                  title="Sign out to refresh session"
-                >
-                  <LogOut size={18} />
+                <button onClick={() => signOut()} className="text-slate-500 hover:text-red-400 transition">
+                  <LogOut size={16} />
                 </button>
               )}
             </div>
           </div>
 
-          {/* Step 2: Wallet Auth */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Step 2: Wallet</label>
-            <div className="flex items-center justify-between p-4 bg-slate-800 rounded-xl border border-slate-700">
+          {/* Wallet Connection Mapping */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Solana Infrastructure</label>
+            <div className="flex items-center justify-between p-4 bg-slate-950/50 rounded-xl border border-slate-800">
               <div className="flex items-center gap-3">
-                <Wallet className={publicKey ? "text-purple-400" : "text-slate-400"} />
-                <span className="font-medium text-xs truncate max-w-[140px]">
-                  {publicKey ? publicKey.toBase58() : "Not Connected"}
+                <Wallet size={18} className={publicKey ? "text-purple-400" : "text-slate-600"} />
+                <span className="text-[11px] font-mono text-slate-300">
+                  {publicKey ? `${publicKey.toBase58().slice(0, 12)}...` : "Disconnected"}
                 </span>
               </div>
-              {walletUiReady ? (
-                <WalletMultiButton className="!bg-purple-600 !h-9 !text-xs !rounded-md hover:!bg-purple-700 transition" />
-              ) : (
-                <div
-                  className="!h-9 min-w-[11rem] rounded-md bg-purple-600/30 border border-purple-500/20"
-                  aria-hidden
-                />
-              )}
+              {walletUiReady && <WalletMultiButton className="!bg-purple-600 !h-8 !text-[10px] !rounded !px-4 hover:!bg-purple-700 transition uppercase !font-bold" />}
             </div>
           </div>
 
-          {/* Final Step: Bridge Identity */}
+          {/* Submission Control */}
           <div className="pt-4">
             <button
-              disabled={!username || !publicKey || loading}
-              onClick={handleLink}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold hover:opacity-90 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-900/20"
+              disabled={!session || !publicKey || !githubIdFromUrl || loading}
+              onClick={handleLinkIdentity}
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:opacity-90 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
             >
-              {loading ? (
-                "Processing..."
-              ) : (
-                <>
-                  <LinkIcon size={20} />
-                  Finalize Identity Bridge
-                </>
-              )}
+              {loading ? "Syncing..." : <><LinkIcon size={16} /> Finalize Identity Bridge</>}
             </button>
-            {username && publicKey && (
-              <p className="text-[10px] text-center text-slate-500 mt-4 flex items-center justify-center gap-1">
-                <CheckCircle size={10} /> Cryptographically linking GitHub and Solana
-              </p>
+            
+            {status.msg && (
+              <div className={`mt-4 flex items-center gap-2 p-3 rounded-lg text-[10px] font-mono border ${
+                status.type === 'success' ? "bg-green-500/5 border-green-500/20 text-green-400" : "bg-red-500/5 border-red-500/20 text-red-400"
+              }`}>
+                {status.type === 'success' ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
+                {status.msg}
+              </div>
             )}
           </div>
-        </div>
+        </section>
       </div>
     </main>
+  );
+}
+
+export default function LinkAccountPage() {
+  return (
+    <Suspense fallback={<div className="bg-slate-950 min-h-screen" />}>
+      <LinkContent />
+    </Suspense>
   );
 }

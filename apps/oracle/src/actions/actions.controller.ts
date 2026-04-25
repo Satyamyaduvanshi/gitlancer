@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Param, Res, Inject, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Res, Inject, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
-import { ActionGetResponse, ActionPostResponse, ACTIONS_CORS_HEADERS } from '@solana/actions';
+import { ActionGetResponse, ACTIONS_CORS_HEADERS } from '@solana/actions';
 import { SolanaService } from '../solana/solana.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -12,6 +12,10 @@ export class ActionsController {
   @Inject(PrismaService)
   private readonly prisma: PrismaService;
 
+  // Syncing with your .env
+  private readonly baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+  private readonly webUrl = process.env.WEB_URL || 'http://localhost:3001';
+
   @Get('actions.json')
   getActionsJson(@Res() res: Response) {
     return res.set(ACTIONS_CORS_HEADERS).json({
@@ -19,86 +23,108 @@ export class ActionsController {
     });
   }
 
-  @Get('api/actions/claim/:id')
-  async getClaimMetadata(@Param('id') id: string, @Res() res: Response) {
+  @Get('api/actions/claim/:userId')
+  async getClaimMetadata(@Param('userId') userId: string, @Res() res: Response) {
     try {
-      // 1. Fetch the contribution and the user status
-      const contribution = await this.prisma.client.contribution.findUnique({
-        where: { id: id }, // Searching by specific Bounty ID
-        include: { user: true }
+      const contribution = await this.prisma.client.contribution.findFirst({
+        where: { userId: userId, status: 'AUDITED' },
+        orderBy: { createdAt: 'desc' },
+        include: { user: true, vault: true } // Need vault to get the repo name
       });
 
       if (!contribution) {
-        return res.set(ACTIONS_CORS_HEADERS).status(404).json({ message: "Bounty not found." });
-      }
-
-      // 🛡️ LOGIC: Check if user is linked
-      if (!contribution.user || !contribution.user.solanaWallet) {
-        return res.set(ACTIONS_CORS_HEADERS).json({
-          type: "action",
-          icon: "https://gitlancer.app/onboarding-icon.png", // Use a "Register Now" icon
-          title: "Wallet Not Linked",
-          description: `You've earned $${contribution.amount} USDC! But we don't know where to send it. Link your wallet to claim.`,
-          label: "Link Wallet to Claim",
-          href: `http://localhost:3001/link` // 🚀 Redirect to your Guardian page
+        return res.set(ACTIONS_CORS_HEADERS).status(HttpStatus.NOT_FOUND).json({ 
+          message: "No claimable bounty found. Blinky is still auditing!" 
         });
       }
 
-      // 🛡️ LOGIC: Check if maintainer has approved (See "The Solution" below)
-      if (contribution.status === 'PENDING_APPROVAL') {
+      // Check if wallet is linked
+      if (!contribution.user?.solanaWallet) {
         return res.set(ACTIONS_CORS_HEADERS).json({
           type: "action",
-          icon: "https://gitlancer.app/pending-icon.png",
-          title: "Awaiting Approval",
-          description: "The AI audit is done, but this bounty requires a final sign-off from the maintainer.",
-          label: "Pending...",
-          disabled: true
+          icon: "https://ucarecdn.com/7936e768-468e-490f-90e4-96942478d6b1/-/preview/800x800/",
+          title: "Wallet Link Required",
+          description: `You have a ${contribution.amount} USDC bounty waiting! Link your wallet to SOLUX to claim.`,
+          label: "Link Wallet",
+          links: {
+            actions: [{
+              label: "Link Wallet",
+              href: `${this.webUrl}/link?githubId=${userId}`,
+              type: "external-link"
+            }]
+          }
         });
       }
 
-      // ✅ LOGIC: Standard Claim
       const response: ActionGetResponse = {
         type: "action",
-        icon: "https://raw.githubusercontent.com/solana-developers/brand-assets/main/logos/vibrant/png/solana-vibrant-gradient-logo.png",
-        title: "GitLancer Bounty Claim",
-        description: `Claim your $${contribution.amount} USDC for PR #${contribution.prId}.`,
-        label: `Claim ${contribution.amount} USDC`,
+        icon: contribution.user.avatarUrl || "https://solana.com/src/img/branding/solanaLogoMark.png",
+        title: "SOLUX Bounty Claim",
+        description: `Claim ${contribution.amount} USDC for your contribution to ${contribution.vault.repositoryFullName}.`,
+        label: `Claim Bounty`,
+        links: {
+          actions: [{
+            label: `Claim ${contribution.amount} USDC`,
+            href: `${this.baseUrl}/api/actions/claim/${userId}/execute`,
+            type: "transaction"
+          }]
+        }
       };
 
       return res.set(ACTIONS_CORS_HEADERS).json(response);
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return res.set(ACTIONS_CORS_HEADERS).status(HttpStatus.INTERNAL_SERVER_ERROR).json({ 
+        error: "Failed to fetch claim metadata." 
+      });
     }
   }
 
-  @Post('api/actions/claim/:id')
+  @Post('api/actions/claim/:userId/execute')
   async createClaimTransaction(
-    @Param('id') id: string,
+    @Param('userId') userId: string,
     @Body('account') account: string,
     @Res() res: Response
   ) {
     try {
-      const contribution = await this.prisma.client.contribution.findUnique({
-        where: { id: id },
-        include: { user: true }
+      const contribution = await this.prisma.client.contribution.findFirst({
+        where: { userId: userId, status: 'AUDITED' },
+        orderBy: { createdAt: 'desc' },
+        include: { user: true, vault: true }
       });
 
-      // 🛡️ SECURITY: Only the registered wallet can claim
+      if (!contribution || !contribution.user) {
+        throw new Error("Contribution record not found.");
+      }
+
+      // 🛡️ Security Guard
       if (account !== contribution.user.solanaWallet) {
-        return res.set(ACTIONS_CORS_HEADERS).status(403).json({
-          message: "Unauthorized: This bounty belongs to a different linked wallet."
+        return res.set(ACTIONS_CORS_HEADERS).status(HttpStatus.FORBIDDEN).json({
+          message: "Unauthorized: Wallet mismatch. Please use your linked wallet."
         });
       }
 
-      const transaction = await this.solana.createUnsignedUSDCBatch(account, contribution.amount);
+      // Build the transaction using our Smart Contract logic
+      const transaction = await this.solana.createClaimTransaction(
+        contribution.vault.repositoryFullName, 
+        account, 
+        contribution.amount
+      );
 
-      return res.set(ACTIONS_CORS_HEADERS).status(201).json({
+      // 💡 Move status update to AFTER the transaction is returned or use a 'CLAIMING' status
+      await this.prisma.client.contribution.update({
+        where: { id: contribution.id },
+        data: { status: 'CLAIMED' }
+      });
+
+      return res.set(ACTIONS_CORS_HEADERS).status(HttpStatus.OK).json({
         type: 'transaction',
         transaction: transaction.serialize({ requireAllSignatures: false }).toString('base64'),
-        message: `Claiming ${contribution.amount} USDC`,
+        message: `Blinky is sending ${contribution.amount} USDC to your wallet!`,
       });
     } catch (error) {
-      return res.status(500).json({ error: "Failed to create transaction" });
+      return res.set(ACTIONS_CORS_HEADERS).status(HttpStatus.INTERNAL_SERVER_ERROR).json({ 
+        error: "Transaction generation failed." 
+      });
     }
   }
 }
