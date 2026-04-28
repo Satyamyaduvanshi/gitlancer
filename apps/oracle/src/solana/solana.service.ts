@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { Connection, Keypair, PublicKey, Transaction, SystemProgram } from '@solana/web3.js';
 import { Program, AnchorProvider, Wallet, Idl, BN } from '@coral-xyz/anchor';
-import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction } from '@solana/spl-token';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -41,13 +41,12 @@ export class SolanaService implements OnModuleInit {
     const contributor = new PublicKey(contributorAddress);
     const amount = new BN(amountInUsdc * 1_000_000); // Handle USDC 6 decimals
 
-    // 1. Derive Vault PDA
+    // 1. Derive PDAs
     const [vaultStatePda] = PublicKey.findProgramAddressSync(
       [Buffer.from("vault"), Buffer.from(repoFullName)],
       this.programId
     );
 
-    // 2. 🛡️ Derive Anti-Double-Spend Bounty PDA
     const [bountyPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("bounty"), vaultStatePda.toBuffer(), Buffer.from(prId)],
       this.programId
@@ -56,28 +55,45 @@ export class SolanaService implements OnModuleInit {
     const vaultUsdcAccount = getAssociatedTokenAddressSync(this.usdcMint, vaultStatePda, true);
     const contributorUsdcAccount = getAssociatedTokenAddressSync(this.usdcMint, contributor);
 
-    // 3. Build the upgraded instruction
+    const transaction = new Transaction();
+
+    // 🛡️ Auto-ATA Creation: If the user doesn't have a USDC account, create one!
+    try {
+      await this.connection.getTokenAccountBalance(contributorUsdcAccount);
+    } catch (e) {
+      this.logger.log(`Creating missing ATA for contributor: ${contributorAddress}`);
+      transaction.add(
+        createAssociatedTokenAccountInstruction(
+          contributor,             // Payer (User claiming)
+          contributorUsdcAccount,  // The new ATA Address
+          contributor,             // Owner
+          this.usdcMint            // Mint (USDC)
+        )
+      );
+    }
+
+    // 2. Build the upgraded smart contract instruction
     const instruction = await this.program.methods
-      .distributeBounty(repoFullName, amount, prId) 
+      .distributeBounty(repoFullName, amount, prId)
       .accounts({
         oracle: this.oracleDelegate.publicKey,
-        contributor: contributor,                   
+        contributor: contributor,
         vaultState: vaultStatePda,
-        bountyRecord: bountyPda,                    
+        bountyRecord: bountyPda,
         vaultTokenAccount: vaultUsdcAccount,
         contributorTokenAccount: contributorUsdcAccount,
-        mint: this.usdcMint,                       
+        mint: this.usdcMint,
         tokenProgram: TOKEN_PROGRAM_ID,
-        systemProgram: SystemProgram.programId,     
+        systemProgram: SystemProgram.programId,
       })
       .instruction();
 
-    // 4. Create Transaction
-    const transaction = new Transaction().add(instruction);
+    // 3. Add instruction and prep for signing
+    transaction.add(instruction);
     transaction.feePayer = contributor;
     transaction.recentBlockhash = (await this.connection.getLatestBlockhash()).blockhash;
 
-    // 5. PARTIAL SIGN by Oracle
+    // 4. PARTIAL SIGN by Oracle
     transaction.partialSign(this.oracleDelegate);
 
     return transaction;

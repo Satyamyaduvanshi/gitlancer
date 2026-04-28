@@ -49,6 +49,7 @@ export default function NativeClaimPage({ params }: { params: Promise<{ id: stri
       });
 
       setStatus("Please approve the transaction in Phantom...");
+      
       const txBuffer = Buffer.from(res.data.transaction, 'base64');
       const transaction = Transaction.from(txBuffer);
 
@@ -57,8 +58,9 @@ export default function NativeClaimPage({ params }: { params: Promise<{ id: stri
 
       setStatus("Simulating and Broadcasting to network...");
 
+      // 🛡️ Strict Simulation Check
       const signature = await connection.sendRawTransaction(rawTransaction, {
-        skipPreflight: false, // Strict check prevents fake successes
+        skipPreflight: false, 
         maxRetries: 3,       
         preflightCommitment: 'confirmed'
       });
@@ -71,18 +73,29 @@ export default function NativeClaimPage({ params }: { params: Promise<{ id: stri
         lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
       }, 'confirmed');
 
-      if (confirmation.value.err) throw new Error("Transaction failed on-chain.");
+      if (confirmation.value.err) {
+        throw new Error("Transaction failed on-chain!");
+      }
       
       setStatus(`🎉 Success! Bounty claimed. Signature: ${signature.slice(0, 8)}...`);
-      setIsSuccess(true); // Hides button
+      setIsSuccess(true); 
       
     } catch (error: any) {
+      console.error("Full Claim Error:", error);
       let errMsg = "Transaction rejected or failed.";
-      if (error.message.includes("custom program error") || error.message.includes("insufficient funds")) {
-        errMsg = "Transaction Failed: The Maintainer's Vault does not have enough USDC.";
-      } else if (error.message) {
-        errMsg = error.message;
+      
+      // 🛡️ Truthful Error Reporting
+      if (error.message) {
+        errMsg = error.message; 
       }
+      
+      // Helpful hint for the most common Devnet issue
+      if (errMsg.includes("0x1")) {
+        errMsg = "Insufficient SOL for gas. Make sure your Phantom wallet has at least 0.01 SOL.";
+      } else if (errMsg.includes("insufficient funds") && !errMsg.includes("0x1")) {
+        errMsg = "The Maintainer's Vault does not have enough USDC.";
+      }
+
       setStatus(`❌ Error: ${errMsg}`);
     } finally {
       setLoading(false);
@@ -92,6 +105,8 @@ export default function NativeClaimPage({ params }: { params: Promise<{ id: stri
   return (
     <main className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4 font-sans">
       <div className="max-w-md w-full border border-slate-800 bg-slate-900 rounded-xl overflow-hidden shadow-2xl relative">
+        
+        {/* Visual Header */}
         <div className="p-8 flex flex-col items-center border-b border-slate-800">
           <img 
             src={metadata?.icon || "https://github.com/ghost.png"} 
@@ -105,21 +120,28 @@ export default function NativeClaimPage({ params }: { params: Promise<{ id: stri
           </p>
         </div>
 
+        {/* Action Area */}
         <div className="p-6 flex flex-col gap-4 bg-slate-950/50">
           <div className="flex justify-center">
-            {mounted ? <WalletMultiButton className="!bg-purple-600 !h-10 !text-xs !rounded-md" /> : <div className="h-10 w-32 bg-slate-800 rounded-md" />}
+            {mounted ? (
+               <WalletMultiButton className="!bg-purple-600 !h-10 !text-xs !rounded-md hover:!bg-purple-700 transition" />
+            ) : (
+               <div className="h-10 w-32 bg-slate-800 rounded-md animate-pulse" />
+            )}
           </div>
 
+          {/* Hide button if already succeeded or disabled */}
           {metadata && !metadata.disabled && !isSuccess && publicKey && (
             <button
-              onClick={executeClaim} disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-md font-bold text-xs uppercase tracking-widest text-white shadow-lg active:scale-95 transition"
+              onClick={executeClaim}
+              disabled={loading}
+              className="w-full py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-md font-bold text-xs uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-all text-white shadow-lg active:scale-95"
             >
               {loading ? "Processing..." : metadata.label}
             </button>
           )}
 
-          {status && status !== "Loading bounty data..." && (
+          {status && status !== "Loading bounty data..." && status !== "" && (
             <div className={`text-center text-[10px] font-mono mt-2 p-3 rounded-lg border break-words ${isSuccess ? 'bg-emerald-900/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
               {status}
             </div>
