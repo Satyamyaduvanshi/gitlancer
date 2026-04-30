@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "SOLUX",
   description: "Audit open-source contributions and distribute rewards via Solana Blinks.",
   icons:{
-    icon:""
+    icon:"/logo-orange.svg"
   }
 };
 

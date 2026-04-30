@@ -11,10 +11,14 @@ import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { GithubModule } from './github/github.module';
 import { VaultsModule } from './vaults/vaults.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BountiesController } from './bounties/bounties.controller';
+import { BountiesService } from './bounties/bounties.service';
+import { BountiesModule } from './bounties/bounties.module';
 
 @Module({
-  imports: [PrismaModule, WebhooksModule,UsersModule, GithubModule, VaultsModule, ],
-  controllers: [AppController,ActionsController, UsersController,],
-  providers: [AppService, AiService, SolanaService, PrismaService,],
+  imports: [EventEmitterModule.forRoot(),PrismaModule, WebhooksModule,UsersModule, GithubModule, VaultsModule, BountiesModule],
+  controllers: [AppController,ActionsController, UsersController, BountiesController,],
+  providers: [AppService, AiService, SolanaService, PrismaService, BountiesService,],
 })
 export class AppModule {}
