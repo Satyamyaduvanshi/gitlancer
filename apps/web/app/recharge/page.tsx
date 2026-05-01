@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import useSWR from 'swr';
 import axios from 'axios';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
