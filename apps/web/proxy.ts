@@ -1,4 +1,4 @@
-import { auth } from "./auth"; // Keep this! It's the correct Auth.js v5 pattern
+import { auth } from "./auth";
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth;

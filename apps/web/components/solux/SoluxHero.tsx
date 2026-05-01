@@ -1,259 +1,181 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
+import { ChevronRight, Cpu, Wallet, GitPullRequest, ArrowRight, BookOpen } from "lucide-react"; 
+import { FaGithub } from "react-icons/fa6"; 
+import Link from "next/link";
+import { useSession } from "next-auth/react"; 
+import Solux3DBackground from "./Solux3DBackground"; 
 
 export default function SoluxHero() {
-  // Container entrance animation
+  const { data: session, status } = useSession(); 
+  const isLoggedIn = status === "authenticated";
+
+  // 1. Page Entrance
+  const pageEntrance = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 1, ease: "easeOut" } }
+  };
+
+  // 2. Text Animations
   const containerVars: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.12, delayChildren: 0.2 },
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
     },
   };
 
   const itemVars: Variants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
     visible: {
       opacity: 1,
       y: 0,
+      filter: "blur(0px)",
       transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
     },
   };
 
-  // Smooth opening animations for the bottom cards
-  const cardLeftVars: Variants = {
-    hidden: { opacity: 0, x: -60, y: 60, rotate: -15 },
+  // 3. Mini Pipeline Lighting Animation
+  const flowVars: Variants = {
+    hidden: { opacity: 0, y: 10 },
     visible: { 
-      opacity: 1, x: 0, y: 0, rotate: -6, 
-      transition: { type: "spring", stiffness: 80, damping: 15, delay: 0.8 } 
+      opacity: 1, 
+      y: 0,
+      transition: { staggerChildren: 0.2, delayChildren: 0.8, duration: 0.5 }
     }
   };
 
-  const cardRightVars: Variants = {
-    hidden: { opacity: 0, x: 60, y: 60, rotate: 15 },
-    visible: { 
-      opacity: 1, x: 0, y: 0, rotate: 6, 
-      transition: { type: "spring", stiffness: 80, damping: 15, delay: 1.0 } 
-    }
-  };
-
-  const cardCenterVars: Variants = {
-    hidden: { opacity: 0, y: 80, scale: 0.9 },
-    visible: { 
-      opacity: 1, y: 0, scale: 1, 
-      transition: { type: "spring", stiffness: 100, damping: 20, delay: 1.2 } 
-    }
-  };
-
-  // Subtle floating animation for the background objects
-  const floatAnimation = {
-    y: [-8, 8, -8],
-    transition: {
-      duration: 6,
-      repeat: Infinity,
-      ease: "easeInOut",
-    },
+  const stepVars: Variants = {
+    hidden: { opacity: 0.3, filter: "grayscale(100%)" },
+    visible: { opacity: 1, filter: "grayscale(0%)", transition: { duration: 0.4 } }
   };
 
   return (
-    <section className="relative isolate min-h-dvh w-full overflow-hidden bg-[#fafafa] dark:bg-black selection:bg-persimmon selection:text-white">
-      {/* Drawing Paper Noise Texture */}
-      <div
-        className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] dark:opacity-[0.02]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-        }}
-        aria-hidden
-      />
+    <motion.section 
+      initial="hidden" 
+      animate="visible" 
+      variants={pageEntrance}
+      className="relative isolate min-h-screen w-full overflow-hidden bg-black selection:bg-persimmon/30 selection:text-persimmon flex flex-col items-center justify-center pt-20 pb-12"
+    >
+      
+      {/* 🌌 Custom React Three Fiber Background */}
+      <Solux3DBackground />
 
+      {/* ⚡ Modern Vignette Overlay */}
+      <div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,transparent_0%,#000000_80%)] pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-persimmon/5 to-transparent blur-3xl pointer-events-none" />
 
-      {/* Floating Background Assets - SIZES INCREASED */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        {/* Top Left Paperclip */}
-        <motion.img
-          animate={floatAnimation}
-          src="./logos/solana.svg"
-          alt=""
-          className="absolute top-[8%] left-[2%] w-24 md:w-36 -rotate-12 opacity-90 drop-shadow-sm"
-        />
-        {/* Left Keyboard */}
-        <motion.img
-          animate={{ y: [-15, 15, -15], transition: { duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 } }}
-          src="https://framerusercontent.com/images/rHF7ngOvRWlxUCFw3CaFKk47z8.png?scale-down-to=1024&width=1611&height=968"
-          alt=""
-          className="absolute scale-110 top-[57%] -left-20 w-64 md:w-[28rem] -rotate-12 opacity-95 drop-shadow-lg dark:brightness-75 dark:contrast-125"
-        />
-        {/* Top Right Laptop */}
-        <motion.img
-          animate={{ y: [10, -10, 10], transition: { duration: 8, repeat: Infinity, ease: "easeInOut", delay: 0.5 } }}
-          src="https://framerusercontent.com/images/57aau0qXXJZVzKDCkclMnY0ykdc.png?scale-down-to=1024&width=3180&height=2832"
-          alt=""
-          className="absolute -top-10 -right-70 w-72 md:w-[32rem] rotate-[15deg] opacity-95 drop-shadow-xl dark:brightness-75 dark:contrast-125"
-        />
-        {/* Bottom Right Binder Clip */}
-        <motion.img
-          animate={floatAnimation}
-          src="https://framerusercontent.com/images/HU9hBZdjRywQqBdKxn8A7kQTgg8.png?width=532&height=607"
-          alt=""
-          className="absolute bottom-[15%] right-[5%] w-20 md:w-32 rotate-[35deg] opacity-90 drop-shadow-md scale-200"
-        />
-      </div>
-
-      <div className="relative z-20 mx-auto flex min-h-dvh w-full max-w-5xl flex-col items-center justify-start px-4 pt-32 pb-14 text-center sm:px-6 lg:px-8">
-        <motion.div
-          variants={containerVars}
-          initial="hidden"
-          animate="visible"
-          className="mx-auto flex flex-col items-center pointer-events-auto w-full"
-        >
-          {/* Top Badge */}
+      {/* 🚀 Main Centered Content */}
+      <div className="relative z-20 mx-auto w-full max-w-5xl px-6 flex flex-col items-center text-center">
+        
+        <motion.div variants={containerVars} className="flex flex-col items-center w-full">
+          
+          {/* Version Badge */}
           <motion.div
             variants={itemVars}
-            className="w-fit rounded-full bg-persimmon/10 px-4 py-1.5 text-[11px] font-medium text-persimmon dark:bg-persimmon/10 dark:text-persimmon border border-permisson/20 dark:border-persimmon/20 backdrop-blur-sm"
+            className="flex items-center gap-2 rounded-full bg-[#111]/80 border border-white/10 px-3 py-1.5 backdrop-blur-md mb-8 shadow-xl"
           >
-            Same day settlement, 0% developer fees
+            <span className="relative flex h-2 w-2 ml-1">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-[11px] font-mono font-medium text-white/70 pr-1 tracking-wide uppercase">
+              Mainnet Beta Soon
+            </span>
           </motion.div>
 
-          {/* Headline - "code" Highlighted */}
+          {/* MASSIVE Premium Headline */}
           <motion.h1
             variants={itemVars}
-            className="mt-6 font-nocturn text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.05] tracking-tight text-neutral-900 dark:text-white"
+            className="text-6xl sm:text-7xl lg:text-[6.5rem] font-bold leading-[1.05] tracking-tighter text-white drop-shadow-2xl"
           >
-            Engineered for contributors.
-            <br />
-            Governed by <span className="text-persimmon">code</span>.
+            Merge code. <br className="sm:hidden" />
+            Mint <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-persimmon to-orange-500">crypto.</span>
           </motion.h1>
 
-          {/* Subheadline */}
+          {/* Enlarged Tagline */}
           <motion.p
             variants={itemVars}
-            className="mt-6 max-w-xl text-pretty text-[clamp(1rem,2vw,1.1rem)] leading-relaxed text-neutral-600 dark:text-neutral-400"
+            className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-white/50 leading-relaxed font-medium"
           >
-            The autonomous bridge between GitHub and Solana. Merge a pull request and get paid direct to your wallet in seconds.
+            The autonomous treasury for open-source. Ship PRs and get paid directly to your Solana wallet in milliseconds.
           </motion.p>
 
-          {/* CTA & Trust Badges */}
-          <motion.div variants={itemVars} className="mt-8 flex flex-col items-center gap-6">
-            {/* Smoothed Hover Animation for Button */}
-            <motion.button
-              whileHover={{ 
-                scale: 1.04, 
-                boxShadow: "0px 8px 25px rgba(252, 76, 2, 0.35)" 
-              }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="inline-flex items-center justify-center rounded-full bg-neutral-900 px-8 py-4 text-sm font-semibold text-white transition-colors dark:bg-white dark:text-black dark:hover:bg-white/90"
-            >
-              Connect GitHub
-            </motion.button>
+          {/* ================= THE REFINED "CODE FLOW" VISUALIZER ================= */}
+          <motion.div 
+            variants={flowVars}
+            className="mt-12 relative overflow-hidden flex items-center gap-3 sm:gap-6 bg-[#0a0a0a]/80 border border-white/10 rounded-full px-6 py-3 backdrop-blur-2xl shadow-[0_0_30px_rgba(0,0,0,0.8)]"
+          >
+            {/* Animated scanning light effect inside the pill */}
+            <motion.div 
+              animate={{ x: ["-200%", "200%"] }} 
+              transition={{ repeat: Infinity, duration: 4, ease: "linear" }} 
+              className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none" 
+            />
 
-            <div className="flex flex-wrap justify-center gap-6 text-sm font-medium text-sky-600 dark:text-sky-400">
-              <span className="flex items-center gap-1.5">
-                <CheckCircleIcon /> Verified PRs
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircleIcon /> On-chain Vaults
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircleIcon /> Instant USDC
-              </span>
-            </div>
+            {/* Step 1 */}
+            <motion.div variants={stepVars} className="flex items-center gap-2">
+              <GitPullRequest size={16} className="text-white/50" />
+              <span className="text-sm font-mono text-white/70 tracking-tight">Merge PR</span>
+            </motion.div>
+
+            <ChevronRight size={14} className="text-white/20" />
+
+            {/* Step 2 */}
+            <motion.div variants={stepVars} className="flex items-center gap-2">
+              <Cpu size={16} className="text-persimmon" />
+              <span className="text-sm font-mono text-persimmon tracking-tight">Audit Passed</span>
+            </motion.div>
+
+            <ChevronRight size={14} className="text-white/20" />
+
+            {/* Step 3 */}
+            <motion.div variants={stepVars} className="flex items-center gap-2">
+              <Wallet size={16} className="text-emerald-400" />
+              <span className="text-sm font-mono text-emerald-400 tracking-tight">Settled</span>
+            </motion.div>
           </motion.div>
 
-          {/* Overlapping Mockup Cards with Entrance & Hover Animations */}
-          <div className="relative mt-24 h-[300px] w-full max-w-3xl">
-            {/* Left Background Card */}
-            <motion.div 
-              variants={cardLeftVars}
-              whileHover={{ scale: 1.05, rotate: 0, zIndex: 50, y: -15 }}
-              className="absolute left-[10%] top-12 z-10 w-[350px] origin-bottom-left rounded-2xl bg-white p-6 shadow-xl dark:bg-carbon dark:border dark:border-white/5 cursor-pointer"
-            >
-              <div className="text-left font-mono text-[10px] text-neutral-400 uppercase tracking-wider mb-4">Pull Request #104</div>
-              <div className="flex justify-between items-center border-b border-neutral-100 dark:border-white/10 pb-4">
-                <div>
-                  <div className="font-semibold text-neutral-900 dark:text-white">Implement Anchor Auth</div>
-                  <div className="text-xs text-neutral-500 mt-1">@Satyamyaduvanshi</div>
-                </div>
-                <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs">
-                  git
-                </div>
-              </div>
+          {/* Smart CTA Buttons */}
+          <motion.div variants={itemVars} className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-5 w-full">
+            
+            {/* Intelligent Auth Button */}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
+              <Link
+                href={isLoggedIn ? "/dashboard" : "/login"}
+                className="group flex items-center justify-center gap-2 bg-white text-black px-8 py-3.5 rounded-xl font-bold text-sm tracking-wide transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] w-full"
+              >
+                {isLoggedIn ? (
+                  <>
+                    Go to Dashboard
+                    <ArrowRight size={18} className="text-black/50 group-hover:translate-x-1 transition-transform ml-1" />
+                  </>
+                ) : (
+                  <>
+                    <FaGithub size={18} />
+                    Connect GitHub
+                    <ArrowRight size={18} className="text-black/50 group-hover:translate-x-1 transition-transform ml-1" />
+                  </>
+                )}
+              </Link>
+            </motion.div>
+            
+            {/* Docs Button */}
+            <motion.div whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.05)" }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
+              <Link
+                href="/docs"
+                className="flex items-center justify-center gap-2 bg-transparent border border-white/15 text-white/80 hover:text-white px-8 py-3.5 rounded-xl font-semibold text-sm tracking-wide transition-all w-full"
+              >
+                <BookOpen size={16} className="text-white/50" />
+                Documentation
+              </Link>
             </motion.div>
 
-            {/* Right Background Card */}
-            <motion.div 
-              variants={cardRightVars}
-              whileHover={{ scale: 1.05, rotate: 0, zIndex: 50, y: -15 }}
-              className="absolute right-[10%] top-16 z-10 w-[350px] origin-bottom-right rounded-2xl bg-white p-6 shadow-xl dark:bg-carbon dark:border dark:border-white/5 cursor-pointer"
-            >
-              <div className="text-left font-mono text-[10px] text-neutral-400 uppercase tracking-wider mb-4">Solana Vault</div>
-              <div className="flex justify-between items-center border-b border-neutral-100 dark:border-white/10 pb-4">
-                <div>
-                  <div className="font-semibold text-neutral-900 dark:text-white">Treasury Payout</div>
-                  <div className="text-xs text-neutral-500 mt-1">Status: Success</div>
-                </div>
-                <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-xs">
-                  $
-                </div>
-              </div>
-            </motion.div>
+          </motion.div>
 
-            {/* Center Main Card */}
-            <motion.div 
-              variants={cardCenterVars}
-              whileHover={{ scale: 1.03, y: -10 }}
-              className="absolute left-1/2 top-0 z-30 w-[420px] -translate-x-1/2 rounded-2xl bg-white p-6 shadow-2xl shadow-neutral-200/50 dark:bg-[#020406] dark:shadow-black/50 dark:border dark:border-white/10 cursor-pointer"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="text-left font-mono text-[10px] text-neutral-400 uppercase tracking-wider">Protocol Settlement</div>
-                <div className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">MERGED</div>
-              </div>
-              
-              <div className="flex justify-between items-start border-b border-neutral-100 dark:border-white/10 pb-6 mb-4">
-                <div className="text-left">
-                  <div className="text-xs text-neutral-500 mb-2">CONTRIBUTOR</div>
-                  <div className="flex items-center gap-2">
-                    {/* Integrated User Avatar */}
-                    <img 
-                      src="https://avatars.githubusercontent.com/u/88279507?s=400&u=d9943d656dcd302b3599d1ac3041afbc4e67156d&v=4" 
-                      alt="Satyam Yaduvanshi" 
-                      className="h-7 w-7 rounded-full border border-neutral-200 dark:border-white/20"
-                    />
-                    <div className="font-medium text-neutral-900 dark:text-white text-sm">Satyam Yaduvanshi</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs text-neutral-500 mb-1">BOUNTY</div>
-                  <div className="font-nocturn text-2xl font-bold text-neutral-900 dark:text-white">$1,500.00</div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                <span>0xSolux...A7f9</span>
-                <span className="flex items-center gap-1 text-persimmon"><LockIcon /> Guardian Verified</span>
-              </div>
-            </motion.div>
-          </div>
         </motion.div>
       </div>
-    </section>
-  );
-}
-
-// Simple SVG Icons
-function CheckCircleIcon() {
-  return (
-    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-}
-
-function LockIcon() {
-  return (
-    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-    </svg>
+    </motion.section>
   );
 }

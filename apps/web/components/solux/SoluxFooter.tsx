@@ -1,163 +1,183 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useSyncExternalStore } from "react";
-
-function useIsMounted() {
-  return useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
-}
+import { ArrowRight } from "lucide-react";
 
 export default function SoluxFooter() {
-  const { theme, setTheme } = useTheme();
-  const mounted = useIsMounted();
+  // Animation for the massive bottom letters
+  const containerVars = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+    },
+  };
+
+  const letterVars = {
+    hidden: { opacity: 0, y: 50, scale: 0.8 },
+    visible: { 
+      opacity: 1, y: 0, scale: 1, 
+      transition: { type: "spring", stiffness: 100, damping: 15 } 
+    },
+  };
+
+  // The "Flower Bloom" animation for the logo
+  const flowerLogoVars = {
+    hidden: { scale: 0, rotate: -90, opacity: 0 },
+    visible: { 
+      scale: 1, 
+      rotate: 0, 
+      opacity: 1, 
+      transition: { type: "spring", stiffness: 80, damping: 12, delay: 0.6 } 
+    },
+  };
 
   return (
-    <footer className="relative w-full overflow-hidden border-t border-black bg-[#fafafa] pt-24 pb-12 dark:border-white/5 dark:bg-black selection:bg-persimmon selection:text-white">
-      {/* Structural Protocol Glow */}
-      <div className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 h-px w-full max-w-4xl bg-gradient-to-r from-transparent via-persimmon/40 to-transparent dark:via-persimmon/20" />
-      <div className="pointer-events-none absolute -bottom-32 left-1/2 -translate-x-1/2 h-64 w-[60%] rounded-[100%] bg-persimmon/5 blur-[100px] dark:bg-persimmon/10" />
-
-
-      
-      
-
-      <div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-8">
-        <div className="grid gap-16 md:grid-cols-2 lg:grid-cols-12">
+    <footer className="w-full bg-black pt-24 pb-8 selection:bg-persimmon/30 selection:text-persimmon border-t border-white/5">
+      <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
+        
+        {/* Top Section: Split Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 pb-24 border-b border-white/10">
           
-          {/* Brand & Mission Column (Takes up 5 columns on large screens) */}
-          <div className="flex flex-col gap-8 lg:col-span-5">
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
+          {/* Left Column: Headline & Mission (Spans 5 cols) */}
+          <div className="lg:col-span-5 flex flex-col gap-8 pr-0 lg:pr-8">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="flex items-center gap-4"
+              className="text-4xl md:text-5xl font-bold tracking-tighter text-white leading-[1.1]"
             >
-              {/* Pure CSS Geometric Logo */}
-              <div className="relative flex size-12 items-center justify-center rounded-xl border border-black/10 bg-gradient-to-br from-neutral-100 to-neutral-200 shadow-inner dark:border-white/5 dark:from-steel dark:to-[#121820]">
-                <div className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_top_right,rgba(252,76,2,0.15),transparent_50%)]" />
-                <div className="h-4 w-4 rotate-45 rounded-[2px] border-[2px] border-persimmon shadow-[0_0_12px_rgba(252,76,2,0.5)]" />
-              </div>
-              <span className="font-nocturn text-4xl font-bold tracking-tight text-neutral-900 dark:text-white">
-                SOLUX.
-              </span>
-            </motion.div>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="max-w-sm text-[15px] leading-relaxed text-neutral-600 dark:text-neutral-400"
-            >
-              The autonomous bridge between GitHub contributions and Solana rewards. Engineered for sovereign developers.
-            </motion.p>
+              Engineered for contributors. <br className="hidden md:block" />
+              Governed by <span className="text-persimmon">code.</span>
+            </motion.h2>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="flex items-center gap-3 mt-2"
+              className="text-white/50 text-base max-w-md leading-relaxed font-medium"
             >
-              {mounted && (
-                <button
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  aria-label="Toggle theme"
-                  className="group flex h-10 w-10 items-center justify-center rounded-lg border border-black/10 bg-white text-neutral-500 transition-all hover:border-persimmon hover:text-persimmon dark:border-white/10 dark:bg-[#1a222c] dark:hover:border-persimmon/50 dark:hover:bg-steel dark:hover:text-persimmon"
-                >
-                  {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-                </button>
-              )}
-              
-              <Link
-                href="https://github.com/Satyamyaduvanshi/gitlancer"
-                target="_blank"
-                className="group flex h-10 w-10 items-center justify-center rounded-lg border border-black/10 bg-white text-neutral-500 transition-all hover:border-persimmon hover:text-persimmon dark:border-white/10 dark:bg-[#1a222c] dark:hover:border-persimmon/50 dark:hover:bg-steel dark:hover:text-persimmon"
+              The autonomous bridge between GitHub and Solana. Merge a pull request and get paid directly to your wallet in seconds.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
+              <Link 
+                href="/login" 
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-bold text-white uppercase tracking-widest transition-all group"
               >
-                <FaGithub className="size-[18px]" />
-              </Link>
-              
-               <Link
-                href="https://x.com/SATYAMyada62558"
-                target="_blank"
-                className="group flex h-10 w-10 items-center justify-center rounded-lg border border-black/10 bg-white text-neutral-500 transition-all hover:border-persimmon hover:text-persimmon dark:border-white/10 dark:bg-[#1a222c] dark:hover:border-persimmon/50 dark:hover:bg-steel dark:hover:text-persimmon"
-              >
-                <FaXTwitter className="size-[16px]" />
+                Initialize Treasury 
+                <ArrowRight size={16} className="text-persimmon group-hover:translate-x-1 transition-transform" />
               </Link>
             </motion.div>
           </div>
 
-          {/* Spacer Column for Large Screens */}
-          <div className="hidden lg:block lg:col-span-1"></div>
+          {/* Right Column: 3-Column Link Grid with Vertical Borders (Spans 7 cols) */}
+          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-0 mt-4 lg:mt-0">
+            
+            {/* Column 1: Ecosystem */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="flex flex-col gap-6 sm:border-l sm:border-white/10 sm:pl-8 lg:pl-12"
+            >
+              <h4 className="text-lg font-bold text-white tracking-tight">Ecosystem</h4>
+              <div className="flex flex-col gap-4 text-[13px] text-white/50 font-medium">
+                <Link href="#blinky" className="hover:text-white transition-colors">Blinky Audit AI</Link>
+                <Link href="#vaults" className="hover:text-white transition-colors">Vault Orchestrator</Link>
+                <Link href="#guardian" className="hover:text-white transition-colors">Identity Guardian</Link>
+                <Link href="#settlement" className="hover:text-white transition-colors">USDC Settlement</Link>
+              </div>
+            </motion.div>
 
-          {/* Links Column 1: Ecosystem */}
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-col gap-6 lg:col-span-3"
-          >
-            <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-neutral-900 dark:text-neutral-200">
-              Ecosystem
-            </h4>
-            <div className="flex flex-col gap-3.5 font-sans text-[14px] font-medium text-neutral-500 dark:text-neutral-400">
-              <Link href="#guardian" className="w-fit transition-colors hover:text-persimmon">Guardian Protocol</Link>
-              <Link href="#blinky" className="w-fit transition-colors hover:text-persimmon">Blinky Audit Bot</Link>
-              <Link href="#vaults" className="w-fit transition-colors hover:text-persimmon">Multi-tenant Vaults</Link>
-              <Link href="#settlement" className="w-fit transition-colors hover:text-persimmon">USDC Settlement</Link>
-            </div>
-          </motion.div>
+            {/* Column 2: Resources */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="flex flex-col gap-6 sm:border-l sm:border-white/10 sm:pl-8 lg:pl-12"
+            >
+              <h4 className="text-lg font-bold text-white tracking-tight">Resources</h4>
+              <div className="flex flex-col gap-4 text-[13px] text-white/50 font-medium">
+                <Link href="/docs" className="hover:text-white transition-colors">Developer Docs</Link>
+                <Link href="/docs/anchor" className="hover:text-white transition-colors">Smart Contract Guide</Link>
+                <Link href="/docs/api" className="hover:text-white transition-colors">API Reference</Link>
+                <Link href="/help" className="hover:text-white transition-colors">Help Center</Link>
+              </div>
+            </motion.div>
 
-          {/* Links Column 2: Resources */}
+            {/* Column 3: Connect */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-col gap-6 sm:border-l sm:border-white/10 sm:pl-8 lg:pl-12"
+            >
+              <h4 className="text-lg font-bold text-white tracking-tight">Connect</h4>
+              <div className="flex flex-col gap-4 text-[13px] text-white/50 font-medium">
+                <Link href="https://x.com/SOLUXdev" target="_blank" className="flex items-center gap-2 hover:text-white transition-colors">
+                  <FaXTwitter size={14} /> Twitter
+                </Link>
+                <Link href="https://github.com/Satyamyaduvanshi" target="_blank" className="flex items-center gap-2 hover:text-white transition-colors">
+                  <FaGithub size={14} /> GitHub
+                </Link>
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
+
+        {/* Bottom Section: Massive Text & Blooming Logo */}
+        <div className="pt-16 pb-8 flex flex-col items-center justify-center">
           <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-            className="flex flex-col gap-6 lg:col-span-3"
+            variants={containerVars}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="flex items-center justify-center gap-4 sm:gap-8 w-full overflow-hidden"
           >
-            <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-neutral-900 dark:text-neutral-200">
-              Resources
-            </h4>
-            <div className="flex flex-col gap-3.5 font-sans text-[14px] font-medium text-neutral-500 dark:text-neutral-400">
-              <Link href="/docs" className="w-fit transition-colors hover:text-persimmon">Developer Docs</Link>
-              <Link href="/docs/anchor" className="w-fit transition-colors hover:text-persimmon">Anchor Integration</Link>
-              <Link href="/docs/nestjs" className="w-fit transition-colors hover:text-persimmon">Oracle Setup</Link>
-              <a href="#" className="flex w-fit items-center gap-2.5 transition-colors hover:text-persimmon">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
-                </span>
-                Systems Operational
-              </a>
-            </div>
+            {/* Massive Letters */}
+            {["S", "O", "L", "U", "X"].map((letter, i) => (
+              <motion.span 
+                key={i} 
+                variants={letterVars}
+                className="text-[15vw] md:text-[12vw] font-black tracking-tighter text-white leading-none font-mono"
+              >
+                {letter}
+              </motion.span>
+            ))}
+
+            {/* Blooming Flower Logo */}
+            <motion.div variants={flowerLogoVars} className="relative w-[12vw] h-[12vw] md:w-[8vw] md:h-[8vw] flex-shrink-0 mt-4 md:mt-8">
+              <Image 
+                src="/logo-orange.svg" 
+                alt="SOLUX Logo" 
+                fill 
+                className="object-contain"
+              />
+            </motion.div>
           </motion.div>
         </div>
 
-        {/* Industrial Bottom Bar */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
-          className="mt-24 flex flex-col items-center justify-between gap-6 border-t border-black/10 pt-8 dark:border-white/10 sm:flex-row"
-        >
-          <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-[10px] tracking-[0.1em] text-neutral-400 dark:text-neutral-500 sm:justify-start">
-          
-          </div>
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
-            © {new Date().getFullYear()} SOLUX. ALL RIGHTS RESERVED.
+        {/* Copyright Centered at Bottom */}
+        <div className="mt-8 flex justify-center text-center">
+          <p className="text-[11px] text-white/30 font-mono tracking-widest uppercase">
+            © {new Date().getFullYear()} Solux. Powered by Solana.
           </p>
-        </motion.div>
+        </div>
+
       </div>
     </footer>
   );

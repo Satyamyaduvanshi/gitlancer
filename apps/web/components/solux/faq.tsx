@@ -86,7 +86,7 @@ export default function Faq() {
           animate={{ y: [0, -10, 0], scale: [1, 1.05, 1] }}
           transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         >
-          <Image src="/logos/gemini.png" alt="Gemini" width={50} height={50} className="opacity-30 dark:opacity-20" />
+          <Image src="/logos/gemini.svg" alt="Gemini" width={50} height={50} className="opacity-30 dark:opacity-20" />
         </motion.div>
       </div>
 
