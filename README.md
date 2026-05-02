@@ -19,6 +19,7 @@
 ---
 
 ## System Architecture
+<img src="./system.svg" alt="arc"/>
 
 
 
