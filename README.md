@@ -3,8 +3,8 @@
 
 **SOLUX** is a decentralized protocol designed to bridge the gap between open-source contributions and instant financial incentives. By combining **AI-driven code audits** with the **Solana blockchain**, SOLUX automates the entire lifecycle of a developer bounty: from PR submission to verified USDC settlement.
 
-Website : https://x.com/SOLUXdev
-x : https://x.com/SOLUXdev
+- **Website:** [solux.website](https://www.solux.website)
+- **X:** [@SOLUXdev](https://x.com/SOLUXdev)
 ---
 
 ## 🚀 The Workflow
