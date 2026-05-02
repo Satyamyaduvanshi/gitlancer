@@ -1,160 +1,83 @@
-# Turborepo starter
+# 🌌 SOLUX (GitLancer)
+### Merge code, get paid. The autonomous Web3 bounty hunter.
 
-This Turborepo starter is maintained by the Turborepo core team.
+SOLUX is a decentralized protocol designed to bridge the gap between open-source contributions and instant financial incentives. By combining **AI-driven code audits** with the **Solana blockchain**, SOLUX automates the entire lifecycle of a developer bounty: from PR submission to verified USDC settlement.
 
-## Using this example
+---
 
-Run the following command:
+## 🚀 The Workflow
 
-```sh
-npx create-turbo@latest
-```
+1. **Fund**: A maintainer initializes a Vault for their repository on the Solana devnet and deposits USDC.
+2. **Code**: A contributor submits a Pull Request (PR) to the GitHub repository.
+3. **Audit**: The SOLUX Bot (Blinky AI), triggered via NestJS webhooks, analyzes the code for quality and security.
+4. **Merge & Pay**: Upon merging, the SOLUX Oracle verifies the contribution and triggers the smart contract to release USDC directly from the Vault to the contributor's wallet.
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## 🛠️ Technical Stack
 
-### Apps and Packages
+* **Blockchain**: Solana (Anchor Framework, Rust).
+* **Backend**: NestJS (Oracle Service & GitHub Webhook Listener).
+* **Frontend**: Next.js 15+ (Turbopack), TypeScript, Tailwind CSS, Framer Motion.
+* **3D Visuals**: Three.js, React Three Fiber (The "Monolith" Execution Core).
+* **Database**: PostgreSQL with Prisma ORM.
+* **Infrastructure**: Docker, Turborepo, Vercel.
+* **Development Environment**: Developed and tested on Arch Linux.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+---
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## 📦 Key Features
 
-### Utilities
+* **Autonomous Audits**: Blinky AI provides real-time feedback on Pull Requests.
+* **Instant Settlement**: No manual payout delays; USDC is transferred the moment code is merged.
+* **Double-Spend Prevention**: Every PR ID is recorded on-chain in a `BountyRecord` to ensure one-time payment.
+* **Secure Oracle**: Only the verified SOLUX Oracle signature can authorize bounty distributions.
+* **Maintainer Controls**: Secure withdrawal functions for idle funds and easy "Uninstall" mechanics.
 
-This Turborepo has some additional tools already setup for you:
+---
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## 🏁 Getting Started
 
-### Build
+### Prerequisites
+* Node.js & pnpm
+* Rust & Anchor CLI
+* Solana CLI (configured to devnet)
 
-To build all apps and packages, run the following command:
+### Installation
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+1. **Clone the Repo:**
+   ```bash
+   git clone [https://github.com/Satyamyaduvanshi/gitlancer.git](https://github.com/Satyamyaduvanshi/gitlancer.git)
+   cd gitlancer
+Install Dependencies:
 
-```sh
-cd my-turborepo
-turbo build
-```
+Bash
+pnpm install
+Smart Contract Deployment:
 
-Without global `turbo`, use your package manager:
+Bash
+anchor build
+anchor deploy
+Run the Web Dashboard:
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
-```
+Bash
+pnpm run dev --filter web
+🔒 Security Architecture
+SOLUX implements a Trust-But-Verify model:
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Vault Isolation: Each repository has its own isolated PDA (Program Derived Address) vault.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+Oracle Validation: The smart contract strictly enforces that only the official SOLUX Oracle key can authorize payouts.
 
-```sh
-turbo build --filter=docs
-```
+On-Chain State: All payout statuses are immutable and verifiable on the Solana ledger.
 
-Without global `turbo`:
+📜 MIT License
+Copyright (c) 2026 Satyam Yadav
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-### Develop
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-To develop all apps and packages, run the following command:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
-# gitlancer
+Developed with ❤️ by Satyam Yadav
