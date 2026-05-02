@@ -156,7 +156,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <p className="text-xs text-white/70 leading-relaxed max-w-[170px] mb-5 drop-shadow-sm transition-colors duration-300 group-hover:text-white">
               Add Solux to your repo for AI audits & payouts.
             </p>
-            <Link href="#" className="flex items-center justify-center gap-2 px-5 py-2.5 w-full rounded-xl bg-persimmon text-white font-bold text-xs transition-all duration-500 hover:bg-orange-500 hover:shadow-[0_8px_25px_rgba(252,76,2,0.5)] hover:-translate-y-0.5 active:scale-[0.96] overflow-hidden group/btn">
+            <Link href="https://github.com/apps/blinky-solux" className="flex items-center justify-center gap-2 px-5 py-2.5 w-full rounded-xl bg-persimmon text-white font-bold text-xs transition-all duration-500 hover:bg-orange-500 hover:shadow-[0_8px_25px_rgba(252,76,2,0.5)] hover:-translate-y-0.5 active:scale-[0.96] overflow-hidden group/btn">
               <div className="absolute inset-[-20px] bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-out" />
               <span className="relative z-10 flex items-center gap-2">
                 Add to Repository

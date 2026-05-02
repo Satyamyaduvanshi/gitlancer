@@ -67,7 +67,7 @@ export default function SoluxStoryFlow() {
   );
 
   return (
-    <section className="bg-black  border-white/5 selection:bg-persimmon/30 selection:text-persimmon">
+    <section id="story" className="bg-black  border-white/5 selection:bg-persimmon/30 selection:text-persimmon">
       
       {/* ================= INTRO HEADER ================= */}
       <div className="relative pt-32 pb-20 px-6 text-center z-10 flex flex-col items-center">

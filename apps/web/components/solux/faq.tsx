@@ -61,7 +61,7 @@ export default function Faq() {
   };
 
   return (
-    <section className="relative w-full overflow-hidden bg-white py-20 transition-colors duration-500 dark:bg-black sm:py-32">
+    <section id="faq" className="relative w-full overflow-hidden bg-white py-20 transition-colors duration-500 dark:bg-black sm:py-32">
       
       {/* Floating Logos Background */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">

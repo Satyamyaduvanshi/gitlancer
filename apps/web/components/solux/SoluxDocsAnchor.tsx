@@ -39,7 +39,7 @@ export default function SoluxBotIntegration() {
             </p>
 
             <Link
-              href="/login"
+              href="https://github.com/apps/blinky-solux"
               className="group flex items-center justify-center gap-3 bg-white text-black px-8 py-4 rounded-xl font-bold text-sm tracking-wide transition-all hover:bg-neutral-200"
             >
               <FaGithub size={18} />
