@@ -10,7 +10,6 @@ import NavItems, { type NavItemsType } from "./NavItems";
 
 const navItems: NavItemsType[] = [
   { name: "Features", link: "#story" },
-  { name: "Pricing", link: "#pricing" },
   { name: "Faq", link: "#faq" },
   { name: "About", link: "#social-proof" },
 ];

@@ -1,92 +1,61 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
-import { Network, Bot } from "lucide-react"; 
+import { Network, Sparkles } from "lucide-react";
+import { FaGithub } from "react-icons/fa6";
+import { SiSolana } from "react-icons/si"; // We use Simple Icons for the Solana logo
+
+// 1. Define the core stack using purely React Icons (No local images needed!)
+const coreStack = [
+  { name: "Solana", icon: SiSolana, color: "group-hover:text-[#14F195]" }, // Official Solana Green
+  { name: "GitHub", icon: FaGithub, color: "group-hover:text-white" },
+  { name: "Anchor", icon: Network, color: "group-hover:text-blue-400" },
+  { name: "Gemini", icon: Sparkles, color: "group-hover:text-purple-400" },
+];
+
+// 2. Multiply it 4 times for the perfect infinite loop
+const techStack = [...coreStack, ...coreStack, ...coreStack, ...coreStack];
 
 export default function SoluxMaintainersStrip() {
   return (
-    <section id="social-proof" className="bg-black py-24 sm:py-32 relative overflow-hidden border-t border-white/5 selection:bg-persimmon/30 selection:text-persimmon">
+    <section className="bg-black py-20 relative overflow-hidden selection:bg-persimmon/30 selection:text-persimmon">
       
-      {/* Subtle Top Glow (Connects visually from the section above) */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-px bg-gradient-to-r from-transparent via-persimmon/50 to-transparent opacity-50" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[150px] bg-persimmon/10 blur-[100px] rounded-full pointer-events-none" />
+      {/* Subtle Top Divider */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] max-w-4xl h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10 flex flex-col items-center">
+      <div className="mx-auto w-full relative z-10 flex flex-col items-center">
         
-        {/* Aggressive, Minimalist Header */}
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-[11px] font-mono text-white/40 uppercase tracking-[0.3em] mb-12 text-center"
-        >
+        <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.3em] mb-12 text-center px-4">
           Engineered with elite infrastructure
-        </motion.p>
+        </p>
 
-        {/* Naked, Floating Logo Strip */}
-        <div className="flex flex-wrap items-center justify-center gap-12 sm:gap-20 lg:gap-24 w-full">
-          
-          {/* Solana */}
+        {/* 🚀 Seamless Infinite Marquee */}
+        <div 
+          className="w-full flex overflow-hidden"
+          style={{ 
+            maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)", 
+            WebkitMaskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)" 
+          }}
+        >
           <motion.div
-            initial={{ opacity: 0, filter: "blur(4px)" }}
-            whileInView={{ opacity: 1, filter: "blur(0px)" }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1, duration: 0.8 }}
-            className="group flex items-center justify-center cursor-pointer"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ ease: "linear", duration: 40, repeat: Infinity }}
+            className="flex items-center gap-16 sm:gap-24 lg:gap-32 w-max px-8"
           >
-            <Image 
-              src="/logos/solana.svg" 
-              alt="Solana" 
-              width={140} 
-              height={32} 
-              className="h-6 sm:h-7 w-auto opacity-40 grayscale transition-all duration-500 group-hover:opacity-100 group-hover:grayscale-0 group-hover:drop-shadow-[0_0_15px_rgba(20,241,149,0.4)]" 
-            />
+            {techStack.map((tech, i) => (
+              <div 
+                key={i} 
+                className="group flex items-center justify-center gap-3 opacity-50 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0 cursor-pointer"
+              >
+                <tech.icon size={26} className={`text-white transition-colors duration-500 ${tech.color}`} />
+                <span className="text-xl sm:text-2xl font-bold tracking-tight text-white transition-colors duration-500">
+                  {tech.name}
+                </span>
+              </div>
+            ))}
           </motion.div>
-        
-          {/* GitHub */}
-          <motion.div
-            initial={{ opacity: 0, filter: "blur(4px)" }}
-            whileInView={{ opacity: 1, filter: "blur(0px)" }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="group flex items-center justify-center cursor-pointer"
-          >
-            <Image 
-              src="/logos/github.svg" 
-              alt="GitHub" 
-              width={120} 
-              height={32} 
-              className="h-6 sm:h-7 w-auto invert opacity-40 transition-all duration-500 group-hover:opacity-100 group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" 
-            />
-          </motion.div>
-
-          {/* Anchor Framework */}
-          <motion.div
-            initial={{ opacity: 0, filter: "blur(4px)" }}
-            whileInView={{ opacity: 1, filter: "blur(0px)" }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="group flex items-center justify-center gap-3 cursor-pointer opacity-40 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0"
-          >
-            <Network size={28} className="text-white group-hover:text-blue-400 transition-colors duration-500 group-hover:drop-shadow-[0_0_15px_rgba(96,165,250,0.5)]" />
-            <span className="text-xl sm:text-2xl font-bold tracking-tight text-white transition-colors duration-500">Anchor</span>
-          </motion.div>
-
-          {/* OpenAI / LLM Engine */}
-          <motion.div
-            initial={{ opacity: 0, filter: "blur(4px)" }}
-            whileInView={{ opacity: 1, filter: "blur(0px)" }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="group flex items-center justify-center gap-3 cursor-pointer opacity-40 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0"
-          >
-            <Bot size={28} className="text-white group-hover:text-emerald-400 transition-colors duration-500 group-hover:drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]" />
-            <span className="text-xl sm:text-2xl font-bold tracking-tight text-white transition-colors duration-500">OpenAI</span>
-          </motion.div>
-
         </div>
+
       </div>
     </section>
   );

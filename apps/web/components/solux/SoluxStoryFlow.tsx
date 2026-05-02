@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { GitPullRequest, ShieldCheck, Zap } from "lucide-react";
 
+// Updated colors to heavily feature Persimmon and match the brand
 const steps = [
   {
     id: 1,
@@ -11,8 +12,7 @@ const steps = [
     subtitle: "Instant static analysis",
     description: "The moment a PR is merged, Blinky intercepts the webhook. It performs deep static analysis, checks for vulnerabilities, and verifies the contribution against bounty criteria in milliseconds.",
     icon: GitPullRequest,
-    color: "text-purple-500",
-    glow: "shadow-[0_0_50px_rgba(168,85,247,0.3)]",
+    color: "text-persimmon", // Brand Primary
   },
   {
     id: 2,
@@ -20,8 +20,7 @@ const steps = [
     subtitle: "Cryptographic binding",
     description: "Zero spoofing. The Guardian protocol cryptographically binds the contributor's GitHub handle to their verified Solana wallet, ensuring funds only flow to the legitimate author.",
     icon: ShieldCheck,
-    color: "text-amber-500",
-    glow: "shadow-[0_0_50px_rgba(245,158,11,0.3)]",
+    color: "text-amber-400",
   },
   {
     id: 3,
@@ -29,151 +28,162 @@ const steps = [
     subtitle: "Zero-friction payout",
     description: "Upon audit success, the on-chain vault is triggered. USDC is instantly routed to the contributor's wallet with zero intermediary fees. PR merged, crypto minted.",
     icon: Zap,
-    color: "text-emerald-500",
-    glow: "shadow-[0_0_50px_rgba(16,185,129,0.3)]",
+    color: "text-emerald-400",
   }
 ];
 
 export default function SoluxStoryFlow() {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Track the scroll progress through this entire section (0 to 1)
+  // Track the scroll progress of the sticky section
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // ================= SCROLL TRANSFORMATIONS =================
-
-  // 1. Massive Headline Animation (Fades out and moves up as you scroll past it)
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
-  const headerY = useTransform(scrollYProgress, [0, 0.1], [0, -100]);
-
-  // 2. Visualizer Animations (The dynamic shape on the left)
-  // State 1 (Audit - Purple): 0.1 to 0.4
-  // State 2 (Guardian - Amber): 0.4 to 0.7
-  // State 3 (Settlement - Emerald): 0.7 to 1.0
+  // ================= SLEEK 3D GIMBAL ANIMATIONS =================
   
-  const visualizerRotateX = useTransform(scrollYProgress, [0.1, 0.4, 0.7, 1], [30, 60, 0, 45]);
-  const visualizerRotateY = useTransform(scrollYProgress, [0.1, 0.4, 0.7, 1], [0, 180, 45, 360]);
-  const visualizerScale = useTransform(scrollYProgress, [0.1, 0.4, 0.5, 0.7, 0.8, 1], [1, 1.2, 0.8, 1.2, 0.9, 1.1]);
-  const visualizerBorderRadius = useTransform(scrollYProgress, [0.1, 0.4, 0.7, 1], ["20%", "50%", "10%", "50%"]);
+  // Outer Ring
+  const rotateX1 = useTransform(scrollYProgress, [0, 1], [45, 135]);
+  const rotateY1 = useTransform(scrollYProgress, [0, 1], [0, 180]);
+  
+  // Middle Ring (Counter-rotating)
+  const rotateX2 = useTransform(scrollYProgress, [0, 1], [135, 45]);
+  const rotateZ2 = useTransform(scrollYProgress, [0, 1], [0, -360]);
 
-  // Colors for the dynamic visualizer shape
-  const borderColor1 = useTransform(scrollYProgress, [0, 0.3, 0.6, 1], ["rgba(168,85,247,0.8)", "rgba(168,85,247,0)", "rgba(16,185,129,0)", "rgba(16,185,129,0.8)"]);
-  const borderColor2 = useTransform(scrollYProgress, [0, 0.3, 0.6, 1], ["rgba(168,85,247,0)", "rgba(245,158,11,0.8)", "rgba(245,158,11,0)", "rgba(16,185,129,0)"]);
-  const borderColor3 = useTransform(scrollYProgress, [0, 0.3, 0.6, 1], ["rgba(168,85,247,0)", "rgba(245,158,11,0)", "rgba(16,185,129,0.8)", "rgba(16,185,129,0)"]);
+  // Inner Ring
+  const rotateY3 = useTransform(scrollYProgress, [0, 1], [45, 360]);
+  const rotateZ3 = useTransform(scrollYProgress, [0, 1], [-45, 45]);
 
+  // Dynamic Glow that shifts colors slightly as you scroll through the phases
+  const coreGlow = useTransform(
+    scrollYProgress, 
+    [0, 0.5, 1], 
+    [
+      "rgba(252,76,2,0.4)",  // Persimmon
+      "rgba(251,191,36,0.3)", // Amber
+      "rgba(52,211,153,0.3)"  // Emerald
+    ]
+  );
 
   return (
-    // Total height is 400vh to give the user plenty of time to scroll through the 3 steps
-    <section ref={containerRef} className="relative bg-black min-h-[400vh] selection:bg-persimmon/30 selection:text-persimmon">
+    <section className="bg-black  border-white/5 selection:bg-persimmon/30 selection:text-persimmon">
       
-      {/* ================= MASSIVE INTRO TEXT ================= */}
-      <motion.div 
-        style={{ opacity: headerOpacity, y: headerY }}
-        className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden pointer-events-none z-10"
-      >
-        <div className="w-full border-t border-b border-white/10 py-6 mb-2 bg-black">
-          <h2 className="text-[12vw] font-black tracking-tighter text-white uppercase text-center leading-none">
-            PROTOCOL
-          </h2>
+      {/* ================= INTRO HEADER ================= */}
+      <div className="relative pt-32 pb-20 px-6 text-center z-10 flex flex-col items-center">
+        <div className="flex items-center gap-2 rounded-full bg-persimmon/10 border border-persimmon/20 px-4 py-1.5 text-[10px] font-bold text-persimmon uppercase tracking-[0.2em] mb-6">
+          Autonomous Architecture
         </div>
-        <div className="w-full border-b border-white/10 py-6 bg-black">
-          <h2 className="text-[12vw] font-black tracking-tighter text-white uppercase text-center leading-none">
-            ARCHITECTURE
-          </h2>
-        </div>
-      </motion.div>
+        <h2 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white tracking-tighter mb-6">
+          The Solux <span className="text-transparent bg-clip-text bg-gradient-to-r from-persimmon to-orange-500">Flow.</span>
+        </h2>
+        <p className="text-lg text-white/50 max-w-xl mx-auto font-medium">
+          Watch how open-source code transforms into secure, on-chain USDC settlement in milliseconds.
+        </p>
+      </div>
 
-      {/* ================= THE STICKY SCROLL SECTION ================= */}
-      <div className="absolute top-0 left-0 w-full h-full flex flex-col lg:flex-row">
+      {/* ================= SCROLLING ARCHITECTURE ================= */}
+      {/* Total height is 300vh (100vh per step) */}
+      <div ref={containerRef} className="relative w-full h-[300vh]">
         
-        {/* LEFT SIDE: Sticky Visualizer (Pins to the screen) */}
-        <div className="lg:w-1/2 h-screen sticky top-0 flex items-center justify-center border-r border-white/5 bg-black overflow-hidden z-20 hidden lg:flex">
+        {/* ⚡ The Sticky Container - Locks to the screen while you scroll */}
+        <div className="sticky top-0 left-0 w-full h-screen flex flex-col lg:flex-row overflow-hidden">
           
-          {/* Subtle grid background for the visualizer */}
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
-
-          {/* The Dynamic Geometric Core (Replaces the 3D model for now) */}
-          <div className="relative w-96 h-96 perspective-1000 flex items-center justify-center">
+          {/* ==== LEFT SIDE: The Persimmon Gimbal ==== */}
+          <div className="w-full lg:w-1/2 h-[40vh] lg:h-screen relative flex items-center justify-center bg-transparent lg:border-r border-white/5 overflow-hidden">
             
-            {/* Outer Ring */}
-            <motion.div 
-              style={{ 
-                rotateX: visualizerRotateX, 
-                rotateY: visualizerRotateY, 
-                scale: visualizerScale,
-                borderRadius: visualizerBorderRadius,
-                borderColor: borderColor1
-              }}
-              className="absolute inset-0 border-[4px] border-purple-500 shadow-[0_0_50px_rgba(168,85,247,0.2)] transition-colors duration-500"
-            />
+            {/* Subtle Grid Background */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
+            
+            {/* The 3D Object Rig */}
+            <div className="relative w-72 h-72 sm:w-96 sm:h-96 flex items-center justify-center perspective-[1000px]">
+              
+              {/* Ambient Dynamic Background Glow */}
+              <motion.div 
+                style={{ backgroundColor: coreGlow }}
+                className="absolute inset-0 m-auto w-48 h-48 blur-[100px] rounded-full transition-colors duration-300"
+              />
 
-            {/* Middle Ring */}
-            <motion.div 
-              style={{ 
-                rotateX: visualizerRotateY, 
-                rotateY: visualizerRotateX, 
-                scale: useTransform(scrollYProgress, [0, 1], [0.8, 1.2]),
-                borderRadius: visualizerBorderRadius,
-                borderColor: borderColor2
-              }}
-              className="absolute inset-8 border-[2px] border-amber-500 border-dashed transition-colors duration-500"
-            />
+              {/* Outer Data Ring */}
+              <motion.div 
+                style={{ rotateX: rotateX1, rotateY: rotateY1, transformStyle: "preserve-3d" }}
+                className="absolute inset-0 border-[2px] border-white/10 rounded-full flex items-center justify-center shadow-[inset_0_0_50px_rgba(255,255,255,0.02)]"
+              >
+                <div className="absolute top-0 w-3 h-3 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)] -translate-y-1.5" />
+              </motion.div>
 
-            {/* Inner Core */}
-            <motion.div 
-              style={{ 
-                rotateZ: visualizerRotateY,
-                scale: useTransform(scrollYProgress, [0, 0.5, 1], [0.5, 1, 0.5]),
-                backgroundColor: borderColor3
-              }}
-              className="absolute inset-20 bg-emerald-500/20 backdrop-blur-md transition-colors duration-500"
-            />
-          </div>
+              {/* Middle Dashed Ring */}
+              <motion.div 
+                style={{ rotateX: rotateX2, rotateZ: rotateZ2, transformStyle: "preserve-3d" }}
+                className="absolute inset-8 border-[2px] border-persimmon/40 border-dashed rounded-full flex items-center justify-center"
+              />
 
-          <div className="absolute bottom-10 left-10 text-[10px] font-mono text-white/30 uppercase tracking-widest">
-            Solux Core Engine — Live Status
-          </div>
-        </div>
+              {/* Inner Solid Persimmon Ring */}
+              <motion.div 
+                style={{ rotateY: rotateY3, rotateZ: rotateZ3, transformStyle: "preserve-3d" }}
+                className="absolute inset-16 border-[4px] border-persimmon/80 rounded-full shadow-[0_0_30px_rgba(252,76,2,0.3)] flex items-center justify-center"
+              >
+                <div className="absolute inset-0 rounded-full bg-persimmon/5 backdrop-blur-sm" />
+              </motion.div>
 
-        {/* RIGHT SIDE: The Scrolling Text Blocks */}
-        <div className="w-full lg:w-1/2 flex flex-col pt-[100vh]">
-          {steps.map((step) => (
-            <div 
-              key={step.id} 
-              className="h-screen flex flex-col justify-center px-8 lg:px-24 relative z-30"
-            >
-              {/* Feature Icon/Badge */}
-              <div className="mb-6">
-                <div className={`inline-flex items-center gap-3 px-4 py-2 rounded-lg bg-white/5 border border-white/10 backdrop-blur-md ${step.glow}`}>
-                  <step.icon size={16} className={step.color} />
-                  <span className={`text-[10px] font-bold uppercase tracking-widest ${step.color}`}>
-                    Phase 0{step.id}
-                  </span>
-                </div>
+              {/* Dead Center Core */}
+              <div className="absolute m-auto w-12 h-12 bg-black border border-persimmon/50 rounded-full shadow-[0_0_40px_rgba(252,76,2,0.6)] flex items-center justify-center z-10">
+                <div className="w-3 h-3 bg-persimmon rounded-full animate-ping opacity-80" />
+                <div className="absolute w-3 h-3 bg-persimmon rounded-full" />
               </div>
 
-              {/* Title (Monospace exact match to Winterfell style) */}
-              <h3 className="text-4xl sm:text-5xl font-mono font-bold tracking-tight text-white mb-4">
-                {step.title}
-              </h3>
+            </div>
 
-              {/* Subtitle */}
-              <h4 className={`text-sm sm:text-base font-bold uppercase tracking-widest mb-6 ${step.color}`}>
-                {step.subtitle}
-              </h4>
-
-              {/* Description */}
-              <p className="text-lg sm:text-xl text-white/40 leading-relaxed font-medium max-w-lg">
-                {step.description}
+            {/* Solux Matrix Label */}
+            <div className="absolute bottom-10 left-10 hidden lg:block">
+              <h3 className="text-white font-mono font-bold text-xl tracking-tight mb-1">Execution Core</h3>
+              <p className="text-persimmon font-mono text-[11px] font-bold uppercase tracking-widest">
+                Live Protocol Status
               </p>
             </div>
-          ))}
-        </div>
+          </div>
 
+          {/* ==== RIGHT SIDE: The Scrolling Text ==== */}
+          <div className="w-full lg:w-1/2 h-[60vh] lg:h-screen relative overflow-hidden bg-black">
+            
+            {/* Inner Absolute Container that slides UP exactly -200vh */}
+            <motion.div 
+              style={{ y: useTransform(scrollYProgress, [0, 1], ["0vh", "-200vh"]) }}
+              className="absolute top-0 left-0 w-full"
+            >
+              {steps.map((step) => (
+                <div 
+                  key={step.id} 
+                  className="h-screen flex flex-col justify-center px-8 sm:px-16 lg:px-24"
+                >
+                  {/* Phase Badge */}
+                  <div className="mb-6 flex items-start">
+                    <div className="inline-flex items-center gap-3 px-4 py-2 rounded-md bg-white/[0.03] border border-white/10 backdrop-blur-md">
+                      <step.icon size={16} className={step.color} />
+                      <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${step.color}`}>
+                        Phase 0{step.id}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Typography perfectly matched to the pixel/monospace vibe */}
+                  <h3 className="text-4xl sm:text-5xl lg:text-6xl font-mono tracking-tight text-white mb-6">
+                    {step.title}
+                  </h3>
+
+                  <h4 className={`text-sm sm:text-base font-bold uppercase tracking-widest mb-6 ${step.color}`}>
+                    {step.subtitle}
+                  </h4>
+
+                  <p className="text-lg sm:text-xl text-[#a1a1aa] leading-relaxed font-medium max-w-lg">
+                    {step.description}
+                  </p>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+        </div>
       </div>
     </section>
   );
