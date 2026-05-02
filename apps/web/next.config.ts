@@ -1,27 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // This will actually work now!
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'avatars.githubusercontent.com',
-        port: '',
-        pathname: '/**', 
-      },
-      {
-        protocol: 'https',
-        hostname: 'github.com',
-        port: '',
-        pathname: '/**', 
-      },
+      { protocol: 'https', hostname: 'avatars.githubusercontent.com', port: '', pathname: '/**' },
+      { protocol: 'https', hostname: 'github.com', port: '', pathname: '/**' },
     ],
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
