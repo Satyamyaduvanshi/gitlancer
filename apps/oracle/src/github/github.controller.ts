@@ -33,7 +33,7 @@ export class GithubController {
     @Req() req: any,
     @Body() payload: any,
   ) {
-    // 1. 🛡️ VERIFY SIGNATURE
+
     const secret = process.env.GITHUB_WEBHOOK_SECRET || 'blinky_secret_123';
     const hmac = crypto.createHmac('sha256', secret);
     const digest = 'sha256=' + hmac.update(req.rawBody).digest('hex');
@@ -46,7 +46,7 @@ export class GithubController {
     const action = payload.action;
     const pr = payload.pull_request;
 
-    // 2. 🚀 PROCESS MERGE
+
     if (action === 'closed' && pr?.merged) {
       const owner = payload.repository.owner.login;
       const repo = payload.repository.name;
@@ -55,7 +55,7 @@ export class GithubController {
       const githubHandle = pr.user.login;
       const userId = pr.user.id.toString();
 
-      // 3. 🛡️ VAULT CHECK
+
       const vault = await this.prisma.client.vault.findUnique({
         where: { repositoryFullName: repoFullName }
       });
@@ -72,10 +72,10 @@ export class GithubController {
       this.logger.log(`🔥 PR #${pr.number} Merged! Blinky is auditing @${githubHandle}...`);
 
       try {
-        // 🧠 4. AI AUDIT
+
         const audit = await this.aiService.auditPullRequest(pr.diff_url);
         
-        // 🔍 5. USER SYNC
+
         let user = await this.prisma.client.user.findUnique({
           where: { id: userId }
         });
@@ -91,14 +91,13 @@ export class GithubController {
           });
         }
 
-        // 💾 6. DETERMINE STATUS
+
         let status = 'AUDITED';
         if (audit.bountyUSDC > vault.budgetLimit) {
           status = 'PENDING_APPROVAL';
         }
 
-        // 💾 7. CREATE CONTRIBUTION RECORD
-        // We save this first so the "Claim" link actually has a record to find
+
         const contribution = await this.prisma.client.contribution.create({
           data: {
             userId: userId,
@@ -109,23 +108,23 @@ export class GithubController {
           },
         });
 
-        // 💬 8. GENERATE COMMENT WITH CLAIM LINK
+
         let finalComment = `### 🤖 SOLUX Audit Complete\n\nGreat work @${githubHandle}! Blinky has finished auditing your contribution.\n\n**Bounty Amount:** ${audit.bountyUSDC} USDC\n**Reasoning:** ${audit.reasoning}\n\n---\n\n`;
 
         const webUrl = process.env.WEB_URL || 'http://localhost:3001';
-        const blinkUrl = process.env.BASE_URL || 'http://localhost:3000'; // Your Action/Blink server
+        const blinkUrl = process.env.BASE_URL || 'http://localhost:3000'; 
 
         if (status === 'PENDING_APPROVAL') {
           finalComment += `⏳ **Pending Approval:** This bounty exceeds the auto-limit and is waiting for the maintainer's review. Check back soon!`;
         } else if (user.solanaWallet) {
-          // ✅ PROPER CLAIM FLOW: User has a wallet, give them the Blink!
+
           finalComment += `🎁 **Your bounty is ready!**\n\n[Claim ${audit.bountyUSDC} USDC via Solana Blink](${blinkUrl}/api/actions/claim/${contribution.id})`;
         } else {
-          // ⚠️ ONBOARDING FLOW: No wallet found
+
           finalComment += `👋 **Wait!** You haven't linked a Solana wallet to your GitHub account yet.\n\n[Link your wallet to claim your bounty](${webUrl}/link?githubId=${userId})`;
         }
 
-        // 💬 9. POST TO GITHUB
+
         await this.githubService.postComment(owner, repo, pr.number, installationId, finalComment);
 
       } catch (err) {

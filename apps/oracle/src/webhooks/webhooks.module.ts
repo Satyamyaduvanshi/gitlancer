@@ -3,7 +3,7 @@ import { WebhooksController } from './webhooks.controller';
 import { WebhooksService } from './webhooks.service';
 import { AiService } from '../ai/ai.service';
 import { PrismaModule } from '../prisma/prisma.module';
-import { GithubModule } from '../github/github.module'; // 👈 Essential for commenting
+import { GithubModule } from '../github/github.module'; 
 
 @Module({
   imports: [

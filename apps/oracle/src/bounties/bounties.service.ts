@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException, Logger, Inject } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service'; // Make sure this path is correct!
+import { PrismaService } from '../prisma/prisma.service'; 
 
 @Injectable()
 export class BountiesService {
   private readonly logger = new Logger(BountiesService.name);
 
-  // ⚡ THE FIX: Using your @Inject pattern so Prisma is actually loaded!
+
   @Inject(PrismaService)
   private readonly prisma: PrismaService;
 
@@ -17,14 +17,14 @@ export class BountiesService {
     try {
       this.logger.log(`Fetching bounties for User ID: ${userId}`);
 
-      // Now this.prisma will be fully defined, and .client will work perfectly!
+  
       const bounties = await this.prisma.client.contribution.findMany({
         where: {
           userId: userId,
         },
         include: {
-          user: true,   // Grabs githubHandle, avatarUrl
-          vault: true,  // Grabs repositoryFullName
+          user: true,   
+          vault: true,  
         },
         orderBy: {
           createdAt: 'desc',

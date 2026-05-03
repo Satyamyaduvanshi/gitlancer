@@ -14,11 +14,11 @@ export class WebhooksService {
     @Inject(GithubService) private readonly github: GithubService,
   ) {}
 
-  // 👈 This decorator tells NestJS to run this silently in the background
+
   @OnEvent('pr.merged')
   async processMerge(payload: any) {
     try {
-      // Unpack the payload here since the controller just passed the whole object
+     
       const pr = payload.pull_request;
       const githubHandle = pr.user.login;
       const diffUrl = pr.diff_url;
@@ -34,22 +34,22 @@ export class WebhooksService {
         return;
       }
 
-      // 1. Always Audit (Security First) - This can take 30+ seconds now with zero issues!
+      
       const audit = await this.ai.auditPullRequest(diffUrl);
       const user = await this.prisma.client.user.findUnique({ where: { id: userId } });
 
       let commentBody = `### 🛡️ GitLancer Guardian Audit\n\n**Analysis:** ${audit.reasoning}\n\n`;
 
-      // if (userId === vault.maintainerId) {
-      //   // 👨‍💻 MAINTAINER FLOW
-      //   commentBody += `👋 **Greetings, Maintainer @${githubHandle}!**\n\nBlinky has audited your merge. Since this is a maintainer contribution, no bounty was issued, but your audit trail is now anchored to the blockchain. Thank you for building!`;
-      // } 
+      if (userId === vault.maintainerId) {
+        //  MAINTAINER FLOW
+        commentBody += `👋 **Greetings, Maintainer @${githubHandle}!**\n\nBlinky has audited your merge. Since this is a maintainer contribution, no bounty was issued, but your audit trail is now anchored to the blockchain. Thank you for building!`;
+      } 
       // 
-      if(false){
-        // testing the bounty payout flow
-      }  
+      // if(false){
+      //   // testing the bounty payout flow
+      // }  
       else {
-        // 🛠️ CONTRIBUTOR FLOW
+
         commentBody += `🔥 **Excellent work @${githubHandle}!**\n\nBlinky has valued this contribution at **${audit.bountyUSDC} USDC**.`;
 
         const contribution = await this.prisma.client.contribution.create({

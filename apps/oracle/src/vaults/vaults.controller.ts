@@ -1,14 +1,14 @@
 import { Controller, Post, Body, Inject, Logger, BadRequestException, Get, Param } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
-@Controller('api') // 👈 CHANGE 1: We removed '/vaults' from here
+@Controller('api') 
 export class VaultsController {
   private readonly logger = new Logger(VaultsController.name);
 
   @Inject(PrismaService)
   private readonly prisma: PrismaService;
 
-  @Post('vaults/register') // 👈 CHANGE 2: Added 'vaults/' here
+  @Post('vaults/register')
   async registerVault(@Body() body: {
     repoFullName: string;
     pdaAddress: string;
@@ -59,7 +59,7 @@ export class VaultsController {
     }
   }
 
-  @Get('vaults/user/:id') // 👈 CHANGE 3: Added 'vaults/' here
+  @Get('vaults/user/:id') 
   async getUserVaults(@Param('id') userId: string) {
     try {
       return await this.prisma.client.vault.findMany({
@@ -71,7 +71,7 @@ export class VaultsController {
     }
   }
 
-  @Get('bounties/user/:id') // 👈 Now this matches the frontend perfectly!
+  @Get('bounties/user/:id') 
   async getUserBounties(@Param('id') userId: string) {
     try {
       return await this.prisma.client.contribution.findMany({

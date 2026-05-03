@@ -2,13 +2,13 @@
 import { use, useState, useEffect } from 'react';
 import useSWR from 'swr';
 import axios from 'axios';
-import { useConnection } from '@solana/wallet-adapter-react';
-import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { PublicKey, LAMPORTS_PER_SOL, Transaction } from '@solana/web3.js';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Copy, ShieldCheck, TerminalSquare, AlertTriangle, Loader2, CheckCircle2, XCircle, X, Trash2 } from 'lucide-react';
+import { Copy, ShieldCheck, TerminalSquare, AlertTriangle, Loader2, CheckCircle2, XCircle, X, Trash2, ArrowUpRight } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 const USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
@@ -19,6 +19,7 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
   const decodedRepoName = decodeURIComponent(repoName);
   const router = useRouter();
   const { connection } = useConnection();
+  const { publicKey, sendTransaction } = useWallet();
   const { data: session } = useSession();
   const userId = (session?.user as any)?.id;
   
@@ -26,8 +27,13 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
   const [usdcBal, setUsdcBal] = useState("0.00");
   const [solBal, setSolBal] = useState("0.0000");
   const [isDeactivating, setIsDeactivating] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  
+  // Modal State
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState("");
 
-  // 🍞 Toast State
+  // Toast State
   const [toast, setToast] = useState<{ show: boolean; msg: string; type: 'success' | 'error' | 'info' }>({ 
     show: false, msg: '', type: 'info' 
   });
@@ -37,7 +43,6 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
     if (type !== 'info') setTimeout(() => setToast(prev => ({ ...prev, show: false })), 4000);
   };
 
-  // 🔄 Fixed SWR Fetching
   const { data: vaults, isLoading: vaultsLoading } = useSWR(userId ? `${API_URL}/api/vaults/user/${userId}` : null, fetcher);
   const vault = vaults?.find((v: any) => v.repositoryFullName === decodedRepoName);
 
@@ -70,6 +75,47 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
     }
   };
 
+  // Custom UI Modal Execution for Withdrawal
+  const executeWithdrawal = async () => {
+    if (!publicKey) return showToast("Please connect your wallet first.", "error");
+
+    const amount = parseFloat(withdrawAmount);
+    if (isNaN(amount) || amount <= 0 || amount > parseFloat(usdcBal)) {
+      return showToast("Invalid amount entered.", "error");
+    }
+
+    setShowWithdrawModal(false); // Hide modal while processing
+    setIsWithdrawing(true);
+    showToast("Generating secure transaction...", "info");
+
+    try {
+      const res = await axios.post(`${API_URL}/api/withdraw`, {
+        repoFullName: decodedRepoName,
+        maintainerAddress: publicKey.toBase58(),
+        amount: amount
+      });
+
+      const txBuffer = Buffer.from(res.data.transaction, 'base64');
+      const transaction = Transaction.from(txBuffer);
+
+      showToast("Please approve the transaction in your wallet.", "info");
+      const signature = await sendTransaction(transaction, connection);
+
+      showToast("Confirming transaction on Solana Devnet...", "info");
+      await connection.confirmTransaction(signature, 'confirmed');
+
+      showToast(`Successfully withdrew ${amount} USDC!`, "success");
+      setUsdcBal((prev) => (parseFloat(prev) - amount).toFixed(2));
+      setWithdrawAmount(""); // Reset input
+
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.response?.data?.error || err.message || "Withdrawal failed.", "error");
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
+
   const handleDeactivate = async () => {
     if (!confirm("Are you sure you want to deactivate this treasury? This will stop all future payouts for this repository.")) return;
     
@@ -77,8 +123,6 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
     showToast("Processing deactivation...", "info");
 
     try {
-      // Assuming you will build a DELETE endpoint: await axios.delete(`${API_URL}/api/vaults/${vault.id}`);
-      // Simulating network delay for now
       await new Promise(resolve => setTimeout(resolve, 1500)); 
       showToast("Treasury successfully disconnected.", "success");
       setTimeout(() => router.push('/repos'), 1500);
@@ -88,7 +132,6 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
     }
   };
 
-  // ⏳ Premium Loading State
   if (vaultsLoading) {
     return (
       <DashboardLayout>
@@ -100,7 +143,6 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
     );
   }
 
-  // ❌ 404 State
   if (!vaultsLoading && !vault) {
     return (
       <DashboardLayout>
@@ -140,12 +182,24 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
         </div>
         
         <div className="flex gap-4 w-full lg:w-auto">
-          <div className="flex-1 lg:flex-none bg-[#111111] border border-white/5 px-8 py-5 rounded-[2rem] shadow-lg text-right group hover:border-persimmon/30 transition-colors">
-            <p className="text-white/40 text-[10px] font-mono mb-1 uppercase tracking-widest group-hover:text-white/60 transition-colors">Treasury (USDC)</p>
-            <p className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-persimmon to-orange-400">{usdcBal}</p>
+          {/* 💰 Treasury Card */}
+          <div className="flex-1 lg:flex-none bg-[#111111] border border-white/5 p-5 rounded-[2rem] shadow-lg flex flex-col justify-between group hover:border-persimmon/30 transition-colors">
+            <div className="flex justify-between items-start mb-4 gap-6">
+              <p className="text-white/40 text-[10px] font-mono uppercase tracking-widest group-hover:text-white/60 transition-colors">Treasury (USDC)</p>
+              <button 
+                onClick={() => setShowWithdrawModal(true)}
+                disabled={isWithdrawing || parseFloat(usdcBal) <= 0}
+                className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 text-persimmon hover:text-orange-400 disabled:opacity-30 transition-colors"
+              >
+                {isWithdrawing ? <Loader2 size={12} className="animate-spin" /> : <ArrowUpRight size={12} />}
+                Withdraw
+              </button>
+            </div>
+            <p className="text-3xl text-right font-bold text-transparent bg-clip-text bg-gradient-to-r from-persimmon to-orange-400">{usdcBal}</p>
           </div>
+
           <div className="flex-1 lg:flex-none bg-[#111111] border border-white/5 px-8 py-5 rounded-[2rem] shadow-lg text-right hover:border-white/10 transition-colors">
-            <p className="text-white/40 text-[10px] font-mono mb-1 uppercase tracking-widest">Rent Gas (SOL)</p>
+            <p className="text-white/40 text-[10px] font-mono mb-4 uppercase tracking-widest">Rent Gas (SOL)</p>
             <p className="text-3xl font-bold text-white">{solBal}</p>
           </div>
         </div>
@@ -171,13 +225,29 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
               <div key={audit.id} className="p-8 flex flex-col md:flex-row gap-8 hover:bg-white/[0.02] transition-colors group">
                 <div className="md:w-1/4">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="bg-white/10 text-white text-xs font-mono px-2.5 py-1 rounded-md border border-white/5">PR #{audit.prId || '---'}</span>
+                    <a 
+                      href={`https://github.com/${decodedRepoName}/pull/${audit.prId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-white/10 hover:bg-white/20 text-white hover:text-persimmon text-xs font-mono px-2.5 py-1 rounded-md border border-white/5 transition-colors"
+                    >
+                      PR #{audit.prId || '---'} ↗
+                    </a>
                     {audit.status === 'CLAIMED' ? 
                       <span className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md"><ShieldCheck size={12}/> Settled</span> : 
                       <span className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-amber-400 bg-amber-500/10 px-2 py-1 rounded-md">Pending</span>
                     }
                   </div>
-                  <p className="text-sm text-white/50">By <span className="text-white font-medium">@{audit.githubHandle || 'contributor'}</span></p>
+                  <p className="text-sm text-white/50">
+                    By <a 
+                         href={`https://github.com/${audit.githubHandle || audit.user?.githubHandle}`} 
+                         target="_blank" 
+                         rel="noopener noreferrer" 
+                         className="text-white font-medium hover:text-persimmon transition-colors"
+                       >
+                         @{audit.githubHandle || audit.user?.githubHandle || 'contributor'}
+                       </a>
+                  </p>
                   <p className="text-2xl font-bold text-white mt-2 group-hover:text-persimmon transition-colors">{audit.amount} <span className="text-sm text-white/40 font-mono tracking-normal">USDC</span></p>
                 </div>
                 
@@ -193,7 +263,7 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
         </div>
       </div>
 
-      {/* ⚠️ Danger Zone (Deactivate Treasury) */}
+      {/* ⚠️ Danger Zone */}
       <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
         <h3 className="text-sm font-bold text-white/40 uppercase tracking-widest border-b border-white/5 pb-2 mb-4">Danger Zone</h3>
         <div className="border border-red-500/20 bg-red-500/5 p-6 rounded-[2rem] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -211,6 +281,62 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
           </button>
         </div>
       </div>
+
+      {/* 🖼️ Custom Withdraw Modal */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#111111] border border-white/10 p-6 rounded-3xl w-full max-w-md shadow-2xl mx-4">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-white">Withdraw Funds</h3>
+              <button 
+                onClick={() => setShowWithdrawModal(false)}
+                className="text-white/40 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="mb-8">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3 block">Amount (USDC)</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  value={withdrawAmount}
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full bg-black/50 border border-white/10 rounded-xl pl-4 pr-16 py-4 text-white text-lg font-mono focus:outline-none focus:border-persimmon/50 transition-colors"
+                />
+                <button
+                  onClick={() => setWithdrawAmount(usdcBal)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-persimmon hover:text-orange-400 uppercase tracking-widest bg-persimmon/10 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Max
+                </button>
+              </div>
+              <div className="flex justify-between items-center mt-3">
+                <span className="text-xs text-white/40">Network: Solana Devnet</span>
+                <span className="text-xs text-white/50">Available: <span className="text-white font-mono">{usdcBal}</span></span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowWithdrawModal(false)}
+                className="flex-1 py-3.5 px-4 rounded-xl text-sm font-bold text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeWithdrawal}
+                disabled={!withdrawAmount || parseFloat(withdrawAmount) <= 0 || parseFloat(withdrawAmount) > parseFloat(usdcBal)}
+                className="flex-1 py-3.5 px-4 bg-persimmon hover:bg-orange-500 text-black rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:hover:bg-persimmon disabled:cursor-not-allowed"
+              >
+                Confirm 
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 🍞 Custom Toast */}
       <div 

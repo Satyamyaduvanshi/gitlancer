@@ -100,12 +100,11 @@ export class ActionsController {
         });
       }
 
-      // 🛡️ UPDATED: Pass the prId to the Solana Service
       const transaction = await this.solana.createClaimTransaction(
         contribution.vault.repositoryFullName, 
         account, 
         contribution.amount,
-        String(contribution.prId) // 👈 NEW
+        String(contribution.prId)
       );
 
       await this.prisma.client.contribution.update({
@@ -121,6 +120,30 @@ export class ActionsController {
     } catch (error) {
       return res.set(ACTIONS_CORS_HEADERS).status(HttpStatus.INTERNAL_SERVER_ERROR).json({ 
         error: "Transaction generation failed." 
+      });
+    }
+  }
+
+  @Post('api/withdraw')
+  async createWithdrawTransaction(
+    @Body() body: { repoFullName: string, maintainerAddress: string, amount: number },
+    @Res() res: Response
+  ) {
+    try {
+      const transaction = await this.solana.createWithdrawTransaction(
+        body.repoFullName,
+        body.maintainerAddress,
+        body.amount
+      );
+
+      // We send this back to the frontend so the maintainer's wallet (Phantom/Solflare) can sign it
+      return res.status(HttpStatus.OK).json({
+        transaction: transaction.serialize({ requireAllSignatures: false }).toString('base64'),
+      });
+    } catch (error) {
+      this.solana['logger'].error('Withdrawal TX Generation Failed', error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ 
+        error: "Failed to generate withdrawal transaction." 
       });
     }
   }

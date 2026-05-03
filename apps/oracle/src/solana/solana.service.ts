@@ -34,14 +34,10 @@ export class SolanaService implements OnModuleInit {
     }
   }
 
-  /**
-   * Builds the transaction for a Bounty Claim Blink
-   */
   async createClaimTransaction(repoFullName: string, contributorAddress: string, amountInUsdc: number, prId: string) {
     const contributor = new PublicKey(contributorAddress);
-    const amount = new BN(amountInUsdc * 1_000_000); // Handle USDC 6 decimals
+    const amount = new BN(amountInUsdc * 1_000_000); 
 
-    // 1. Derive PDAs
     const [vaultStatePda] = PublicKey.findProgramAddressSync(
       [Buffer.from("vault"), Buffer.from(repoFullName)],
       this.programId
@@ -57,22 +53,21 @@ export class SolanaService implements OnModuleInit {
 
     const transaction = new Transaction();
 
-    // 🛡️ Auto-ATA Creation: If the user doesn't have a USDC account, create one!
+
     try {
       await this.connection.getTokenAccountBalance(contributorUsdcAccount);
     } catch (e) {
       this.logger.log(`Creating missing ATA for contributor: ${contributorAddress}`);
       transaction.add(
         createAssociatedTokenAccountInstruction(
-          contributor,             // Payer (User claiming)
-          contributorUsdcAccount,  // The new ATA Address
-          contributor,             // Owner
-          this.usdcMint            // Mint (USDC)
+          contributor,
+          contributorUsdcAccount,
+          contributor,
+          this.usdcMint
         )
       );
     }
 
-    // 2. Build the upgraded smart contract instruction
     const instruction = await this.program.methods
       .distributeBounty(repoFullName, amount, prId)
       .accounts({
@@ -88,13 +83,61 @@ export class SolanaService implements OnModuleInit {
       })
       .instruction();
 
-    // 3. Add instruction and prep for signing
     transaction.add(instruction);
     transaction.feePayer = contributor;
     transaction.recentBlockhash = (await this.connection.getLatestBlockhash()).blockhash;
 
-    // 4. PARTIAL SIGN by Oracle
+  
     transaction.partialSign(this.oracleDelegate);
+
+    return transaction;
+  }
+
+
+  async createWithdrawTransaction(repoFullName: string, maintainerAddress: string, amountInUsdc: number) {
+    const maintainer = new PublicKey(maintainerAddress);
+    const amount = new BN(amountInUsdc * 1_000_000);
+
+    const [vaultStatePda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("vault"), Buffer.from(repoFullName)],
+      this.programId
+    );
+
+    const vaultUsdcAccount = getAssociatedTokenAddressSync(this.usdcMint, vaultStatePda, true);
+    const maintainerUsdcAccount = getAssociatedTokenAddressSync(this.usdcMint, maintainer);
+
+    const transaction = new Transaction();
+
+  
+    try {
+      await this.connection.getTokenAccountBalance(maintainerUsdcAccount);
+    } catch (e) {
+      this.logger.log(`Creating missing ATA for maintainer: ${maintainerAddress}`);
+      transaction.add(
+        createAssociatedTokenAccountInstruction(
+          maintainer,
+          maintainerUsdcAccount,
+          maintainer,
+          this.usdcMint
+        )
+      );
+    }
+
+    const instruction = await this.program.methods
+      .withdrawFunds(repoFullName, amount)
+      .accounts({
+        maintainer: maintainer,
+        vaultState: vaultStatePda,
+        vaultTokenAccount: vaultUsdcAccount,
+        maintainerTokenAccount: maintainerUsdcAccount,
+        mint: this.usdcMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .instruction();
+
+    transaction.add(instruction);
+    transaction.feePayer = maintainer;
+    transaction.recentBlockhash = (await this.connection.getLatestBlockhash()).blockhash;
 
     return transaction;
   }

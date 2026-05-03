@@ -7,7 +7,6 @@ export class AppController {
 
   @Get()
   getHello(): ReturnType<AppService['getHello']> {
-    // If injection worked, this.appService won't be undefined
     return this.appService.getHello();
   }
 }

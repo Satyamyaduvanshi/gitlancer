@@ -1,4 +1,4 @@
-// 1. Load environment variables from the ROOT .env first
+
 import { join } from 'path';
 import * as dotenv from 'dotenv';
 dotenv.config({ path: join(__dirname, '../../../.env') }); 
@@ -24,7 +24,6 @@ async function bootstrap() {
     exposedHeaders: ['x-blockchain-ids', 'x-action-version'],
   });
 
-  // debug log show a string, not undefined
   console.log('🔑 Database Check:', process.env.DATABASE_URL ? 'URL Found ✅' : 'URL Missing ❌');
   
   await app.listen(3000);

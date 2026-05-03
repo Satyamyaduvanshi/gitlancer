@@ -20,7 +20,7 @@ export class UsersController {
 
   @Post('link')
   async linkWallet(
-    @Headers('authorization') authHeader: string, // 🛡️ Bearer token from frontend
+    @Headers('authorization') authHeader: string, 
     @Body() body: { 
       githubId: string;      
       githubHandle: string; 
@@ -32,17 +32,17 @@ export class UsersController {
     if (!body.githubId || !body.walletAddress) throw new BadRequestException('Required fields missing');
 
     try {
-      // 🛡️ SECURITY CHECK: Verify identity with GitHub API
+   
       const githubResponse = await axios.get('https://api.github.com/user', {
         headers: { Authorization: authHeader },
       });
 
-      // Cross-reference the token's owner with the githubId provided in the body
+     
       if (githubResponse.data.id.toString() !== body.githubId) {
         throw new UnauthorizedException('Identity Mismatch: You cannot link a wallet to someone else\'s account.');
       }
 
-      // 2. Identity is verified. Now link the wallet.
+     
       const user = await this.prisma.client.user.upsert({
         where: { id: body.githubId },
         update: { 

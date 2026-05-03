@@ -51,7 +51,7 @@ export class WebhooksController {
 
       this.logger.log(`📥 Merge Detected: ${repoName} by @${githubHandle}. Queueing background audit...`);
 
-      // ⚡ This will now properly find the emit function!
+  
       this.eventEmitter.emit('pr.merged', payload);
 
       return { status: 'queued', message: 'PR merge detected. Background audit started.' };

@@ -162,6 +162,74 @@
           "type": "string"
         }
       ]
+    },
+    {
+      "name": "withdraw_funds",
+      "discriminator": [
+        241,
+        36,
+        29,
+        111,
+        208,
+        31,
+        104,
+        217
+      ],
+      "accounts": [
+        {
+          "name": "maintainer",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault_state"
+          ]
+        },
+        {
+          "name": "vault_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "repo_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault_token_account",
+          "writable": true
+        },
+        {
+          "name": "maintainer_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "repo_name",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -197,6 +265,11 @@
       "code": 6000,
       "name": "UnauthorizedOracle",
       "msg": "❌ Security Violation: This transaction was not signed by the official SOLUX Oracle."
+    },
+    {
+      "code": 6001,
+      "name": "UnauthorizedWithdrawal",
+      "msg": "❌ Security: Only the maintainer of this vault can withdraw funds."
     }
   ],
   "types": [

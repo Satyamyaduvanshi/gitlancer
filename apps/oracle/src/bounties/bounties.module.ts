@@ -5,6 +5,6 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Module({
   controllers: [BountiesController],
-  providers: [BountiesService, PrismaService], // 👈 MUST BE HERE
+  providers: [BountiesService, PrismaService], 
 })
 export class BountiesModule {}

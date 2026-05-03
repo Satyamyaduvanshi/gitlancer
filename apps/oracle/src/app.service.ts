@@ -7,7 +7,6 @@ export class AppService {
 
   async getHello() {
     try {
-      // Test the connection by counting users (should be 0 for now)
       const userCount = await this.prisma.client.user.count();
       return {
         status: 'Oracle Online',
