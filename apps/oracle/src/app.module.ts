@@ -15,10 +15,12 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { BountiesController } from './bounties/bounties.controller';
 import { BountiesService } from './bounties/bounties.service';
 import { BountiesModule } from './bounties/bounties.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { LiquidityAlertService } from './liquidity/liquidity.service';
 
 @Module({
-  imports: [EventEmitterModule.forRoot(),PrismaModule, WebhooksModule,UsersModule, GithubModule, VaultsModule, BountiesModule],
+  imports: [EventEmitterModule.forRoot(),ScheduleModule.forRoot(),PrismaModule, WebhooksModule,UsersModule, GithubModule, VaultsModule, BountiesModule],
   controllers: [AppController,ActionsController, UsersController, BountiesController,],
-  providers: [AppService, AiService, SolanaService, PrismaService, BountiesService,],
+  providers: [AppService, AiService, SolanaService, PrismaService, BountiesService, LiquidityAlertService,],
 })
 export class AppModule {}

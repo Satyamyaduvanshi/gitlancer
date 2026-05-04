@@ -8,7 +8,7 @@ import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Copy, ShieldCheck, TerminalSquare, AlertTriangle, Loader2, CheckCircle2, XCircle, X, Trash2, ArrowUpRight } from 'lucide-react';
+import { Copy, ShieldCheck, TerminalSquare, AlertTriangle, Loader2, CheckCircle2, XCircle, X, Trash2, ArrowUpRight, MessageSquare, ExternalLink } from 'lucide-react'; // 👈 Added MessageSquare & ExternalLink
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 const USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
@@ -33,6 +33,10 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
 
+  // 🔔 NEW: Discord Webhook State
+  const [webhookInput, setWebhookInput] = useState("");
+  const [isUpdatingWebhook, setIsUpdatingWebhook] = useState(false);
+
   // Toast State
   const [toast, setToast] = useState<{ show: boolean; msg: string; type: 'success' | 'error' | 'info' }>({ 
     show: false, msg: '', type: 'info' 
@@ -43,7 +47,8 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
     if (type !== 'info') setTimeout(() => setToast(prev => ({ ...prev, show: false })), 4000);
   };
 
-  const { data: vaults, isLoading: vaultsLoading } = useSWR(userId ? `${API_URL}/api/vaults/user/${userId}` : null, fetcher);
+  // 🔄 Notice I added `mutate` here so we can refresh the data after saving the webhook
+  const { data: vaults, isLoading: vaultsLoading, mutate: mutateVaults } = useSWR(userId ? `${API_URL}/api/vaults/user/${userId}` : null, fetcher);
   const vault = vaults?.find((v: any) => v.repositoryFullName === decodedRepoName);
 
   const { data: audits, isLoading: auditsLoading } = useSWR(vault ? `${API_URL}/api/bounties/user/${vault.maintainerId}` : null, fetcher);
@@ -75,7 +80,41 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
     }
   };
 
-  // Custom UI Modal Execution for Withdrawal
+  // 🔔 NEW: Save Webhook Function
+  const handleSaveWebhook = async () => {
+    if (!webhookInput) return;
+    setIsUpdatingWebhook(true);
+    showToast("Connecting webhook...", "info");
+    try {
+      await axios.patch(`${API_URL}/api/vaults/${vault.id}`, { discordWebhookUrl: webhookInput });
+      showToast("Discord webhook connected!", "success");
+      setWebhookInput("");
+      mutateVaults(); // Refreshes the SWR cache
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to save webhook.", "error");
+    } finally {
+      setIsUpdatingWebhook(false);
+    }
+  };
+
+  // 🔔 NEW: Remove Webhook Function
+  const handleRemoveWebhook = async () => {
+    if (!confirm("Stop receiving Discord alerts for this repository?")) return;
+    setIsUpdatingWebhook(true);
+    showToast("Disconnecting webhook...", "info");
+    try {
+      await axios.patch(`${API_URL}/api/vaults/${vault.id}`, { discordWebhookUrl: null });
+      showToast("Discord webhook disconnected.", "success");
+      mutateVaults(); 
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to disconnect webhook.", "error");
+    } finally {
+      setIsUpdatingWebhook(false);
+    }
+  };
+
   const executeWithdrawal = async () => {
     if (!publicKey) return showToast("Please connect your wallet first.", "error");
 
@@ -84,7 +123,7 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
       return showToast("Invalid amount entered.", "error");
     }
 
-    setShowWithdrawModal(false); // Hide modal while processing
+    setShowWithdrawModal(false); 
     setIsWithdrawing(true);
     showToast("Generating secure transaction...", "info");
 
@@ -106,7 +145,7 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
 
       showToast(`Successfully withdrew ${amount} USDC!`, "success");
       setUsdcBal((prev) => (parseFloat(prev) - amount).toFixed(2));
-      setWithdrawAmount(""); // Reset input
+      setWithdrawAmount(""); 
 
     } catch (err: any) {
       console.error(err);
@@ -166,7 +205,17 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold text-white tracking-tight">{decodedRepoName.split('/')[1] || decodedRepoName}</h1>
-            <span className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold tracking-widest rounded-md uppercase flex items-center gap-1.5">
+            {/* 🔗 NEW: Direct link to GitHub Repo */}
+            <a 
+              href={`https://github.com/${decodedRepoName}`} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-white/30 hover:text-white transition-colors"
+              title="View on GitHub"
+            >
+              <ExternalLink size={20} />
+            </a>
+            <span className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold tracking-widest rounded-md uppercase flex items-center gap-1.5 ml-2">
               <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Active
             </span>
           </div>
@@ -260,6 +309,54 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
               </div>
             ))
           )}
+        </div>
+      </div>
+
+      {/* 🔔 NEW: Integrations (Discord Alerts) */}
+      <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 mb-10">
+        <h3 className="text-sm font-bold text-white/40 uppercase tracking-widest border-b border-white/5 pb-2 mb-4">Integrations</h3>
+        <div className="bg-[#111111] border border-white/5 p-6 rounded-[2rem] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-lg">
+          <div>
+            <h4 className="font-bold text-white mb-1 flex items-center gap-2"><MessageSquare size={18} className="text-[#5865F2]"/> Discord Alerts</h4>
+            <p className="text-sm text-white/50">Receive predictive liquidity warnings directly to your server.</p>
+          </div>
+          
+          <div className="w-full sm:w-auto flex-1 max-w-md flex gap-2">
+            {vault.discordWebhookUrl ? (
+              // Connected State
+              <div className="flex items-center justify-between w-full bg-black/40 border border-[#5865F2]/30 px-4 py-3 rounded-xl">
+                <span className="text-xs text-white/60 font-mono truncate mr-4">
+                  Connected: {vault.discordWebhookUrl.substring(0, 38)}...
+                </span>
+                <button 
+                  onClick={handleRemoveWebhook}
+                  disabled={isUpdatingWebhook}
+                  className="text-red-400 hover:text-red-300 transition-colors disabled:opacity-50 p-1"
+                  title="Disconnect Webhook"
+                >
+                  {isUpdatingWebhook ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                </button>
+              </div>
+            ) : (
+              // Disconnected State
+              <div className="flex w-full gap-2">
+                <input 
+                  type="text"
+                  placeholder="https://discord.com/api/webhooks/..."
+                  value={webhookInput}
+                  onChange={(e) => setWebhookInput(e.target.value)}
+                  className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#5865F2]/50 transition-colors"
+                />
+                <button
+                  onClick={handleSaveWebhook}
+                  disabled={isUpdatingWebhook || !webhookInput.includes('discord.com/api/webhooks')}
+                  className="px-6 py-3 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors disabled:opacity-50"
+                >
+                   {isUpdatingWebhook ? <Loader2 size={16} className="animate-spin" /> : 'Connect'}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

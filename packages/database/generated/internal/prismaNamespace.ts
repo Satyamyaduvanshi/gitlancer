@@ -684,6 +684,7 @@ export const VaultScalarFieldEnum = {
   pdaAddress: 'pdaAddress',
   vaultBump: 'vaultBump',
   budgetLimit: 'budgetLimit',
+  discordWebhookUrl: 'discordWebhookUrl',
   maintainerId: 'maintainerId',
   createdAt: 'createdAt'
 } as const

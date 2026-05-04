@@ -7,7 +7,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import axios from "axios";
-import { HandCoins, ShieldCheck, Code2, ArrowUpRight, User, Hexagon, HelpCircle } from "lucide-react";
+import { HandCoins, ShieldCheck, Code2, ArrowUpRight, User, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -29,13 +29,21 @@ export default function NativeClaimPage({ params }: { params: Promise<{ id: stri
 
   const { data: userBounties, isLoading: bountiesLoading } = useSWR(userId ? `${API_URL}/api/bounties/user/${userId}` : null, fetcher);
 
-  const { totalEarned, pendingCount } = useMemo(() => {
-    if (!userBounties) return { totalEarned: 0, pendingCount: 0 };
-    return {
-      totalEarned: userBounties.filter((b: any) => b.status === 'CLAIMED').reduce((sum: number, b: any) => sum + b.amount, 0),
-      pendingCount: userBounties.filter((b: any) => b.status === 'AUDITED' || b.status === 'PENDING_APPROVAL').length
-    };
+  // 🛡️ UPGRADED: Added b.amount > 0 to filter out 0 USDC rejected PRs
+  const { totalEarned, pendingBounties } = useMemo(() => {
+    if (!userBounties) return { totalEarned: 0, pendingBounties: [] };
+    
+    const earned = userBounties
+      .filter((b: any) => b.status === 'CLAIMED')
+      .reduce((sum: number, b: any) => sum + b.amount, 0);
+      
+    const pending = userBounties
+      .filter((b: any) => (b.status === 'AUDITED' || b.status === 'PENDING_APPROVAL') && b.amount > 0);
+
+    return { totalEarned: earned, pendingBounties: pending };
   }, [userBounties]);
+
+  const pendingCount = pendingBounties.length;
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -219,7 +227,7 @@ export default function NativeClaimPage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
 
-          {/* 📊 RIGHT COLUMN: Contributor Profile */}
+          {/* 📊 RIGHT COLUMN: Contributor Profile & Pending List */}
           <div className="md:col-span-2 flex flex-col gap-6">
             
             <div className="bg-persimmon/40 rounded-[2rem] border border-black/20 shadow-2xl p-8 flex flex-col justify-between group transition-all duration-500 hover:border-white/20 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1">
@@ -239,7 +247,7 @@ export default function NativeClaimPage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
 
-            <div className="bg-[#111111] rounded-[2rem] border border-white/5 shadow-2xl p-8 flex flex-col justify-between group transition-all duration-500 hover:border-white/20 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 flex-1">
+            <div className={`bg-[#111111] rounded-[2rem] border border-white/5 shadow-2xl p-8 flex flex-col justify-between group transition-all duration-500 hover:border-white/20 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 ${pendingBounties.length > 0 ? '' : 'flex-1'}`}>
               <div className="flex items-center justify-between mb-6">
                 <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-500 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3"><Code2 size={20} /></div>
                 <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest group-hover:text-white/60 transition-colors">Pending Work</p>
@@ -262,6 +270,37 @@ export default function NativeClaimPage({ params }: { params: Promise<{ id: stri
                 </div>
               )}
             </div>
+
+            {/* 📋 NEW: Pending PRs List (Only shows if there are actual PRs > 0 USDC) */}
+            {pendingBounties.length > 0 && (
+              <div className="bg-[#111111] rounded-[2rem] border border-white/5 shadow-2xl p-6 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 overflow-hidden flex-1">
+                <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" /> Action Required
+                </h3>
+                <div className="flex flex-col gap-3 overflow-y-auto pr-2">
+                  {pendingBounties.map((bounty: any) => (
+                    <div key={bounty.id} className="flex justify-between items-center p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/5 transition-colors group/item">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-white group-hover/item:text-amber-400 transition-colors">
+                          {bounty.vault?.repositoryFullName?.split('/')[1] || 'Repository'}
+                        </span>
+                        <Link 
+                          href={`https://github.com/${bounty.vault?.repositoryFullName}/pull/${bounty.prId}`} 
+                          target="_blank" 
+                          className="text-xs text-white/40 hover:text-white transition-colors flex items-center gap-1 w-fit"
+                        >
+                          PR #{bounty.prId} <ArrowUpRight size={10} />
+                        </Link>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-bold text-persimmon">{bounty.amount}</span>
+                        <span className="text-[10px] text-white/40 ml-1">USDC</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
           </div>
 

@@ -25,8 +25,9 @@ model Vault {
   id                 String   @id @default(uuid())
   repositoryFullName String   @unique 
   pdaAddress         String   @unique 
-  vaultBump          Int      // 👈 Added for Solana PDA verification
+  vaultBump          Int      
   budgetLimit        Float    @default(100.0) 
+  discordWebhookUrl  String?  // 👈 NEW: Optional webhook for this specific repo
   
   maintainerId       String
   maintainer         User     @relation(fields: [maintainerId], references: [id])
@@ -39,6 +40,7 @@ enum ContributionStatus {
   PENDING_APPROVAL
   AUDITED
   CLAIMED
+  REJECTED 
 }
 
 model Contribution {

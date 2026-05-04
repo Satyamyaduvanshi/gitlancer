@@ -12,7 +12,8 @@
 export const ContributionStatus = {
   PENDING_APPROVAL: 'PENDING_APPROVAL',
   AUDITED: 'AUDITED',
-  CLAIMED: 'CLAIMED'
+  CLAIMED: 'CLAIMED',
+  REJECTED: 'REJECTED'
 } as const
 
 export type ContributionStatus = (typeof ContributionStatus)[keyof typeof ContributionStatus]

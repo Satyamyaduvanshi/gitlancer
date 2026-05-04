@@ -42,6 +42,7 @@ export type VaultMinAggregateOutputType = {
   pdaAddress: string | null
   vaultBump: number | null
   budgetLimit: number | null
+  discordWebhookUrl: string | null
   maintainerId: string | null
   createdAt: Date | null
 }
@@ -52,6 +53,7 @@ export type VaultMaxAggregateOutputType = {
   pdaAddress: string | null
   vaultBump: number | null
   budgetLimit: number | null
+  discordWebhookUrl: string | null
   maintainerId: string | null
   createdAt: Date | null
 }
@@ -62,6 +64,7 @@ export type VaultCountAggregateOutputType = {
   pdaAddress: number
   vaultBump: number
   budgetLimit: number
+  discordWebhookUrl: number
   maintainerId: number
   createdAt: number
   _all: number
@@ -84,6 +87,7 @@ export type VaultMinAggregateInputType = {
   pdaAddress?: true
   vaultBump?: true
   budgetLimit?: true
+  discordWebhookUrl?: true
   maintainerId?: true
   createdAt?: true
 }
@@ -94,6 +98,7 @@ export type VaultMaxAggregateInputType = {
   pdaAddress?: true
   vaultBump?: true
   budgetLimit?: true
+  discordWebhookUrl?: true
   maintainerId?: true
   createdAt?: true
 }
@@ -104,6 +109,7 @@ export type VaultCountAggregateInputType = {
   pdaAddress?: true
   vaultBump?: true
   budgetLimit?: true
+  discordWebhookUrl?: true
   maintainerId?: true
   createdAt?: true
   _all?: true
@@ -201,6 +207,7 @@ export type VaultGroupByOutputType = {
   pdaAddress: string
   vaultBump: number
   budgetLimit: number
+  discordWebhookUrl: string | null
   maintainerId: string
   createdAt: Date
   _count: VaultCountAggregateOutputType | null
@@ -234,6 +241,7 @@ export type VaultWhereInput = {
   pdaAddress?: Prisma.StringFilter<"Vault"> | string
   vaultBump?: Prisma.IntFilter<"Vault"> | number
   budgetLimit?: Prisma.FloatFilter<"Vault"> | number
+  discordWebhookUrl?: Prisma.StringNullableFilter<"Vault"> | string | null
   maintainerId?: Prisma.StringFilter<"Vault"> | string
   createdAt?: Prisma.DateTimeFilter<"Vault"> | Date | string
   maintainer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -246,6 +254,7 @@ export type VaultOrderByWithRelationInput = {
   pdaAddress?: Prisma.SortOrder
   vaultBump?: Prisma.SortOrder
   budgetLimit?: Prisma.SortOrder
+  discordWebhookUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   maintainerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   maintainer?: Prisma.UserOrderByWithRelationInput
@@ -261,6 +270,7 @@ export type VaultWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.VaultWhereInput | Prisma.VaultWhereInput[]
   vaultBump?: Prisma.IntFilter<"Vault"> | number
   budgetLimit?: Prisma.FloatFilter<"Vault"> | number
+  discordWebhookUrl?: Prisma.StringNullableFilter<"Vault"> | string | null
   maintainerId?: Prisma.StringFilter<"Vault"> | string
   createdAt?: Prisma.DateTimeFilter<"Vault"> | Date | string
   maintainer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -273,6 +283,7 @@ export type VaultOrderByWithAggregationInput = {
   pdaAddress?: Prisma.SortOrder
   vaultBump?: Prisma.SortOrder
   budgetLimit?: Prisma.SortOrder
+  discordWebhookUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   maintainerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.VaultCountOrderByAggregateInput
@@ -291,6 +302,7 @@ export type VaultScalarWhereWithAggregatesInput = {
   pdaAddress?: Prisma.StringWithAggregatesFilter<"Vault"> | string
   vaultBump?: Prisma.IntWithAggregatesFilter<"Vault"> | number
   budgetLimit?: Prisma.FloatWithAggregatesFilter<"Vault"> | number
+  discordWebhookUrl?: Prisma.StringNullableWithAggregatesFilter<"Vault"> | string | null
   maintainerId?: Prisma.StringWithAggregatesFilter<"Vault"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Vault"> | Date | string
 }
@@ -301,6 +313,7 @@ export type VaultCreateInput = {
   pdaAddress: string
   vaultBump: number
   budgetLimit?: number
+  discordWebhookUrl?: string | null
   createdAt?: Date | string
   maintainer: Prisma.UserCreateNestedOneWithoutVaultsInput
   contributions?: Prisma.ContributionCreateNestedManyWithoutVaultInput
@@ -312,6 +325,7 @@ export type VaultUncheckedCreateInput = {
   pdaAddress: string
   vaultBump: number
   budgetLimit?: number
+  discordWebhookUrl?: string | null
   maintainerId: string
   createdAt?: Date | string
   contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutVaultInput
@@ -323,6 +337,7 @@ export type VaultUpdateInput = {
   pdaAddress?: Prisma.StringFieldUpdateOperationsInput | string
   vaultBump?: Prisma.IntFieldUpdateOperationsInput | number
   budgetLimit?: Prisma.FloatFieldUpdateOperationsInput | number
+  discordWebhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maintainer?: Prisma.UserUpdateOneRequiredWithoutVaultsNestedInput
   contributions?: Prisma.ContributionUpdateManyWithoutVaultNestedInput
@@ -334,6 +349,7 @@ export type VaultUncheckedUpdateInput = {
   pdaAddress?: Prisma.StringFieldUpdateOperationsInput | string
   vaultBump?: Prisma.IntFieldUpdateOperationsInput | number
   budgetLimit?: Prisma.FloatFieldUpdateOperationsInput | number
+  discordWebhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintainerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contributions?: Prisma.ContributionUncheckedUpdateManyWithoutVaultNestedInput
@@ -345,6 +361,7 @@ export type VaultCreateManyInput = {
   pdaAddress: string
   vaultBump: number
   budgetLimit?: number
+  discordWebhookUrl?: string | null
   maintainerId: string
   createdAt?: Date | string
 }
@@ -355,6 +372,7 @@ export type VaultUpdateManyMutationInput = {
   pdaAddress?: Prisma.StringFieldUpdateOperationsInput | string
   vaultBump?: Prisma.IntFieldUpdateOperationsInput | number
   budgetLimit?: Prisma.FloatFieldUpdateOperationsInput | number
+  discordWebhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -364,6 +382,7 @@ export type VaultUncheckedUpdateManyInput = {
   pdaAddress?: Prisma.StringFieldUpdateOperationsInput | string
   vaultBump?: Prisma.IntFieldUpdateOperationsInput | number
   budgetLimit?: Prisma.FloatFieldUpdateOperationsInput | number
+  discordWebhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintainerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -384,6 +403,7 @@ export type VaultCountOrderByAggregateInput = {
   pdaAddress?: Prisma.SortOrder
   vaultBump?: Prisma.SortOrder
   budgetLimit?: Prisma.SortOrder
+  discordWebhookUrl?: Prisma.SortOrder
   maintainerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -399,6 +419,7 @@ export type VaultMaxOrderByAggregateInput = {
   pdaAddress?: Prisma.SortOrder
   vaultBump?: Prisma.SortOrder
   budgetLimit?: Prisma.SortOrder
+  discordWebhookUrl?: Prisma.SortOrder
   maintainerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -409,6 +430,7 @@ export type VaultMinOrderByAggregateInput = {
   pdaAddress?: Prisma.SortOrder
   vaultBump?: Prisma.SortOrder
   budgetLimit?: Prisma.SortOrder
+  discordWebhookUrl?: Prisma.SortOrder
   maintainerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -503,6 +525,7 @@ export type VaultCreateWithoutMaintainerInput = {
   pdaAddress: string
   vaultBump: number
   budgetLimit?: number
+  discordWebhookUrl?: string | null
   createdAt?: Date | string
   contributions?: Prisma.ContributionCreateNestedManyWithoutVaultInput
 }
@@ -513,6 +536,7 @@ export type VaultUncheckedCreateWithoutMaintainerInput = {
   pdaAddress: string
   vaultBump: number
   budgetLimit?: number
+  discordWebhookUrl?: string | null
   createdAt?: Date | string
   contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutVaultInput
 }
@@ -552,6 +576,7 @@ export type VaultScalarWhereInput = {
   pdaAddress?: Prisma.StringFilter<"Vault"> | string
   vaultBump?: Prisma.IntFilter<"Vault"> | number
   budgetLimit?: Prisma.FloatFilter<"Vault"> | number
+  discordWebhookUrl?: Prisma.StringNullableFilter<"Vault"> | string | null
   maintainerId?: Prisma.StringFilter<"Vault"> | string
   createdAt?: Prisma.DateTimeFilter<"Vault"> | Date | string
 }
@@ -562,6 +587,7 @@ export type VaultCreateWithoutContributionsInput = {
   pdaAddress: string
   vaultBump: number
   budgetLimit?: number
+  discordWebhookUrl?: string | null
   createdAt?: Date | string
   maintainer: Prisma.UserCreateNestedOneWithoutVaultsInput
 }
@@ -572,6 +598,7 @@ export type VaultUncheckedCreateWithoutContributionsInput = {
   pdaAddress: string
   vaultBump: number
   budgetLimit?: number
+  discordWebhookUrl?: string | null
   maintainerId: string
   createdAt?: Date | string
 }
@@ -598,6 +625,7 @@ export type VaultUpdateWithoutContributionsInput = {
   pdaAddress?: Prisma.StringFieldUpdateOperationsInput | string
   vaultBump?: Prisma.IntFieldUpdateOperationsInput | number
   budgetLimit?: Prisma.FloatFieldUpdateOperationsInput | number
+  discordWebhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   maintainer?: Prisma.UserUpdateOneRequiredWithoutVaultsNestedInput
 }
@@ -608,6 +636,7 @@ export type VaultUncheckedUpdateWithoutContributionsInput = {
   pdaAddress?: Prisma.StringFieldUpdateOperationsInput | string
   vaultBump?: Prisma.IntFieldUpdateOperationsInput | number
   budgetLimit?: Prisma.FloatFieldUpdateOperationsInput | number
+  discordWebhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintainerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -618,6 +647,7 @@ export type VaultCreateManyMaintainerInput = {
   pdaAddress: string
   vaultBump: number
   budgetLimit?: number
+  discordWebhookUrl?: string | null
   createdAt?: Date | string
 }
 
@@ -627,6 +657,7 @@ export type VaultUpdateWithoutMaintainerInput = {
   pdaAddress?: Prisma.StringFieldUpdateOperationsInput | string
   vaultBump?: Prisma.IntFieldUpdateOperationsInput | number
   budgetLimit?: Prisma.FloatFieldUpdateOperationsInput | number
+  discordWebhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contributions?: Prisma.ContributionUpdateManyWithoutVaultNestedInput
 }
@@ -637,6 +668,7 @@ export type VaultUncheckedUpdateWithoutMaintainerInput = {
   pdaAddress?: Prisma.StringFieldUpdateOperationsInput | string
   vaultBump?: Prisma.IntFieldUpdateOperationsInput | number
   budgetLimit?: Prisma.FloatFieldUpdateOperationsInput | number
+  discordWebhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contributions?: Prisma.ContributionUncheckedUpdateManyWithoutVaultNestedInput
 }
@@ -647,6 +679,7 @@ export type VaultUncheckedUpdateManyWithoutMaintainerInput = {
   pdaAddress?: Prisma.StringFieldUpdateOperationsInput | string
   vaultBump?: Prisma.IntFieldUpdateOperationsInput | number
   budgetLimit?: Prisma.FloatFieldUpdateOperationsInput | number
+  discordWebhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -687,6 +720,7 @@ export type VaultSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   pdaAddress?: boolean
   vaultBump?: boolean
   budgetLimit?: boolean
+  discordWebhookUrl?: boolean
   maintainerId?: boolean
   createdAt?: boolean
   maintainer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -700,6 +734,7 @@ export type VaultSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   pdaAddress?: boolean
   vaultBump?: boolean
   budgetLimit?: boolean
+  discordWebhookUrl?: boolean
   maintainerId?: boolean
   createdAt?: boolean
   maintainer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -711,6 +746,7 @@ export type VaultSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   pdaAddress?: boolean
   vaultBump?: boolean
   budgetLimit?: boolean
+  discordWebhookUrl?: boolean
   maintainerId?: boolean
   createdAt?: boolean
   maintainer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -722,11 +758,12 @@ export type VaultSelectScalar = {
   pdaAddress?: boolean
   vaultBump?: boolean
   budgetLimit?: boolean
+  discordWebhookUrl?: boolean
   maintainerId?: boolean
   createdAt?: boolean
 }
 
-export type VaultOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "repositoryFullName" | "pdaAddress" | "vaultBump" | "budgetLimit" | "maintainerId" | "createdAt", ExtArgs["result"]["vault"]>
+export type VaultOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "repositoryFullName" | "pdaAddress" | "vaultBump" | "budgetLimit" | "discordWebhookUrl" | "maintainerId" | "createdAt", ExtArgs["result"]["vault"]>
 export type VaultInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   maintainer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   contributions?: boolean | Prisma.Vault$contributionsArgs<ExtArgs>
@@ -751,6 +788,7 @@ export type $VaultPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     pdaAddress: string
     vaultBump: number
     budgetLimit: number
+    discordWebhookUrl: string | null
     maintainerId: string
     createdAt: Date
   }, ExtArgs["result"]["vault"]>
@@ -1183,6 +1221,7 @@ export interface VaultFieldRefs {
   readonly pdaAddress: Prisma.FieldRef<"Vault", 'String'>
   readonly vaultBump: Prisma.FieldRef<"Vault", 'Int'>
   readonly budgetLimit: Prisma.FieldRef<"Vault", 'Float'>
+  readonly discordWebhookUrl: Prisma.FieldRef<"Vault", 'String'>
   readonly maintainerId: Prisma.FieldRef<"Vault", 'String'>
   readonly createdAt: Prisma.FieldRef<"Vault", 'DateTime'>
 }

@@ -3,6 +3,7 @@ import { Response } from 'express';
 import { ActionGetResponse, ACTIONS_CORS_HEADERS } from '@solana/actions';
 import { SolanaService } from '../solana/solana.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { PublicKey } from '@solana/web3.js'; 
 
 @Controller()
 export class ActionsController {
@@ -26,7 +27,10 @@ export class ActionsController {
   async getClaimMetadata(@Param('userId') userId: string, @Res() res: Response) {
     try {
       const contribution = await this.prisma.client.contribution.findFirst({
-        where: { userId: userId, status: 'AUDITED' },
+        where: { 
+          userId: userId, 
+          status: { in: ['AUDITED', 'REJECTED'] } 
+        },
         orderBy: { createdAt: 'desc' },
         include: { user: true, vault: true }
       });
@@ -34,6 +38,18 @@ export class ActionsController {
       if (!contribution) {
         return res.set(ACTIONS_CORS_HEADERS).status(HttpStatus.NOT_FOUND).json({ 
           message: "No claimable bounty found. Blinky is still auditing!" 
+        });
+      }
+
+      if (contribution.amount <= 0 || contribution.status === 'REJECTED') {
+        return res.set(ACTIONS_CORS_HEADERS).json({
+          type: "action",
+          icon: contribution.user?.avatarUrl || "https://solana.com/src/img/branding/solanaLogoMark.png",
+          title: "SOLUX Audit: No Payout",
+          description: `Blinky AI audited your contribution to ${contribution.vault.repositoryFullName}. The changes were marked as trivial (e.g., docs only) or ineligible. Bounty Awarded: 0 USDC.`,
+          label: "Ineligible",
+          disabled: true,
+          links: { actions: [] }
         });
       }
 
@@ -85,12 +101,15 @@ export class ActionsController {
   ) {
     try {
       const contribution = await this.prisma.client.contribution.findFirst({
-        where: { userId: userId, status: 'AUDITED' },
+        where: { 
+          userId: userId, 
+          status: { in: ['AUDITED', 'REJECTED'] } 
+        },
         orderBy: { createdAt: 'desc' },
         include: { user: true, vault: true }
       });
 
-      if (!contribution || !contribution.user) {
+      if (!contribution || !contribution.user || !contribution.vault) {
         throw new Error("Contribution record not found.");
       }
 
@@ -100,6 +119,21 @@ export class ActionsController {
         });
       }
 
+      if (contribution.amount <= 0 || contribution.status === 'REJECTED') {
+        return res.set(ACTIONS_CORS_HEADERS).status(HttpStatus.BAD_REQUEST).json({
+          message: "Claim failed: Blinky AI awarded 0 USDC for this pull request. No transaction generated."
+        });
+      }
+
+      const vaultPda = new PublicKey(contribution.vault.pdaAddress);
+      const vaultBalance = await this.solana.getVaultUsdcBalance(vaultPda);
+
+      if (vaultBalance < contribution.amount) {
+        return res.set(ACTIONS_CORS_HEADERS).status(HttpStatus.BAD_REQUEST).json({
+          message: `Claim failed: The maintainer's treasury is empty (${vaultBalance} USDC). They have been alerted to top up!`
+        });
+      }
+      
       const transaction = await this.solana.createClaimTransaction(
         contribution.vault.repositoryFullName, 
         account, 
@@ -118,6 +152,7 @@ export class ActionsController {
         message: `Blinky is sending ${contribution.amount} USDC to your wallet!`,
       });
     } catch (error) {
+      this.solana['logger'].error('Transaction generation failed', error);
       return res.set(ACTIONS_CORS_HEADERS).status(HttpStatus.INTERNAL_SERVER_ERROR).json({ 
         error: "Transaction generation failed." 
       });
@@ -136,7 +171,6 @@ export class ActionsController {
         body.amount
       );
 
-      // We send this back to the frontend so the maintainer's wallet (Phantom/Solflare) can sign it
       return res.status(HttpStatus.OK).json({
         transaction: transaction.serialize({ requireAllSignatures: false }).toString('base64'),
       });

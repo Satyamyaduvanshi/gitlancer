@@ -141,4 +141,14 @@ export class SolanaService implements OnModuleInit {
 
     return transaction;
   }
+
+  async getVaultUsdcBalance(vaultPda: PublicKey): Promise<number> {
+    try {
+      const ata = getAssociatedTokenAddressSync(this.usdcMint, vaultPda, true);
+      const balance = await this.connection.getTokenAccountBalance(ata);
+      return balance.value.uiAmount || 0;
+    } catch (e) {
+      return 0; 
+    }
+  }
 }
