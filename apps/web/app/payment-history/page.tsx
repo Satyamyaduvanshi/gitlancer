@@ -1,11 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import useSWR from 'swr';
 import axios from 'axios';
 import React from 'react';
 import { useSession } from 'next-auth/react';
 import DashboardLayout from '@/components/DashboardLayout';
-import { History, ExternalLink, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
+import { History, ExternalLink, ShieldCheck, ChevronDown, ChevronUp, CalendarRange, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -15,30 +15,109 @@ const fetcher = (url: string) => axios.get(url).then(res => res.data);
 export default function PaymentHistoryPage() {
   const { data: session } = useSession();
   const userId = (session?.user as any)?.id;
+  
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   const { data: bounties, isLoading } = useSWR(userId ? `${API_URL}/api/bounties/user/${userId}` : null, fetcher);
-  const paidBounties = bounties?.filter((b: any) => b.status === 'CLAIMED').sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) || [];
+  
+  // 1. Get all claimed bounties
+  const allPaidBounties = useMemo(() => {
+    return bounties?.filter((b: any) => b.status === 'CLAIMED').sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) || [];
+  }, [bounties]);
+
+  // 2. Filter by selected date range
+  const filteredBounties = useMemo(() => {
+    return allPaidBounties.filter((bounty: any) => {
+      if (!startDate && !endDate) return true;
+      
+      const bountyDate = new Date(bounty.createdAt);
+      
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        if (bountyDate < start) return false;
+      }
+      
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999); // Include the entire end day
+        if (bountyDate > end) return false;
+      }
+      
+      return true;
+    });
+  }, [allPaidBounties, startDate, endDate]);
+
+  const hasActiveFilters = startDate !== '' || endDate !== '';
 
   return (
     <DashboardLayout>
-      <div className="mb-8">
+      <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
         <h1 className="text-3xl font-bold text-foreground tracking-tight flex items-center gap-3">
-          <History className="text-persimmon" size={28} /> Payment History
+          <History className="text-persimmon" size={28} /> Settlement Ledger
         </h1>
-        <p className="text-foreground/50 text-sm mt-1">A complete ledger of all USDC distributed from your repositories.</p>
+        <p className="text-foreground/50 text-sm mt-2 max-w-2xl">
+          Every payout settled through SOLUX. The chain sees a transaction. You see the complete audit trail.
+        </p>
       </div>
 
-      <div className="bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-black/5 dark:border-white/5 overflow-hidden">
+      {/* 📅 Date Range Filter Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-background rounded-2xl border border-black/5 dark:border-white/5 p-4 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-700 delay-100">
+        <div className="flex items-center gap-2 text-sm font-bold text-foreground/70 uppercase tracking-widest">
+          <CalendarRange size={18} className="text-persimmon" />
+          Range
+        </div>
+        
+        <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+          <input 
+            type="date" 
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-mono text-foreground focus:outline-none focus:border-persimmon transition-colors"
+          />
+          <span className="text-foreground/40 font-mono">→</span>
+          <input 
+            type="date" 
+            value={endDate}
+            min={startDate} // Prevent selecting an end date before the start date
+            onChange={(e) => setEndDate(e.target.value)}
+            className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-mono text-foreground focus:outline-none focus:border-persimmon transition-colors"
+          />
+          
+          {hasActiveFilters && (
+            <button 
+              onClick={() => { setStartDate(''); setEndDate(''); }}
+              className="p-2 text-foreground/40 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+              title="Clear filters"
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-black/5 dark:border-white/5 overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
         
         {isLoading ? (
           <div className="p-10 flex justify-center items-center">
             <p className="text-persimmon font-mono text-sm animate-pulse">FETCHING LEDGER...</p>
           </div>
-        ) : paidBounties.length === 0 ? (
+        ) : allPaidBounties.length === 0 ? (
           <div className="p-16 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-black/5 dark:bg-white/5 rounded-full flex items-center justify-center mb-4"><History size={24} className="text-foreground/30" /></div>
-            <p className="text-foreground/50 text-sm">No payment history found yet.</p>
+            <h3 className="text-xl font-bold text-foreground mb-2">No settlements yet</h3>
+            <p className="text-foreground/50 text-sm max-w-sm">Your authorized payouts will appear here once contributors claim them via their Solana wallets.</p>
+          </div>
+        ) : filteredBounties.length === 0 ? (
+          <div className="p-16 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-black/5 dark:bg-white/5 rounded-full flex items-center justify-center mb-4"><CalendarRange size={24} className="text-foreground/30" /></div>
+            <h3 className="text-xl font-bold text-foreground mb-2">No results found</h3>
+            <p className="text-foreground/50 text-sm">No settlements match your selected date range.</p>
+            <button onClick={() => { setStartDate(''); setEndDate(''); }} className="mt-4 text-sm font-bold text-persimmon hover:text-orange-500 transition-colors">
+              Clear Filters
+            </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -53,9 +132,8 @@ export default function PaymentHistoryPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/5 dark:divide-white/5">
-                {paidBounties.map((bounty: any) => {
+                {filteredBounties.map((bounty: any) => {
                   
-                  // ⚡ THE FIX: Extracting from Prisma relations
                   const handle = bounty.user?.githubHandle || 'github_user';
                   const avatarUrl = bounty.user?.avatarUrl || `https://github.com/${handle}.png`;
                   const repo = bounty.vault?.repositoryFullName || 'unknown/repo';
