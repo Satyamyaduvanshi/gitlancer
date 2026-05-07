@@ -1,16 +1,16 @@
 # ----------------------------------------------------
-# Base image
+# Base
 # ----------------------------------------------------
     FROM node:22-alpine3.22 AS base
 
     ENV PNPM_HOME="/pnpm"
     ENV PATH="$PNPM_HOME:$PATH"
     
-    RUN apk add --no-cache libc6-compat openssl
+    RUN apk add --no-cache libc6-compat openssl python3 make g++
     RUN corepack enable
     
     # ----------------------------------------------------
-    # Prune workspace
+    # Builder
     # ----------------------------------------------------
     FROM base AS builder
     
@@ -23,7 +23,7 @@
     RUN turbo prune oracle --docker
     
     # ----------------------------------------------------
-    # Install dependencies
+    # Installer
     # ----------------------------------------------------
     FROM base AS installer
     
@@ -35,26 +35,25 @@
     
     RUN pnpm install --frozen-lockfile
     
-    # Copy full source
     COPY --from=builder /app/out/full/ .
     
     # ----------------------------------------------------
-    # Prisma generate
+    # Prisma
     # ----------------------------------------------------
     
-    # Dummy envs so prisma generate works during build
     ENV DATABASE_URL="postgresql://dummy"
     ENV DIRECT_URL="postgresql://dummy"
     
-    RUN pnpm prisma generate
+    # Generate Prisma client from database package
+    RUN cd packages/database && npx prisma generate
     
     # ----------------------------------------------------
-    # Build oracle app
+    # Build
     # ----------------------------------------------------
     RUN pnpm turbo run build --filter=oracle
     
     # ----------------------------------------------------
-    # Production runner
+    # Runner
     # ----------------------------------------------------
     FROM node:22-alpine3.22 AS runner
     
@@ -65,19 +64,15 @@
     
     RUN apk add --no-cache openssl
     
-    # Create non-root user
     RUN addgroup --system --gid 1001 nodejs
     RUN adduser --system --uid 1001 nestjs
     
     USER nestjs
     
-    # Copy built app
     COPY --from=installer /app .
     
-    # Render uses dynamic PORT
     ENV HOST=0.0.0.0
     
     EXPOSE 3000
     
-    # Start NestJS app
     CMD ["node", "apps/oracle/dist/apps/oracle/src/main.js"]

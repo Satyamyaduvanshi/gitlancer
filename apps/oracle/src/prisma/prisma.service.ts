@@ -1,10 +1,10 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { getPrisma, PrismaClient } from '@gitlancer/db';
+import { getPrisma } from '@gitlancer/db';
 
 @Injectable()
 export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
-  public readonly client: PrismaClient = getPrisma();
+  public readonly client: ReturnType<typeof getPrisma> = getPrisma();
 
   async onModuleInit() {
     await this.client.$connect();
