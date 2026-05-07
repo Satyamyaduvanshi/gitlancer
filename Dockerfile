@@ -29,6 +29,8 @@ RUN pnpm --filter @gitlancer/db run db:generate
 # Build the NestJS backend
 RUN pnpm turbo run build --filter=oracle
 
+# ... (Everything above stays exactly the same) ...
+
 # 4. Final runner image
 FROM alpine AS runner
 WORKDIR /app
@@ -43,5 +45,6 @@ COPY --from=installer /app .
 ENV HOST=0.0.0.0
 EXPOSE 3000
 
-# 🛡️ THE FIX: CD into the app and use standard npm to bypass the Corepack/pnpm permission crash
-CMD ["sh", "-c", "cd apps/oracle && npm run start:prod"]
+# 🛡️ THE FIX: A smart bootloader that tries both common NestJS output paths. 
+# If it fails, it searches the directory and prints the location to the logs so we can see it.
+CMD ["sh", "-c", "if [ -f dist/apps/oracle/main.js ]; then node dist/apps/oracle/main.js; elif [ -f apps/oracle/dist/main.js ]; then node apps/oracle/dist/main.js; elif [ -f apps/oracle/dist/src/main.js ]; then node apps/oracle/dist/src/main.js; else echo '❌ main.js NOT FOUND! Searching system...' && find . -name 'main.js' | grep -v node_modules && exit 1; fi"]
