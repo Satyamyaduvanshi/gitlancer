@@ -1,14 +1,16 @@
-# 🛡️ THE FIX: Bumped to Node 22 to support pnpm v11+
-FROM node:22-alpine AS alpine
+# Base image pinned to Alpine 3.22 for newer security patches.
+FROM node:22-alpine3.22 AS alpine
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+RUN apk upgrade --no-cache
 RUN corepack enable
 
 # 1. Prune the workspace for the 'oracle' app
 FROM alpine AS builder
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
-RUN pnpm add -g turbo
+# 🛡️ THE FIX: Use npm to install turbo globally to avoid the pnpm PATH crash
+RUN npm install -g turbo
 COPY . .
 RUN turbo prune oracle --docker
 
