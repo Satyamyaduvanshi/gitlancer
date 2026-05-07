@@ -38,7 +38,8 @@ USER nestjs
 
 COPY --from=installer /app .
 
-# Expose the port NestJS is listening on
+# Render dynamically sets process.env.PORT, so we expose it globally
+ENV HOST=0.0.0.0
 EXPOSE 3000
 
 # Start the compiled NestJS application

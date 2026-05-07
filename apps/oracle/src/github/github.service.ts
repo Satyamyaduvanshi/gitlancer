@@ -1,20 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import axios from 'axios';
-import * as fs from 'fs';
-import * as path from 'path';
 
 @Injectable()
 export class GithubService {
   private readonly logger = new Logger(GithubService.name);
   private readonly appId = process.env.GITHUB_APP_ID;
-  private readonly privateKeyPath = path.resolve(process.env.GITHUB_PRIVATE_KEY_PATH || './blinky-key.pem');
-  
-  
   private readonly baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 
   private generateJwt(): string {
-    const privateKey = fs.readFileSync(this.privateKeyPath, 'utf8');
+    // 🛡️ THE FIX: Reads the string from .env and replaces literal \n with actual newlines
+    const rawKey = process.env.GITHUB_PRIVATE_KEY;
+    if (!rawKey) throw new Error("Missing GITHUB_PRIVATE_KEY in .env");
+    
+    const privateKey = rawKey.replace(/\\n/g, '\n');
+
     const payload = {
       iat: Math.floor(Date.now() / 1000) - 60,
       exp: Math.floor(Date.now() / 1000) + (10 * 60),
@@ -33,7 +33,6 @@ export class GithubService {
     return response.data.token;
   }
 
-
   async getGithubUserInfo(installationId: string, username: string) {
     try {
       const token = await this.getInstallationToken(installationId);
@@ -50,7 +49,6 @@ export class GithubService {
       return null;
     }
   }
-
 
   async postComment(
     owner: string, 

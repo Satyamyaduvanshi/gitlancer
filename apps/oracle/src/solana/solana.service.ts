@@ -2,8 +2,6 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { Connection, Keypair, PublicKey, Transaction, SystemProgram } from '@solana/web3.js';
 import { Program, AnchorProvider, Wallet, Idl, BN } from '@coral-xyz/anchor';
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction } from '@solana/spl-token';
-import * as fs from 'fs';
-import * as path from 'path';
 
 import * as soluxIdl from './idl/solux_program.json';
 
@@ -20,9 +18,12 @@ export class SolanaService implements OnModuleInit {
   onModuleInit() {
     this.connection = new Connection(process.env.SOLANA_RPC_URL!, 'confirmed');
     try {
-      const keyPath = path.resolve(__dirname, '../../oracle-delegate.json');
-      const secret = fs.readFileSync(keyPath, 'utf8');
-      this.oracleDelegate = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(secret)));
+      // 🛡️ THE FIX: Parse the array string directly from the environment variables
+      const secretString = process.env.ORACLE_SECRET_KEY;
+      if (!secretString) throw new Error("Missing ORACLE_SECRET_KEY in .env");
+
+      const secretArray = JSON.parse(secretString);
+      this.oracleDelegate = Keypair.fromSecretKey(Uint8Array.from(secretArray));
       
       const wallet = new Wallet(this.oracleDelegate);
       const provider = new AnchorProvider(this.connection, wallet, { preflightCommitment: 'confirmed' });
@@ -52,7 +53,6 @@ export class SolanaService implements OnModuleInit {
     const contributorUsdcAccount = getAssociatedTokenAddressSync(this.usdcMint, contributor);
 
     const transaction = new Transaction();
-
 
     try {
       await this.connection.getTokenAccountBalance(contributorUsdcAccount);
@@ -86,13 +86,11 @@ export class SolanaService implements OnModuleInit {
     transaction.add(instruction);
     transaction.feePayer = contributor;
     transaction.recentBlockhash = (await this.connection.getLatestBlockhash()).blockhash;
-
   
     transaction.partialSign(this.oracleDelegate);
 
     return transaction;
   }
-
 
   async createWithdrawTransaction(repoFullName: string, maintainerAddress: string, amountInUsdc: number) {
     const maintainer = new PublicKey(maintainerAddress);
@@ -107,7 +105,6 @@ export class SolanaService implements OnModuleInit {
     const maintainerUsdcAccount = getAssociatedTokenAddressSync(this.usdcMint, maintainer);
 
     const transaction = new Transaction();
-
   
     try {
       await this.connection.getTokenAccountBalance(maintainerUsdcAccount);
