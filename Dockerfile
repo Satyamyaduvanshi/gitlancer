@@ -22,12 +22,14 @@ COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --frozen-lockfile
 
-# 🛡️ THE FIX: Generate the Prisma client here, so it is part of the installer layer
+# Copy the actual source code over
 COPY --from=builder /app/out/full/ .
-RUN pnpm --filter @gitlancer/db run db:generate 
+
+# 🛡️ THE FIX: Walk directly into the database package and force Prisma to generate.
+# This bypasses any silent script failures.
+RUN cd packages/database && npx prisma generate
 
 # 3. Build the project
-# Build the NestJS backend
 RUN pnpm turbo run build --filter=oracle
 
 # 4. Final runner image
@@ -44,5 +46,5 @@ COPY --from=installer /app .
 ENV HOST=0.0.0.0
 EXPOSE 3000
 
-# Start the compiled NestJS application
+# Start the compiled NestJS application using the exact path we found!
 CMD ["node", "apps/oracle/dist/apps/oracle/src/main.js"]
