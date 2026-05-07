@@ -1,5 +1,5 @@
-# Base setup
-FROM node:20-alpine AS alpine
+# 🛡️ THE FIX: Bumped to Node 22 to support pnpm v11+
+FROM node:22-alpine AS alpine
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
