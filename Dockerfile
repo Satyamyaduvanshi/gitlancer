@@ -38,9 +38,6 @@ FROM alpine AS runner
 WORKDIR /app
 RUN apk add --no-cache openssl
 
-# Install TSX globally to magically handle all TypeScript execution
-RUN npm install -g tsx
-
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
 USER nestjs
@@ -51,6 +48,5 @@ COPY --from=installer /app .
 ENV HOST=0.0.0.0
 EXPOSE 3000
 
-# 🛡️ THE ULTIMATE FIX: Run the raw TypeScript source code directly!
-# This behaves exactly like your local 'dev' environment and bypasses all compile issues.
-CMD ["tsx", "apps/oracle/src/main.ts"]
+# 🛡️ THE FIX: Run the COMPILED main.js file now that the imports are fixed!
+CMD ["node", "apps/oracle/dist/apps/oracle/src/main.js"]

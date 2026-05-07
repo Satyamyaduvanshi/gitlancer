@@ -1,5 +1,5 @@
 // packages/database/index.ts
-import { PrismaClient } from './generated/client'; // <-- Removed .js
+import { PrismaClient } from './generated/client.js'; // 🛡️ MUST HAVE .js
 import { PrismaNeon } from '@prisma/adapter-neon';
 import { neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
@@ -23,4 +23,4 @@ export const getPrisma = (): PrismaClient => {
   return prismaInstance;
 };
 
-export { PrismaClient } from './generated/client'; // <-- Removed .js
+export { PrismaClient } from './generated/client.js'; // 🛡️ MUST HAVE .js
