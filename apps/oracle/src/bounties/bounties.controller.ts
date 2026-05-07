@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Logger, InternalServerErrorException, Inject } from '@nestjs/common';
-import { BountiesService } from './bounties.service';
+import { BountiesService, UserBountyWithRelations } from './bounties.service';
 
 @Controller('api/bounties')
 export class BountiesController {
@@ -10,7 +10,7 @@ export class BountiesController {
   private readonly bountiesService: BountiesService;
 
   @Get('user/:userId')
-  async getUserBounties(@Param('userId') userId: string) {
+  async getUserBounties(@Param('userId') userId: string): Promise<UserBountyWithRelations[]> {
     this.logger.log(`GET request received for /api/bounties/user/${userId}`);
     
     try {

@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Inject, Logger, BadRequestException, Get, Param, Patch } from '@nestjs/common';
+import { Contribution, ContributionStatus, Vault } from '@gitlancer/db';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('api') // 👈 This automatically prefixes all routes below with /api
@@ -16,7 +17,7 @@ export class VaultsController {
     githubHandle: string;
     avatarUrl: string;
     vaultBump: number;
-  }) {
+  }): Promise<Vault> {
     const { repoFullName, pdaAddress, maintainerId, githubHandle, avatarUrl, vaultBump } = body;
 
     try {
@@ -60,7 +61,7 @@ export class VaultsController {
   }
 
   @Get('vaults/user/:id') 
-  async getUserVaults(@Param('id') userId: string) {
+  async getUserVaults(@Param('id') userId: string): Promise<Vault[]> {
     try {
       return await this.prisma.client.vault.findMany({
         where: { maintainerId: userId },
@@ -72,7 +73,7 @@ export class VaultsController {
   }
 
   @Get('bounties/user/:id') 
-  async getUserBounties(@Param('id') userId: string) {
+  async getUserBounties(@Param('id') userId: string): Promise<Contribution[]> {
     try {
       return await this.prisma.client.contribution.findMany({
         where: { userId: userId },
@@ -85,7 +86,7 @@ export class VaultsController {
 
 
   @Patch('vaults/:id')
-  async updateVault(@Param('id') id: string, @Body() body: { discordWebhookUrl?: string | null }) {
+  async updateVault(@Param('id') id: string, @Body() body: { discordWebhookUrl?: string | null }): Promise<Vault> {
     try {
       return await this.prisma.client.vault.update({
         where: { id },
@@ -102,13 +103,13 @@ export class VaultsController {
   async updateBountyStatus(
     @Param('id') id: string, 
     @Body() body: { status: string }
-  ) {
+  ): Promise<Contribution> {
     try {
       // Update the contribution record in PostgreSQL
       const updatedBounty = await this.prisma.client.contribution.update({
         where: { id },
         // Prisma expects the exact Enum value (e.g., 'CLAIMED')
-        data: { status: body.status as any }, 
+        data: { status: body.status as ContributionStatus },
       });
 
       this.logger.log(`✅ Bounty ${id} status updated to ${body.status}`);

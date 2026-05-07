@@ -1,5 +1,13 @@
 import { Injectable, NotFoundException, Logger, Inject } from '@nestjs/common';
+import { Prisma } from '@gitlancer/db';
 import { PrismaService } from '../prisma/prisma.service'; 
+
+export type UserBountyWithRelations = Prisma.ContributionGetPayload<{
+  include: {
+    user: true;
+    vault: true;
+  };
+}>;
 
 @Injectable()
 export class BountiesService {
@@ -9,7 +17,7 @@ export class BountiesService {
   @Inject(PrismaService)
   private readonly prisma: PrismaService;
 
-  async getBountiesByUserId(userId: string) {
+  async getBountiesByUserId(userId: string): Promise<UserBountyWithRelations[]> {
     if (!userId) {
       throw new NotFoundException('User ID is required');
     }

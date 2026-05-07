@@ -23,4 +23,4 @@ export const getPrisma = (): PrismaClient => {
   return prismaInstance;
 };
 
-export { PrismaClient } from './generated/client.js'; // 🛡️ MUST HAVE .js
+export * from '@prisma/client';
