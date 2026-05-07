@@ -1,0 +1,45 @@
+# Base setup
+FROM node:20-alpine AS alpine
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+# 1. Prune the workspace for the 'oracle' app
+FROM alpine AS builder
+RUN apk add --no-cache libc6-compat openssl
+WORKDIR /app
+RUN pnpm add -g turbo
+COPY . .
+RUN turbo prune oracle --docker
+
+# 2. Install dependencies
+FROM alpine AS installer
+RUN apk add --no-cache libc6-compat openssl
+WORKDIR /app
+COPY .gitignore .gitignore
+COPY --from=builder /app/out/json/ .
+COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN pnpm install --frozen-lockfile
+
+# 3. Build the project
+COPY --from=builder /app/out/full/ .
+# Generate the Prisma client using your exact package name
+RUN pnpm --filter @gitlancer/db run db:generate 
+# Build the NestJS backend
+RUN pnpm turbo run build --filter=oracle
+
+# 4. Final runner image
+FROM alpine AS runner
+WORKDIR /app
+RUN apk add --no-cache openssl
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nestjs
+USER nestjs
+
+COPY --from=installer /app .
+
+# Expose the port NestJS is listening on
+EXPOSE 3000
+
+# Start the compiled NestJS application
+CMD ["node", "apps/oracle/dist/main.js"]
