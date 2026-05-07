@@ -1,4 +1,4 @@
-# Base image pinned to Alpine 3.22 for newer security patches.
+\# Base image pinned to Alpine 3.22 for newer security patches.
 FROM node:22-alpine3.22 AS alpine
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -13,7 +13,7 @@ RUN npm install -g turbo
 COPY . .
 RUN turbo prune oracle --docker
 
-# 2. Install dependencies
+# 2. Install dependencies (AND Generate Prisma Client)
 FROM alpine AS installer
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
@@ -22,10 +22,11 @@ COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --frozen-lockfile
 
-# 3. Build the project
+# 🛡️ THE FIX: Generate the Prisma client here, so it is part of the installer layer
 COPY --from=builder /app/out/full/ .
-# Generate the Prisma client using your exact package name
 RUN pnpm --filter @gitlancer/db run db:generate 
+
+# 3. Build the project
 # Build the NestJS backend
 RUN pnpm turbo run build --filter=oracle
 
@@ -43,5 +44,5 @@ COPY --from=installer /app .
 ENV HOST=0.0.0.0
 EXPOSE 3000
 
-# 🛡️ THE FINAL FIX: Point Node directly to the deeply nested path we found in the logs
+# Start the compiled NestJS application
 CMD ["node", "apps/oracle/dist/apps/oracle/src/main.js"]
