@@ -25,8 +25,10 @@ RUN pnpm install --frozen-lockfile
 # Copy the actual source code over
 COPY --from=builder /app/out/full/ .
 
-# 🛡️ THE FIX: Walk directly into the database package and force Prisma to generate.
-# This bypasses any silent script failures.
+# 🛡️ THE FIX: Give Prisma dummy URLs so it stops crying during the build phase.
+# It will use your real Render variables when the app actually runs!
+ENV DATABASE_URL="postgresql://dummy_build_url"
+ENV DIRECT_URL="postgresql://dummy_build_url"
 RUN cd packages/database && npx prisma generate
 
 # 3. Build the project
@@ -46,5 +48,5 @@ COPY --from=installer /app .
 ENV HOST=0.0.0.0
 EXPOSE 3000
 
-# Start the compiled NestJS application using the exact path we found!
+# Start the compiled NestJS application
 CMD ["node", "apps/oracle/dist/apps/oracle/src/main.js"]
