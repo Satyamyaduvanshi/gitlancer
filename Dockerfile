@@ -9,7 +9,6 @@ RUN corepack enable
 FROM alpine AS builder
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
-# 🛡️ THE FIX: Use npm to install turbo globally to avoid the pnpm PATH crash
 RUN npm install -g turbo
 COPY . .
 RUN turbo prune oracle --docker
@@ -44,5 +43,5 @@ COPY --from=installer /app .
 ENV HOST=0.0.0.0
 EXPOSE 3000
 
-# Start the compiled NestJS application
-CMD ["node", "apps/oracle/dist/main.js"]
+# 🛡️ THE FIX: Let package.json handle the exact path to main.js automatically
+CMD ["pnpm", "--filter", "oracle", "run", "start:prod"]
