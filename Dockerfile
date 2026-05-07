@@ -43,5 +43,5 @@ COPY --from=installer /app .
 ENV HOST=0.0.0.0
 EXPOSE 3000
 
-# 🛡️ THE FIX: Let package.json handle the exact path to main.js automatically
-CMD ["pnpm", "--filter", "oracle", "run", "start:prod"]
+# 🛡️ THE FIX: CD into the app and use standard npm to bypass the Corepack/pnpm permission crash
+CMD ["sh", "-c", "cd apps/oracle && npm run start:prod"]
