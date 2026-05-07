@@ -1,17 +1,13 @@
 // packages/database/index.ts
-
-// 🛡️ THE FIX: Added .js extension to the relative import
-import { PrismaClient } from './generated/client.js';
+import { PrismaClient } from './generated/client'; // <-- Removed .js
 import { PrismaNeon } from '@prisma/adapter-neon';
 import { neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
 
 neonConfig.webSocketConstructor = ws;
 
-// We create a variable to hold our singleton
 let prismaInstance: PrismaClient | null = null;
 
-// This function ensures we only create the client when we actually need it
 export const getPrisma = (): PrismaClient => {
   if (prismaInstance) return prismaInstance;
 
@@ -27,5 +23,4 @@ export const getPrisma = (): PrismaClient => {
   return prismaInstance;
 };
 
-// 🛡️ THE FIX: Added .js extension here too
-export { PrismaClient } from './generated/client.js';
+export { PrismaClient } from './generated/client'; // <-- Removed .js

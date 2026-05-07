@@ -25,8 +25,7 @@ RUN pnpm install --frozen-lockfile
 # Copy the actual source code over
 COPY --from=builder /app/out/full/ .
 
-# 🛡️ THE FIX: Give Prisma dummy URLs so it stops crying during the build phase.
-# It will use your real Render variables when the app actually runs!
+# Give Prisma dummy URLs so it stops crying during the build phase.
 ENV DATABASE_URL="postgresql://dummy_build_url"
 ENV DIRECT_URL="postgresql://dummy_build_url"
 RUN cd packages/database && npx prisma generate
@@ -38,6 +37,10 @@ RUN pnpm turbo run build --filter=oracle
 FROM alpine AS runner
 WORKDIR /app
 RUN apk add --no-cache openssl
+
+# Install TSX globally to magically handle all TypeScript execution
+RUN npm install -g tsx
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
 USER nestjs
@@ -48,5 +51,6 @@ COPY --from=installer /app .
 ENV HOST=0.0.0.0
 EXPOSE 3000
 
-# Start the compiled NestJS application
-CMD ["node", "apps/oracle/dist/apps/oracle/src/main.js"]
+# 🛡️ THE ULTIMATE FIX: Run the raw TypeScript source code directly!
+# This behaves exactly like your local 'dev' environment and bypasses all compile issues.
+CMD ["tsx", "apps/oracle/src/main.ts"]
