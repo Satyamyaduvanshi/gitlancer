@@ -1,6 +1,7 @@
 // packages/database/index.ts
 
-import { PrismaClient } from './generated/client';
+// 🛡️ THE FIX: Added .js extension to the relative import
+import { PrismaClient } from './generated/client.js';
 import { PrismaNeon } from '@prisma/adapter-neon';
 import { neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
@@ -26,5 +27,5 @@ export const getPrisma = (): PrismaClient => {
   return prismaInstance;
 };
 
-// Also export the type for the Oracle service
-export { PrismaClient } from './generated/client';
+// 🛡️ THE FIX: Added .js extension here too
+export { PrismaClient } from './generated/client.js';
