@@ -1,4 +1,4 @@
-\# Base image pinned to Alpine 3.22 for newer security patches.
+# Base image pinned to Alpine 3.22 for newer security patches.
 FROM node:22-alpine3.22 AS alpine
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
