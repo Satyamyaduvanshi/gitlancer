@@ -1,5 +1,5 @@
 // packages/database/index.ts
-import { PrismaClient } from './generated/client.js'; // 🛡️ MUST HAVE .js
+import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from '@prisma/adapter-neon';
 import { neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
