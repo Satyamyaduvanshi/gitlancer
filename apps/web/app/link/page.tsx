@@ -111,7 +111,7 @@ function LinkContent() {
             width={24} 
             height={24} 
             priority 
-            className="opacity-90 grayscale" 
+            className="opacity-90" 
           />
           <span className="text-xl font-bold tracking-tight text-white">
             SOLUX
