@@ -43,20 +43,19 @@ export class AiService {
           ${diff.substring(0, 15000)}
         `;
 
-        // 2. Generate Content using Groq
-        const chatCompletion = await this.groq.chat.completions.create({
-          messages: [{ role: 'user', content: prompt }],
-          model: 'llama3-70b-8192', // The best Llama 3 model for reasoning
-          temperature: 0.2,
-          response_format: { type: 'json_object' }, // 🛡️ Forces pure JSON output!
-        });
+       const chatCompletion = await this.groq.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'llama-3.3-70b-versatile', // correct model
+        temperature: 0.2,
+        response_format: { type: 'json_object' }, 
+      });
 
         const text = chatCompletion.choices[0]?.message?.content || '{}';
 
-        // 3. Parse JSON (No need for regex cleanup thanks to response_format)
+        
         const parsedAudit = JSON.parse(text);
 
-        // 4. Server-Side Sanity Checks
+        
         if (parsedAudit.isEligible === false) {
           parsedAudit.bountyUSDC = 0; 
         }
