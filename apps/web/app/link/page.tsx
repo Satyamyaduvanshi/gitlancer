@@ -95,17 +95,9 @@ function LinkContent() {
       <div className="w-full max-w-[420px] relative z-10 flex flex-col items-center bg-[#0a0a0a]/90 backdrop-blur-md border border-white/20 p-8 sm:p-10 rounded-2xl shadow-2xl">
         
         {/* 🤝 CUSTOMIZED Animated Handshake (Lottie) */}
-        <div 
-          className="w-32 h-32 -mt-10 mb-2 opacity-80 transition-opacity hover:opacity-100"
-          style={{
-            // You can customize the handshake colors here if the Lottie supports it
-            '--lottie-color-1': '#ffffff',
-            '--lottie-color-2': '#a1a1aa',
-          } as React.CSSProperties}
-        >
+        <div className="w-32 h-32 -mt-10 mb-2 opacity-80 transition-opacity hover:opacity-100">
           <DotLottieReact 
-            // 🚨 REPLACE THIS URL with your actual Handshake Lottie JSON URL from LottieFiles
-            src="https://lottie.host/your-handshake-lottie-url.json" 
+            src="https://lottie.host/a61578ec-ccbf-4b08-8e6f-40edb8cc78ea/tWfU3C7Y89.json" 
             loop 
             autoplay 
           />
@@ -119,7 +111,7 @@ function LinkContent() {
             width={24} 
             height={24} 
             priority 
-            className="opacity-90" 
+            className="opacity-90 grayscale" 
           />
           <span className="text-xl font-bold tracking-tight text-white">
             SOLUX
@@ -157,7 +149,7 @@ function LinkContent() {
             {!session ? (
               <button 
                 onClick={() => signIn("github")} 
-                className="text-xs hover:bg-persimmon hover:text-white hover:duration-300 bg-white text-black px-4 py-2 rounded-md font-medium transition-colors active:scale-95"
+                className="text-xs bg-white text-black px-4 py-2 rounded-md font-medium hover:bg-zinc-200 transition-colors active:scale-95"
               >
                 Connect
               </button>
@@ -191,7 +183,7 @@ function LinkContent() {
             <div className="relative z-50">
               {walletUiReady && (
                 <WalletMultiButton 
-                  className={`!bg-white !text-black hover:!bg-persimmon hover:!text-white hover:!duration-300 !h-8 !px-4 !rounded-md !font-medium !text-xs !transition-all !duration-200 active:!scale-95 shadow-none ${publicKey ? '!bg-transparent !text-zinc-500 border !border-zinc-800 hover:!text-white hover:!bg-zinc-900' : ''}`} 
+                  className={`!bg-white !text-black hover:!bg-zinc-200 !h-8 !px-4 !rounded-md !font-medium !text-xs !transition-all !duration-200 active:!scale-95 shadow-none ${publicKey ? '!bg-transparent !text-zinc-500 border !border-zinc-800 hover:!text-white hover:!bg-zinc-900' : ''}`} 
                 >
                   {publicKey ? publicKey.toBase58().slice(0, 4) + '...' + publicKey.toBase58().slice(-4) : 'Connect'}
                 </WalletMultiButton>
@@ -229,10 +221,10 @@ function LinkContent() {
             </div>
           )}
 
-          {/* 📝 Notice Block */}
-          <div className="mt-5 p-3.5 rounded-lg bg-zinc-900/40 border border-zinc-800/50">
+          {/* 📝 Important Note Block */}
+          <div className="mt-5 p-3.5 rounded-lg bg-[#fc4c02]/[0.03] border border-[#fc4c02]/10 transition-colors hover:bg-[#fc4c02]/[0.05]">
             <p className="text-[11px] text-zinc-400 leading-relaxed text-center">
-              <strong className="text-zinc-300 font-medium">Notice:</strong> You can change your wallet at any time by re-linking it if you lose access or prefer to receive funds in a different wallet.
+              <strong className="text-[#fc4c02] font-semibold tracking-wide">Heads up:</strong> You can change your wallet at any time by re-linking it if you lose access or prefer to receive funds in a different wallet.
             </p>
           </div>
         </div>
