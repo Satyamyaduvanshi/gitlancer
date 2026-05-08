@@ -82,7 +82,7 @@ export default function Solux3DBackground() {
     <div className="absolute inset-0 z-0 pointer-events-none">
       <Canvas camera={{ position: [0, 0, 15], fov: 45 }}>
         {/* ⚡ Pure Black Fog to fade distant pillars perfectly into bg-black */}
-        <fog attach="fog" args={["#000000", 15, 45]} /> 
+        <fog attach="fog" args={["#000000", 15, 25]} /> 
         <Scene />
       </Canvas>
     </div>

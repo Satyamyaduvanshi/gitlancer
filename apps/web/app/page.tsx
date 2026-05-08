@@ -1,3 +1,4 @@
+import { DashboardPreview } from "@/components/solux/DashboardPreview";
 import Faq from "@/components/solux/faq";
 import SoluxDocsAnchor from "@/components/solux/SoluxDocsAnchor";
 import SoluxFooter from "@/components/solux/SoluxFooter";
@@ -12,6 +13,7 @@ export default function Home() {
       <SoluxNav />
       <main>
         <SoluxHero />
+        <DashboardPreview/>
         <SoluxStoryFlow />
         <SoluxMaintainersStrip />
         <SoluxDocsAnchor />

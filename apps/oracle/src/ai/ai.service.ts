@@ -1,24 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 import axios from 'axios';
 
 @Injectable()
 export class AiService {
   private readonly logger = new Logger(AiService.name);
-  private genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-  
-  private model = this.genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash",
-    generationConfig: { temperature: 0.2 } 
-  });
+  private groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
   async auditPullRequest(diffUrl: string) {
     let retries = 3;
-    let backoffDelay = 2000; // Start with a 2-second delay
+    let backoffDelay = 2000;
 
     while (retries > 0) {
       try {
-        // 1. Fetch raw diff from GitHub
         const { data: diff } = await axios.get(diffUrl);
 
         const prompt = `
@@ -49,13 +43,18 @@ export class AiService {
           ${diff.substring(0, 15000)}
         `;
 
-        // 2. Generate Content
-        const result = await this.model.generateContent(prompt);
-        const text = result.response.text();
+        // 2. Generate Content using Groq
+        const chatCompletion = await this.groq.chat.completions.create({
+          messages: [{ role: 'user', content: prompt }],
+          model: 'llama3-70b-8192', // The best Llama 3 model for reasoning
+          temperature: 0.2,
+          response_format: { type: 'json_object' }, // 🛡️ Forces pure JSON output!
+        });
 
-        // 3. Clean and Parse JSON
-        const jsonString = text.replace(/```json|```/g, '').trim();
-        const parsedAudit = JSON.parse(jsonString);
+        const text = chatCompletion.choices[0]?.message?.content || '{}';
+
+        // 3. Parse JSON (No need for regex cleanup thanks to response_format)
+        const parsedAudit = JSON.parse(text);
 
         // 4. Server-Side Sanity Checks
         if (parsedAudit.isEligible === false) {
@@ -71,21 +70,19 @@ export class AiService {
       } catch (error: any) {
   
         if ((error?.status === 503 || error?.status === 429) && retries > 1) {
-          this.logger.warn(`⚠️ Gemini API busy (Status: ${error.status}). Retrying in ${backoffDelay / 1000}s... (${retries - 1} tries left)`);
+          this.logger.warn(`⚠️ Groq API busy (Status: ${error.status}). Retrying in ${backoffDelay / 1000}s... (${retries - 1} tries left)`);
           await new Promise(resolve => setTimeout(resolve, backoffDelay));
           retries--;
           backoffDelay *= 2;
           continue;
         }
-
       
         if (error instanceof SyntaxError && retries > 1) {
-          this.logger.warn(`⚠️ Gemini returned invalid JSON. Retrying... (${retries - 1} tries left)`);
+          this.logger.warn(`⚠️ Groq returned invalid JSON. Retrying... (${retries - 1} tries left)`);
           await new Promise(resolve => setTimeout(resolve, backoffDelay));
           retries--;
           continue;
         }
-
        
         this.logger.error('❌ Failed to audit PR entirely after retries', error);
         
