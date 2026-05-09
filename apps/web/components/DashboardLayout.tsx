@@ -204,16 +204,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     />
                   </div>
 
-          
-                  <div className="absolute -bottom-10 right-2 pointer-events-none select-none opacity-60 dark:opacity-80 transition-all duration-500 ease-out group-hover/wallet:opacity-100 group-hover/wallet:translate-y-1 group-hover/wallet:-rotate-6 z-20">
-                    <Image 
-                      src="/walletwhite.svg" 
-                      alt="Connect Wallet Indicator" 
-                      width={45}   
-                      height={45} 
-                      className="object-contain drop-shadow-md" 
-                    />
-                  </div>
+      
                 </div>
               </nav>
             </div>
