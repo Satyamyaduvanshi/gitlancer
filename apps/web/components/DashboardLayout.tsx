@@ -197,19 +197,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <span className="text-sm tracking-wide">Logout</span>
                 </button>
 
-                <div className="relative mt-4 mb-10 flex flex-col group/wallet">
-                  <div className="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/wallet:scale-[1.02]">
+                <div className="relative mt-4 mb-8 flex flex-col group/wallet">
+                  <div className="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/wallet:scale-[1.02] relative z-10">
                     <WalletMultiButtonDynamic 
                       className="w-full! justify-start! px-3! h-10! min-h-[40px]! rounded-xl! bg-white/5! hover:bg-white/10! border! border-white/5! hover:border-white/10! hover:border-persimmon/30! hover:shadow-[0_0_15px_rgba(252,76,2,0.15)]! text-foreground! font-sans! font-medium! text-sm! tracking-wide transition-all duration-300 active:scale-[0.98]!" 
                     />
                   </div>
-                  
-                  <div className="absolute -bottom-[60px] right-[20px] pointer-events-none select-none opacity-60 dark:opacity-80 transition-all duration-500 ease-out group-hover/wallet:opacity-100 group-hover/wallet:translate-y-1 group-hover/wallet:-rotate-3 z-50">
+
+          
+                  <div className="absolute -bottom-10 right-2 pointer-events-none select-none opacity-60 dark:opacity-80 transition-all duration-500 ease-out group-hover/wallet:opacity-100 group-hover/wallet:translate-y-1 group-hover/wallet:-rotate-6 z-20">
                     <Image 
                       src="/walletwhite.svg" 
                       alt="Connect Wallet Indicator" 
-                      width={50}   
-                      height={50} 
+                      width={45}   
+                      height={45} 
                       className="object-contain drop-shadow-md" 
                     />
                   </div>
