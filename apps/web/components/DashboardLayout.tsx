@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -18,6 +19,9 @@ import dynamic from 'next/dynamic';
 import { motion, LayoutGroup } from 'framer-motion';
 import DashboardHeader from './DashboardHeader';
 
+// 🛡️ Global flag to track initial load across route changes
+let hasLoaded = false;
+
 // 🛡️ Hydration Fix: Dynamically import the wallet button
 const WalletMultiButtonDynamic = dynamic(
   async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
@@ -26,6 +30,12 @@ const WalletMultiButtonDynamic = dynamic(
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
+  // Prevent initial animation from firing again on route changes
+  const isFirstLoad = !hasLoaded;
+  useEffect(() => {
+    hasLoaded = true;
+  }, []);
 
   // Menu Section Items
   const menuItems = [
@@ -38,7 +48,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // General Section Items
   const generalItems = [
-    { name: 'Settings', href: '/settings', icon: Settings },
     { name: 'Help', href: '/help', icon: HelpCircle },
   ];
 
@@ -63,52 +72,52 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
 
         {!isActive && (
-          <div className="absolute inset-0 bg-black/5 dark:bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]" />
+          <div className="absolute inset-0 bg-black/5 dark:bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" />
         )}
         
-        {/* 🛡️ TIGHTER PADDING: Reduced to py-2 instead of py-2.5 */}
-        <div className={`relative z-10 flex items-center gap-3 px-3 py-2 transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+        <div className={`relative z-10 flex items-center gap-3 px-3 py-2 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           isActive 
             ? 'text-persimmon font-medium scale-100' 
             : 'text-foreground/60 hover:text-foreground group-hover:translate-x-1.5'
         }`}>
-          <Icon size={18} className={`transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+          <Icon size={18} className={`transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
           <span className="text-sm tracking-wide">{item.name}</span>
         </div>
       </Link>
     );
   };
 
-  // --- 🎬 MASTER ENTRANCE ANIMATIONS ---
+  // --- 🎬 MASTER ENTRANCE ANIMATIONS (Premium Easing) ---
+  const premiumEase = [0.22, 1, 0.36, 1]; // Buttery smooth ease-out curve
+
   const layoutVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.5, staggerChildren: 0.2 } }
+    visible: { opacity: 1, transition: { duration: 0.6, staggerChildren: 0.1 } }
   };
 
   const sidebarVariants = {
-    hidden: { opacity: 0, x: -30 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: premiumEase } }
   };
 
   const contentVariants = {
-    hidden: { opacity: 0, scale: 0.98 },
-    visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: premiumEase } }
   };
 
   return (
     <motion.div 
       variants={layoutVariants}
-      initial="hidden"
+      initial={isFirstLoad ? "hidden" : "visible"}
       animate="visible"
-      // 🛡️ TIGHTER GAP: Reduced from p-3 gap-3 to p-2 gap-2
       className="flex h-screen bg-black/5 dark:bg-[#050505] text-foreground font-sans selection:bg-persimmon/20 selection:text-persimmon p-2 gap-2 overflow-hidden"
     >
       
       {/* 🧭 Floating Sidebar Card */}
       <motion.aside 
         variants={sidebarVariants}
-        // 🛡️ SLIMMER SIDEBAR: Reduced width to 230px, reduced padding to p-4
-        className="w-[230px] bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-black/40 dark:border-white/40 flex flex-col justify-between p-4 overflow-hidden transition-all flex-shrink-0"
+        // 🛡️ UPDATED: Border zinc-400
+        className="w-[230px] bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-zinc-400/40 dark:border-zinc-400/40 flex flex-col justify-between p-4 overflow-hidden transition-all flex-shrink-0"
       >
         
         <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col pb-2">
@@ -146,14 +155,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                 <button 
                   onClick={() => signOut({ callbackUrl: '/login' })}
-                  className="relative flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] text-foreground/60 hover:text-persimmon hover:bg-persimmon/10 hover:translate-x-1.5 text-left w-full group mt-1"
+                  className="relative flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] text-foreground/60 hover:text-persimmon hover:bg-persimmon/10 hover:translate-x-1.5 text-left w-full group mt-1"
                 >
-                  <LogOut size={18} className="transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-110 group-hover:-translate-x-0.5" />
+                  <LogOut size={18} className="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-translate-x-0.5" />
                   <span className="text-sm tracking-wide">Logout</span>
                 </button>
 
                 <div className="relative mt-3 mb-10 flex flex-col group/wallet">
-                  <div className="transition-transform duration-300 ease-out group-hover/wallet:scale-[1.02]">
+                  <div className="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/wallet:scale-[1.02]">
                     <WalletMultiButtonDynamic 
                       className="w-full! justify-start! px-3! h-9! min-h-[36px]! rounded-xl! bg-white/5! hover:bg-white/10! border! border-white/5! hover:border-white/10! hover:border-persimmon/30! hover:shadow-[0_0_15px_rgba(252,76,2,0.15)]! text-foreground! font-sans! font-medium! text-sm! tracking-wide transition-all duration-300 active:scale-[0.98]!" 
                     />
@@ -174,13 +183,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </LayoutGroup>
         </div>
 
-        {/* ⚡ GITHUB BOT AD BLOCK - Tighter padding */}
+        {/* ⚡ GITHUB BOT AD BLOCK */}
         <div className="relative p-4 shrink-0 rounded-2xl border border-black/5 dark:border-white/5 bg-carbon overflow-hidden group shadow-lg transition-all duration-500 hover:shadow-[0_15px_30px_rgba(0,0,0,0.3)] hover:border-white/10 hover:-translate-y-1 mt-2">
           <Image 
             src="/gback.jpg" 
             alt="Github Integration" 
             fill 
-            className="object-cover opacity-20 transition-all duration-700 ease-out group-hover:opacity-50 group-hover:scale-110" 
+            className="object-cover opacity-20 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-50 group-hover:scale-110" 
           />
           <div className="relative z-10 flex flex-col items-center text-center">
             <div className="flex items-center justify-center gap-2 mb-2 transition-transform duration-500 group-hover:scale-105">
@@ -207,17 +216,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         
         <DashboardHeader />
 
-        <main 
-          className="flex-1 bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-black/40 dark:border-white/40 overflow-y-auto no-scrollbar relative"
-        >
+        {/* 🛡️ UPDATED: Border zinc-400 */}
+        <main className="flex-1 bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-zinc-400/40 dark:border-zinc-400/40 overflow-y-auto no-scrollbar relative overflow-hidden">
           
-          <div 
+          {/* 🛡️ THE FIX: Replaced snappy Tailwind classes with pure Framer Motion route transitions */}
+          <motion.div 
             key={pathname} 
-            // 🛡️ TIGHTER PADDING: Reduced from p-8 to p-6
-            className="p-6 max-w-7xl mx-auto min-h-full animate-in fade-in zoom-in-[0.98] slide-in-from-bottom-2 duration-300 ease-out fill-mode-both"
+            initial={{ opacity: 0, y: 15, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.6, ease: premiumEase }}
+            className="p-6 max-w-7xl mx-auto min-h-full"
           >
             {children}
-          </div>
+          </motion.div>
 
         </main>
         

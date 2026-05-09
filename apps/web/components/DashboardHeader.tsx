@@ -3,15 +3,24 @@ import { useState, useRef, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, Settings, User } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 import Link from 'next/link';
 import NotificationBell from './NotificationBell';
+
+// 🛡️ Global flag to track initial load across route changes
+let headerHasLoaded = false;
 
 export default function DashboardHeader() {
   const { data: session, status } = useSession();
   
+  // Prevent initial animation from firing again on route changes
+  const isFirstLoad = !headerHasLoaded;
+  useEffect(() => {
+    headerHasLoaded = true;
+  }, []);
+
   // Interaction States
-  const [isHoveringProfile, setIsHoveringProfile] = useState(false);
+  const [isHoveringWelcome, setIsHoveringWelcome] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -33,23 +42,28 @@ export default function DashboardHeader() {
 
   return (
     <motion.header 
-      initial={{ opacity: 0, y: -20 }}
+      // 🛡️ THE FIX: If it's not the first load, set initial to false so it skips the entry animation
+      initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="flex justify-between items-center bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-black/5 dark:border-white/5 p-4 pl-8 flex-shrink-0 relative z-50"
+      className="flex justify-between items-center bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-zinc-400/40 dark:border-zinc-400/40 p-4 pl-8 flex-shrink-0 relative z-50"
     >
       
       {/* 👋 Left: Personalized Welcome Message */}
-      <div className="flex flex-col justify-center">
+      <div 
+        className="flex flex-col justify-center cursor-default"
+        onMouseEnter={() => setIsHoveringWelcome(true)}
+        onMouseLeave={() => setIsHoveringWelcome(false)}
+      >
         <h2 className="text-xl font-bold text-foreground tracking-tight">
           Welcome back, <span className="text-persimmon">{name}</span>{' '}
           <span 
-            className={`inline-block origin-[70%_70%] transition-transform duration-300 ${isHoveringProfile ? 'animate-wave' : ''}`}
+            className={`inline-block origin-[70%_70%] transition-transform duration-300 ${isHoveringWelcome ? 'animate-wave' : ''}`}
           >
             👋
           </span>
         </h2>
-        <p className="text-xs text-foreground/50 font-medium mt-0.5">
+        <p className="text-xs text-foreground/50 font-medium mt-0.5 transition-colors duration-300">
           Here is what's happening with your treasury today.
         </p>
       </div>
@@ -61,16 +75,14 @@ export default function DashboardHeader() {
         <NotificationBell />
 
         {/* Subtle Divider */}
-        <div className="w-px h-8 bg-black/10 dark:bg-white/10" />
+        <div className="w-px h-8 bg-zinc-400/20 dark:bg-zinc-400/20" />
 
         {/* User Identity Info & Dropdown Container */}
         <div className="relative" ref={dropdownRef}>
           
           {/* The Clickable Profile Area */}
           <div 
-            className="flex items-center gap-3 cursor-pointer group"
-            onMouseEnter={() => setIsHoveringProfile(true)}
-            onMouseLeave={() => setIsHoveringProfile(false)}
+            className="flex items-center gap-3 cursor-pointer group select-none"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             {/* GitHub Name & ID (Right Aligned) */}
@@ -90,7 +102,7 @@ export default function DashboardHeader() {
 
             {/* GitHub Avatar */}
             <div className={`relative w-11 h-11 rounded-full overflow-hidden border-2 shadow-sm transition-all duration-300 ${
-              isDropdownOpen ? 'border-persimmon' : 'border-black/5 dark:border-white/5 group-hover:border-persimmon/50'
+              isDropdownOpen ? 'border-persimmon' : 'border-zinc-400/40 dark:border-zinc-400/40 group-hover:border-persimmon/50'
             }`}>
               {status === 'loading' ? (
                 <div className="w-full h-full bg-steel animate-pulse" />
@@ -108,12 +120,12 @@ export default function DashboardHeader() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute right-0 mt-4 w-56 bg-background border border-black/5 dark:border-white/5 rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.12)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col p-2"
+                className="absolute right-0 top-[calc(100%+14px)] w-56 bg-background border border-zinc-400/40 dark:border-zinc-400/40 rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.12)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col p-2 z-[100]"
               >
                 
                 {/* User Info Header inside Dropdown */}
-                <div className="px-4 py-3 border-b border-black/5 dark:border-white/5 mb-2">
-                  <p className="text-xs font-mono text-foreground/50 uppercase tracking-widest mb-1">Signed in as</p>
+                <div className="px-4 py-3 border-b border-zinc-400/20 dark:border-zinc-400/20 mb-2">
+                  <p className="text-[10px] font-mono text-foreground/50 uppercase tracking-widest mb-1">Signed in as</p>
                   <p className="text-sm font-bold text-foreground truncate">@{username}</p>
                 </div>
 
