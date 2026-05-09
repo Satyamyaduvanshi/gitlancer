@@ -7,29 +7,27 @@ import { LogOut, Settings } from 'lucide-react';
 import Link from 'next/link';
 import NotificationBell from './NotificationBell';
 
-// 🛡️ Global flag to track initial load across route changes
+
 let headerHasLoaded = false;
 
 export default function DashboardHeader() {
   const { data: session, status } = useSession();
   
-  // Prevent initial animation from firing again on route changes
+
   const isFirstLoad = !headerHasLoaded;
   useEffect(() => {
     headerHasLoaded = true;
   }, []);
 
-  // Interaction States
+
   const [isHoveringWelcome, setIsHoveringWelcome] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Extract just the first name for a cleaner greeting
   const name = session?.user?.name?.split(' ')[0] || 'Maintainer';
   const username = (session?.user as any)?.username || 'github_user';
   const image = session?.user?.image || '/gback.jpg'; 
 
-  // Close dropdown when clicking anywhere outside of it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -42,14 +40,14 @@ export default function DashboardHeader() {
 
   return (
     <motion.header 
-      // 🛡️ THE FIX: If it's not the first load, set initial to false so it skips the entry animation
+      
       initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="flex justify-between items-center bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-zinc-400/40 dark:border-zinc-400/40 p-4 pl-8 flex-shrink-0 relative z-50"
     >
       
-      {/* 👋 Left: Personalized Welcome Message */}
+
       <div 
         className="flex flex-col justify-center cursor-default"
         onMouseEnter={() => setIsHoveringWelcome(true)}
@@ -68,24 +66,20 @@ export default function DashboardHeader() {
         </p>
       </div>
 
-      {/* 👤 Right: Actions & User Profile */}
       <div className="flex items-center gap-5 pr-2">
         
-        {/* Notification Bell */}
+
         <NotificationBell />
 
-        {/* Subtle Divider */}
         <div className="w-px h-8 bg-zinc-400/20 dark:bg-zinc-400/20" />
 
-        {/* User Identity Info & Dropdown Container */}
         <div className="relative" ref={dropdownRef}>
-          
-          {/* The Clickable Profile Area */}
+
           <div 
             className="flex items-center gap-3 cursor-pointer group select-none"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
-            {/* GitHub Name & ID (Right Aligned) */}
+
             <div className="flex flex-col justify-center text-right">
               {status === 'loading' ? (
                 <>
@@ -100,7 +94,7 @@ export default function DashboardHeader() {
               )}
             </div>
 
-            {/* GitHub Avatar */}
+
             <div className={`relative w-11 h-11 rounded-full overflow-hidden border-2 shadow-sm transition-all duration-300 ${
               isDropdownOpen ? 'border-persimmon' : 'border-zinc-400/40 dark:border-zinc-400/40 group-hover:border-persimmon/50'
             }`}>
@@ -112,7 +106,6 @@ export default function DashboardHeader() {
             </div>
           </div>
 
-          {/* 🔽 Dropdown Menu */}
           <AnimatePresence>
             {isDropdownOpen && (
               <motion.div
@@ -120,10 +113,9 @@ export default function DashboardHeader() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute right-0 top-[calc(100%+14px)] w-56 bg-background border border-zinc-400/40 dark:border-zinc-400/40 rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.12)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col p-2 z-[100]"
+                className="absolute right-0 top-[calc(100%+24px)] w-56 bg-background border border-zinc-400/40 dark:border-zinc-400/40 rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.12)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col p-2 z-[100]"
               >
                 
-                {/* User Info Header inside Dropdown */}
                 <div className="px-4 py-3 border-b border-zinc-400/20 dark:border-zinc-400/20 mb-2">
                   <p className="text-[10px] font-mono text-foreground/50 uppercase tracking-widest mb-1">Signed in as</p>
                   <p className="text-sm font-bold text-foreground truncate">@{username}</p>

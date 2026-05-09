@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SOLUX",
+  title: "SOLUX | github payment treasury",
   description: "Audit open-source contributions and distribute rewards via Solana Blinks.",
   icons:{
     icon:"/logo-orange.svg"

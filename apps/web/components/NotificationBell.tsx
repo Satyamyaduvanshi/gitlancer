@@ -14,30 +14,25 @@ export default function NotificationBell() {
 
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
-  // Local state to keep track of notifications the user has dismissed or read in this session
+
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
-  // ⚡ Fetch Real Data
   const { data: vaults } = useSWR(userId ? `${API_URL}/api/vaults/user/${userId}` : null, fetcher);
   const { data: bounties } = useSWR(userId ? `${API_URL}/api/bounties/user/${userId}` : null, fetcher);
 
-  // 🧠 Dynamically Generate Notifications based on real backend state
   const notifications = useMemo(() => {
     if (!vaults || !bounties) return [];
     
     const generatedNotifs: any[] = [];
 
-    // 1. Vault Low Balance Check
     vaults.forEach((vault: any) => {
-      // Calculate total spent for this specific vault
+
       const vaultBounties = bounties.filter((b: any) => b.vaultId === vault.id && b.status === 'CLAIMED');
       const totalSpent = vaultBounties.reduce((sum: number, b: any) => sum + b.amount, 0);
       const remainingBalance = vault.budgetLimit - totalSpent;
 
-      // 🚨 Alert if remaining balance is 20 USDC or lower
-      if (remainingBalance <= 20) {
+      if (remainingBalance <= 15) {
         const repoName = vault.repositoryFullName.split('/')[1] || vault.repositoryFullName;
         generatedNotifs.push({
           id: `low_bal_${vault.id}`,
@@ -45,12 +40,12 @@ export default function NotificationBell() {
           title: `${repoName} Balance Low`,
           message: `Your vault for ${repoName} has only ${remainingBalance} USDC remaining.`,
           time: 'Active Alert',
-          timestamp: Date.now(), // Always float to top
+          timestamp: Date.now(), 
         });
       }
     });
 
-    // 2. Pending Payouts Check
+
     const pendingBounties = bounties.filter((b: any) => b.status === 'AUDITED');
     pendingBounties.forEach((b: any) => {
       generatedNotifs.push({
@@ -63,7 +58,6 @@ export default function NotificationBell() {
       });
     });
 
-    // 3. Recent Settlements (Show the last 2 claimed)
     const recentClaims = bounties
       .filter((b: any) => b.status === 'CLAIMED')
       .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -76,11 +70,11 @@ export default function NotificationBell() {
         title: 'Settlement Confirmed',
         message: `${b.amount} USDC sent to @${b.user?.githubHandle || 'Contributor'}.`,
         time: new Date(b.createdAt).toLocaleDateString(),
-        timestamp: new Date(b.createdAt).getTime() - 1000, // Slightly older so it sits below active alerts
+        timestamp: new Date(b.createdAt).getTime() - 1000, 
       });
     });
 
-    // Filter out dismissed ones, determine read status, and sort by newest
+
     return generatedNotifs
       .filter(n => !dismissedIds.has(n.id))
       .map(n => ({ ...n, unread: !readIds.has(n.id) }))
@@ -90,7 +84,6 @@ export default function NotificationBell() {
 
   const unreadCount = notifications.filter(n => n.unread).length;
 
-  // UX Fix: Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) setIsOpen(false);
@@ -113,14 +106,13 @@ export default function NotificationBell() {
   return (
     <div className="relative" ref={dropdownRef}>
       
-      {/* 🔔 The Bell Button */}
+
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2.5 bg-black/5 dark:bg-white/5 rounded-full border border-black/5 dark:border-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors duration-200 active:scale-95 group"
       >
         <Bell size={18} className="text-foreground/60 group-hover:text-persimmon transition-colors" />
         
-        {/* Unread Ping Dot */}
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 flex h-3 w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-persimmon opacity-75"></span>
@@ -129,13 +121,13 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* 📋 The Dropdown Menu */}
+
       <div 
         className={`absolute right-0 mt-3 w-80 sm:w-96 bg-background/95 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-3xl shadow-2xl z-50 transform origin-top-right transition-all duration-200 ease-out ${
           isOpen ? 'scale-100 opacity-100 translate-y-0 pointer-events-auto' : 'scale-95 opacity-0 -translate-y-2 pointer-events-none'
         }`}
       >
-        {/* Dropdown Header */}
+
         <div className="flex items-center justify-between px-5 py-4 border-b border-black/5 dark:border-white/5">
           <div className="flex items-center gap-2">
             <h3 className="font-bold text-foreground">Notifications</h3>
@@ -194,12 +186,6 @@ export default function NotificationBell() {
               </div>
             ))
           )}
-        </div>
-
-        <div className="p-3 border-t border-black/5 dark:border-white/5 text-center bg-black/5 dark:bg-white/5 rounded-b-3xl">
-          <button className="text-xs text-foreground/60 hover:text-foreground font-medium transition-colors w-full py-1">
-            View Settings
-          </button>
         </div>
       </div>
     </div>

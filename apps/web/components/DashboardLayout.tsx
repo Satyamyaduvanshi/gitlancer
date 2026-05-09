@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -12,17 +12,19 @@ import {
   ArrowRight,
   HelpCircle,
   History,
-  HandCoins 
+  HandCoins,
+  Menu, 
+  X     
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import dynamic from 'next/dynamic';
-import { motion, LayoutGroup } from 'framer-motion';
+import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
 import DashboardHeader from './DashboardHeader';
 
-// 🛡️ Global flag to track initial load across route changes
+
 let hasLoaded = false;
 
-// 🛡️ Hydration Fix: Dynamically import the wallet button
+
 const WalletMultiButtonDynamic = dynamic(
   async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
   { ssr: false }
@@ -30,14 +32,21 @@ const WalletMultiButtonDynamic = dynamic(
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  
 
-  // Prevent initial animation from firing again on route changes
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
   const isFirstLoad = !hasLoaded;
   useEffect(() => {
     hasLoaded = true;
   }, []);
 
-  // Menu Section Items
+
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [pathname]);
+
+ 
   const menuItems = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Repositories', href: '/repos', icon: FolderGit2 },
@@ -46,28 +55,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Pending Claims', href: '/pending-claim', icon: HandCoins } 
   ];
 
-  // General Section Items
+
   const generalItems = [
     { name: 'Help', href: '/help', icon: HelpCircle },
   ];
 
-  // 🪄 Animated Nav Item Component
+
   const NavItem = ({ item, isActive }: { item: any, isActive: boolean }) => {
     const Icon = item.icon;
     return (
-      <Link href={item.href} className="relative block group">
-        
+      <Link 
+        href={item.href} 
+        onClick={() => setIsMobileOpen(false)} 
+        className="relative block group"
+      >
         {isActive && (
           <motion.div
             layoutId="sidebar-active-indicator"
             layoutDependency={pathname} 
             className="absolute inset-0 bg-persimmon/10 rounded-xl"
             initial={false}
-            transition={{
-              type: "spring",
-              stiffness: 350,
-              damping: 30,
-            }}
+            transition={{ type: "spring", stiffness: 350, damping: 30 }}
           />
         )}
 
@@ -75,7 +83,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="absolute inset-0 bg-black/5 dark:bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" />
         )}
         
-        <div className={`relative z-10 flex items-center gap-3 px-3 py-2 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        <div className={`relative z-10 flex items-center gap-3 px-3 py-2.5 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           isActive 
             ? 'text-persimmon font-medium scale-100' 
             : 'text-foreground/60 hover:text-foreground group-hover:translate-x-1.5'
@@ -87,8 +95,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   };
 
-  // --- 🎬 MASTER ENTRANCE ANIMATIONS (Premium Easing) ---
-  const premiumEase = [0.22, 1, 0.36, 1]; // Buttery smooth ease-out curve
+
+  const premiumEase = [0.22, 1, 0.36, 1]; 
 
   const layoutVariants = {
     hidden: { opacity: 0 },
@@ -110,31 +118,59 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       variants={layoutVariants}
       initial={isFirstLoad ? "hidden" : "visible"}
       animate="visible"
-      className="flex h-screen bg-black/5 dark:bg-[#050505] text-foreground font-sans selection:bg-persimmon/20 selection:text-persimmon p-2 gap-2 overflow-hidden"
+      className="flex h-screen w-full bg-black/5 dark:bg-[#050505] text-foreground font-sans selection:bg-persimmon/20 selection:text-persimmon p-2 gap-2 overflow-hidden"
     >
       
-      {/* 🧭 Floating Sidebar Card */}
+ 
+      <AnimatePresence>
+        {isMobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => setIsMobileOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
       <motion.aside 
         variants={sidebarVariants}
-        // 🛡️ UPDATED: Border zinc-400
-        className="w-[230px] bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-zinc-400/40 dark:border-zinc-400/40 flex flex-col justify-between p-4 overflow-hidden transition-all flex-shrink-0"
+        className={`
+          fixed inset-y-2 left-2 z-[100] w-[260px] transform transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
+          ${isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-[120%]'} 
+          lg:static lg:translate-x-0 lg:w-[230px] lg:z-auto
+          bg-background rounded-3xl border border-zinc-400/40 dark:border-zinc-400/40 
+          flex flex-col justify-between p-4 overflow-hidden flex-shrink-0
+          lg:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:lg:shadow-[0_8px_30px_rgb(0,0,0,0.2)]
+        `}
       >
-        
         <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col pb-2">
           
-          <Link href="/dashboard" className="mb-6 px-2 flex items-center gap-3 group w-fit">
-            <Image 
-              src="/logo-orange.svg" 
-              alt="Official SOLUX Logo" 
-              width={24} 
-              height={24} 
-              priority 
-              className="flex-shrink-0 transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3"
-            />
-            <span className="text-xl font-bold tracking-tighter text-foreground transition-colors duration-300">
-              SOLUX<span className="text-persimmon">.</span>
-            </span>
-          </Link>
+
+          <div className="flex items-center justify-between mb-6 px-2">
+            <Link href="/dashboard" className="flex items-center gap-3 group w-fit" onClick={() => setIsMobileOpen(false)}>
+              <Image 
+                src="/logo-orange.svg" 
+                alt="Official SOLUX Logo" 
+                width={24} 
+                height={24} 
+                priority 
+                className="flex-shrink-0 transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3"
+              />
+              <span className="text-xl font-bold tracking-tighter text-foreground transition-colors duration-300">
+                SOLUX<span className="text-persimmon">.</span>
+              </span>
+            </Link>
+
+            <button 
+              onClick={() => setIsMobileOpen(false)}
+              className="lg:hidden p-1.5 rounded-xl bg-black/5 dark:bg-white/5 text-foreground/50 hover:text-foreground hover:bg-black/10 transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </div>
 
           <LayoutGroup id="solux-sidebar">
             <div className="mb-6">
@@ -155,16 +191,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                 <button 
                   onClick={() => signOut({ callbackUrl: '/login' })}
-                  className="relative flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] text-foreground/60 hover:text-persimmon hover:bg-persimmon/10 hover:translate-x-1.5 text-left w-full group mt-1"
+                  className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] text-foreground/60 hover:text-persimmon hover:bg-persimmon/10 hover:translate-x-1.5 text-left w-full group mt-1"
                 >
                   <LogOut size={18} className="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-translate-x-0.5" />
                   <span className="text-sm tracking-wide">Logout</span>
                 </button>
 
-                <div className="relative mt-3 mb-10 flex flex-col group/wallet">
+                <div className="relative mt-4 mb-10 flex flex-col group/wallet">
                   <div className="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/wallet:scale-[1.02]">
                     <WalletMultiButtonDynamic 
-                      className="w-full! justify-start! px-3! h-9! min-h-[36px]! rounded-xl! bg-white/5! hover:bg-white/10! border! border-white/5! hover:border-white/10! hover:border-persimmon/30! hover:shadow-[0_0_15px_rgba(252,76,2,0.15)]! text-foreground! font-sans! font-medium! text-sm! tracking-wide transition-all duration-300 active:scale-[0.98]!" 
+                      className="w-full! justify-start! px-3! h-10! min-h-[40px]! rounded-xl! bg-white/5! hover:bg-white/10! border! border-white/5! hover:border-white/10! hover:border-persimmon/30! hover:shadow-[0_0_15px_rgba(252,76,2,0.15)]! text-foreground! font-sans! font-medium! text-sm! tracking-wide transition-all duration-300 active:scale-[0.98]!" 
                     />
                   </div>
                   
@@ -183,7 +219,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </LayoutGroup>
         </div>
 
-        {/* ⚡ GITHUB BOT AD BLOCK */}
         <div className="relative p-4 shrink-0 rounded-2xl border border-black/5 dark:border-white/5 bg-carbon overflow-hidden group shadow-lg transition-all duration-500 hover:shadow-[0_15px_30px_rgba(0,0,0,0.3)] hover:border-white/10 hover:-translate-y-1 mt-2">
           <Image 
             src="/gback.jpg" 
@@ -211,21 +246,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       </motion.aside>
 
-      {/* ⚡ RIGHT SIDE COLUMN */}
-      <motion.div variants={contentVariants} className="flex-1 flex flex-col gap-2 min-w-0 h-full">
-        
-        <DashboardHeader />
+      <motion.div variants={contentVariants} className="flex-1 flex flex-col gap-2 min-w-0 h-full w-full">
 
-        {/* 🛡️ UPDATED: Border zinc-400 */}
+        <div className="flex items-center gap-2 w-full">
+
+          <button 
+            onClick={() => setIsMobileOpen(true)}
+            className="lg:hidden p-4 bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-zinc-400/40 dark:border-zinc-400/40 shrink-0 text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors active:scale-95"
+          >
+            <Menu size={24} />
+          </button>
+          
+          <div className="flex-1 min-w-0">
+            <DashboardHeader />
+          </div>
+        </div>
+
         <main className="flex-1 bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-zinc-400/40 dark:border-zinc-400/40 overflow-y-auto no-scrollbar relative overflow-hidden">
           
-          {/* 🛡️ THE FIX: Replaced snappy Tailwind classes with pure Framer Motion route transitions */}
           <motion.div 
             key={pathname} 
             initial={{ opacity: 0, y: 15, filter: "blur(4px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.6, ease: premiumEase }}
-            className="p-6 max-w-7xl mx-auto min-h-full"
+            className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto min-h-full" 
           >
             {children}
           </motion.div>
