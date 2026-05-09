@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import dynamic from 'next/dynamic';
-import { motion, LayoutGroup } from 'framer-motion'; // 🛡️ THE FIX: Imported LayoutGroup
+import { motion, LayoutGroup } from 'framer-motion';
 import DashboardHeader from './DashboardHeader';
 
 // 🛡️ Hydration Fix: Dynamically import the wallet button
@@ -48,10 +48,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <Link href={item.href} className="relative block group">
         
-        {/* The Magic Sliding Background Pill */}
+        {/* 🛡️ THE FIX: Added layoutDependency={pathname} to prevent Next.js routing ghost pills */}
         {isActive && (
           <motion.div
             layoutId="sidebar-active-indicator"
+            layoutDependency={pathname} 
             className="absolute inset-0 bg-persimmon/10 rounded-xl"
             initial={false}
             transition={{
@@ -101,8 +102,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </span>
           </Link>
 
-
-          <LayoutGroup>
+          {/* 🛡️ Strict LayoutGroup with a unique ID bounds the animation */}
+          <LayoutGroup id="solux-sidebar">
             {/* 📂 MENU SECTION */}
             <div className="mb-8">
               <p className="px-3 text-[11px] font-mono text-foreground/40 uppercase tracking-widest mb-3 transition-colors duration-300 hover:text-foreground/60">Menu</p>
@@ -113,6 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </nav>
             </div>
 
+            {/* ⚙️ GENERAL SECTION */}
             <div className="flex-1">
               <p className="px-3 text-[11px] font-mono text-foreground/40 uppercase tracking-widest mb-3 transition-colors duration-300 hover:text-foreground/60">General</p>
               <nav className="space-y-1 relative flex flex-col">
@@ -120,6 +122,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <NavItem key={item.name} item={item} isActive={pathname.startsWith(item.href)} />
                 ))}
 
+                {/* Logout Button */}
                 <button 
                   onClick={() => signOut({ callbackUrl: '/login' })}
                   className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] text-foreground/60 hover:text-persimmon hover:bg-persimmon/10 hover:translate-x-1.5 text-left w-full group mt-1.5"
@@ -128,6 +131,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <span className="text-sm tracking-wide">Logout</span>
                 </button>
 
+                {/* Wallet Button & Callout Container */}
                 <div className="relative mt-3 mb-14 flex flex-col group/wallet">
                   <div className="transition-transform duration-300 ease-out group-hover/wallet:scale-[1.02]">
                     <WalletMultiButtonDynamic 
@@ -135,6 +139,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     />
                   </div>
                   
+                  {/* Hand-Drawn Arrow Callout */}
                   <div className="absolute -bottom-[80px] right-[40px] pointer-events-none select-none opacity-60 dark:opacity-80 transition-all duration-500 ease-out group-hover/wallet:opacity-100 group-hover/wallet:translate-y-1 group-hover/wallet:-rotate-3 z-50">
                     <Image 
                       src="/walletwhite.svg" 
@@ -150,6 +155,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </LayoutGroup>
         </div>
 
+        {/* ⚡ GITHUB BOT AD BLOCK */}
         <div className="relative p-5 shrink-0 rounded-2xl border border-black/5 dark:border-white/5 bg-carbon overflow-hidden group shadow-lg transition-all duration-500 hover:shadow-[0_15px_30px_rgba(0,0,0,0.3)] hover:border-white/10 hover:-translate-y-1 mt-4">
           <Image 
             src="/gback.jpg" 
@@ -176,9 +182,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
       </aside>
+
+      {/* ⚡ RIGHT SIDE COLUMN */}
       <div className="flex-1 flex flex-col gap-3 min-w-0 h-full">
-        <DashboardHeader />    
-        <main className="flex-1 bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-black/5 dark:border-white/5 overflow-y-auto no-scrollbar relative">      
+        
+        <DashboardHeader />
+
+        <main className="flex-1 bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-black/5 dark:border-white/5 overflow-y-auto no-scrollbar relative">
+          
           <div 
             key={pathname} 
             className="p-8 max-w-7xl mx-auto min-h-full animate-in fade-in zoom-in-[0.98] slide-in-from-bottom-2 duration-300 ease-out fill-mode-both"
