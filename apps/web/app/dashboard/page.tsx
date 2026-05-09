@@ -9,6 +9,7 @@ import PayoutCalendar from '@/components/PayoutCalendar';
 import RecentVaults from '@/components/RecentVaults';
 import RecentPRs from '@/components/RecentPRs';
 import { ArrowUpRight } from 'lucide-react';
+import { motion } from 'framer-motion'; // 🛡️ Added Framer Motion
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
@@ -53,81 +54,117 @@ export default function DashboardOverview() {
     return Object.keys(grouped).map(date => ({ date, amount: grouped[date] })).reverse(); 
   }, [bounties]);
 
+  // --- 🎬 FRAMER MOTION ANIMATION VARIANTS ---
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20, filter: 'blur(4px)' },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      filter: 'blur(0px)', 
+      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } 
+    }
+  };
+
   return (
     <DashboardLayout>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">Dashboard</h1>
-        <p className="text-foreground/50 text-sm mt-1">Real-time oversight of the SOLUX treasury ecosystem.</p>
-      </div>
+      <motion.div 
+        variants={containerVariants} 
+        initial="hidden" 
+        animate="visible"
+        className="w-full max-w-7xl mx-auto"
+      >
+        {/* 🚀 Header */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Dashboard</h1>
+          <p className="text-foreground/50 text-sm mt-1">Real-time oversight of the SOLUX treasury ecosystem.</p>
+        </motion.div>
 
-      {/* 🚀 Top Row: Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-        <Link href="/payment-history" className="block transition-transform hover:-translate-y-1">
-          <div className="bg-persimmon rounded-3xl p-6 shadow-lg shadow-persimmon/20 relative overflow-hidden flex flex-col justify-between min-h-[160px] h-full group">
-            <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/20 transition-all" />
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-white/90 font-medium text-sm">Total USDC Distributed</h3>
-              <div className="p-1.5 bg-white/20 rounded-full text-white backdrop-blur-sm group-hover:bg-white/30 transition-colors"><ArrowUpRight size={16} /></div>
+        {/* 🚀 Top Row: Stat Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+          <motion.div variants={itemVariants}>
+            <Link href="/payment-history" className="block transition-transform hover:-translate-y-1">
+              <div className="bg-persimmon rounded-3xl p-6 shadow-lg shadow-persimmon/20 relative overflow-hidden flex flex-col justify-between min-h-[160px] h-full group">
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/20 transition-all" />
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-white/90 font-medium text-sm">Total USDC Distributed</h3>
+                  <div className="p-1.5 bg-white/20 rounded-full text-white backdrop-blur-sm group-hover:bg-white/30 transition-colors"><ArrowUpRight size={16} /></div>
+                </div>
+                <div>
+                  <h2 className="text-5xl font-bold text-white mb-2">{totalPaid}</h2>
+                  <p className="text-xs text-white/70 font-medium flex items-center gap-1.5">
+                    <span className={`bg-white/20 px-1.5 py-0.5 rounded text-[10px]`}>{growthPct >= 0 ? `+${growthPct}%` : `${growthPct}%`}</span> 
+                    {growthPct >= 0 ? 'Increased' : 'Decreased'} from last month
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+
+          <motion.div variants={itemVariants}>
+            <Link href="/repos" className="block">
+              <StatCard title="Active Vaults" value={vaults?.length || 0} loading={vaultsLoading} trend="Steady operations" />
+            </Link>
+          </motion.div>
+
+          <motion.div variants={itemVariants}>
+            <Link href="/pending-claim" className="block">
+              <StatCard title="Pending Claims" value={pendingBounties} loading={bountiesLoading} trend="Awaiting withdrawal" />
+            </Link>
+          </motion.div>
+        </div>
+
+        {/* 📈 Middle Row: Chart & Calendar (Height 400px) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+          <motion.div variants={itemVariants} className="lg:col-span-2 bg-background border border-black/5 dark:border-white/5 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] h-[400px] flex flex-col">
+            <div className="flex items-center gap-2 mb-6"><h3 className="font-bold text-foreground text-lg">Treasury Analytics</h3></div>
+            <div className="flex-1 w-full h-full -ml-4">
+              {bountiesLoading ? (
+                <div className="w-full h-full flex justify-center items-center"><p className="text-persimmon font-mono text-sm animate-pulse">AGGREGATING DATA...</p></div>
+              ) : chartData.length === 0 ? (
+                <div className="w-full h-full flex justify-center items-center border-2 border-dashed border-black/5 dark:border-white/5 rounded-2xl"><p className="text-foreground/30 font-mono text-xs uppercase">No distribution data available yet.</p></div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#fc4c02" stopOpacity={0.3}/><stop offset="95%" stopColor="#fc4c02" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(150,150,150,0.1)" vertical={false} />
+                    <XAxis dataKey="date" stroke="rgba(150, 150, 150, 0.4)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
+                    <YAxis stroke="rgba(150, 150, 150, 0.4)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                    <Tooltip cursor={{ stroke: '#fc4c02', strokeWidth: 1, strokeDasharray: '4 4' }} contentStyle={{ backgroundColor: 'var(--color-background)', borderColor: 'rgba(150,150,150,0.1)', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: '13px', color: 'var(--color-foreground)' }} itemStyle={{ color: '#fc4c02', fontWeight: 'bold' }} />
+                    <Area type="monotone" dataKey="amount" stroke="#fc4c02" strokeWidth={3} fillOpacity={1} fill="url(#colorAmount)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
-            <div>
-              <h2 className="text-5xl font-bold text-white mb-2">{totalPaid}</h2>
-              <p className="text-xs text-white/70 font-medium flex items-center gap-1.5">
-                <span className={`bg-white/20 px-1.5 py-0.5 rounded text-[10px]`}>{growthPct >= 0 ? `+${growthPct}%` : `${growthPct}%`}</span> 
-                {growthPct >= 0 ? 'Increased' : 'Decreased'} from last month
-              </p>
-            </div>
-          </div>
-        </Link>
-        <Link href="/repos" className="block">
-          <StatCard title="Active Vaults" value={vaults?.length || 0} loading={vaultsLoading} trend="Steady operations" />
-        </Link>
-        <Link href="/pending-claim" className="block">
-          <StatCard title="Pending Claims" value={pendingBounties} loading={bountiesLoading} trend="Awaiting withdrawal" />
-        </Link>
-      </div>
+          </motion.div>
 
-      {/* 📈 Middle Row: Chart & Calendar (Height 400px) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
-        <div className="lg:col-span-2 bg-background border border-black/5 dark:border-white/5 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] h-[400px] flex flex-col">
-          <div className="flex items-center gap-2 mb-6"><h3 className="font-bold text-foreground text-lg">Treasury Analytics</h3></div>
-          <div className="flex-1 w-full h-full -ml-4">
-            {bountiesLoading ? (
-              <div className="w-full h-full flex justify-center items-center"><p className="text-persimmon font-mono text-sm animate-pulse">AGGREGATING DATA...</p></div>
-            ) : chartData.length === 0 ? (
-              <div className="w-full h-full flex justify-center items-center border-2 border-dashed border-black/5 dark:border-white/5 rounded-2xl"><p className="text-foreground/30 font-mono text-xs uppercase">No distribution data available yet.</p></div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#fc4c02" stopOpacity={0.3}/><stop offset="95%" stopColor="#fc4c02" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(150,150,150,0.1)" vertical={false} />
-                  <XAxis dataKey="date" stroke="rgba(150, 150, 150, 0.4)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
-                  <YAxis stroke="rgba(150, 150, 150, 0.4)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
-                  <Tooltip cursor={{ stroke: '#fc4c02', strokeWidth: 1, strokeDasharray: '4 4' }} contentStyle={{ backgroundColor: 'var(--color-background)', borderColor: 'rgba(150,150,150,0.1)', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: '13px', color: 'var(--color-foreground)' }} itemStyle={{ color: '#fc4c02', fontWeight: 'bold' }} />
-                  <Area type="monotone" dataKey="amount" stroke="#fc4c02" strokeWidth={3} fillOpacity={1} fill="url(#colorAmount)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+          <motion.div variants={itemVariants} className="h-[400px]">
+            <PayoutCalendar bounties={bounties || []} />
+          </motion.div>
         </div>
-        <div className="h-[400px]">
-          <PayoutCalendar bounties={bounties || []} />
-        </div>
-      </div>
 
-      {/* 🗂️ Bottom Row: Vaults & PRs side-by-side */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-1">
-          <RecentVaults vaults={vaults} loading={vaultsLoading} />
+        {/* 🗂️ Bottom Row: Vaults & PRs side-by-side */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <motion.div variants={itemVariants} className="lg:col-span-1">
+            <RecentVaults vaults={vaults} loading={vaultsLoading} />
+          </motion.div>
+          <motion.div variants={itemVariants} className="lg:col-span-2">
+            <RecentPRs bounties={bounties || []} loading={bountiesLoading} />
+          </motion.div>
         </div>
-        <div className="lg:col-span-2">
-          <RecentPRs bounties={bounties || []} loading={bountiesLoading} />
-        </div>
-      </div>
 
+      </motion.div>
     </DashboardLayout>
   );
 }

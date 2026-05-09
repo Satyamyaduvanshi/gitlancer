@@ -52,7 +52,7 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
   // Fetch all user bounties
   const { data: allAudits, isLoading: auditsLoading } = useSWR(vault ? `${API_URL}/api/bounties/user/${vault.maintainerId}` : null, fetcher);
   
-  // 🛡️ THE FIX: Filter the bounties so this page ONLY shows audits for THIS specific vault
+  // 🛡️ Filter the bounties so this page ONLY shows audits for THIS specific vault
   const repoAudits = useMemo(() => {
     if (!allAudits || !vault) return [];
     return allAudits.filter((audit: any) => audit.vaultId === vault.id);
@@ -345,10 +345,22 @@ export default function RepoDetailPage({ params }: { params: Promise<{ repoName:
                         >
                           PR #{cleanPrId || '---'} ↗
                         </a>
-                        {audit.status === 'CLAIMED' ? 
-                          <span className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md"><ShieldCheck size={12}/> Settled</span> : 
-                          <span className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-amber-400 bg-amber-500/10 px-2 py-1 rounded-md">Pending</span>
-                        }
+                        
+                        {/* 🛡️ REJECTED BADGE LOGIC FIX */}
+                        {audit.status === 'CLAIMED' ? (
+                          <span className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md">
+                            <ShieldCheck size={12}/> Settled
+                          </span>
+                        ) : audit.status === 'REJECTED' || audit.amount === 0 ? (
+                          <span className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-red-400 bg-red-500/10 px-2 py-1 rounded-md">
+                            <XCircle size={12}/> Rejected
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-amber-400 bg-amber-500/10 px-2 py-1 rounded-md">
+                            Pending
+                          </span>
+                        )}
+
                       </div>
                       <p className="text-sm text-white/50">
                         By <a 

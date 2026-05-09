@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
+import { motion, LayoutGroup } from 'framer-motion'; // 🛡️ THE FIX: Imported LayoutGroup
 import DashboardHeader from './DashboardHeader';
 
 // 🛡️ Hydration Fix: Dynamically import the wallet button
@@ -81,16 +81,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    // 🌍 Outer Background - Restored to p-3 gap-3 for proper breathing room
     <div className="flex h-screen bg-black/5 dark:bg-[#050505] text-foreground font-sans selection:bg-persimmon/20 selection:text-persimmon p-3 gap-3 overflow-hidden">
       
-      {/* 🧭 Floating Sidebar Card - Now precisely 250px wide */}
       <aside className="w-[250px] bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-black/5 dark:border-white/5 flex flex-col justify-between p-5 overflow-hidden transition-all flex-shrink-0">
         
-        {/* Top Scrollable Area (Navs + Wallet) */}
         <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col pb-2">
           
-          {/* Logo & Text Block */}
           <Link href="/dashboard" className="mb-8 px-2 flex items-center gap-3 group w-fit">
             <Image 
               src="/logo-orange.svg" 
@@ -105,57 +101,55 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </span>
           </Link>
 
-          {/* 📂 MENU SECTION */}
-          <div className="mb-8">
-            <p className="px-3 text-[11px] font-mono text-foreground/40 uppercase tracking-widest mb-3 transition-colors duration-300 hover:text-foreground/60">Menu</p>
-            <nav className="space-y-1 relative">
-              {menuItems.map((item) => (
-                <NavItem key={item.name} item={item} isActive={pathname.startsWith(item.href)} />
-              ))}
-            </nav>
-          </div>
 
-          {/* ⚙️ GENERAL SECTION */}
-          <div className="flex-1">
-            <p className="px-3 text-[11px] font-mono text-foreground/40 uppercase tracking-widest mb-3 transition-colors duration-300 hover:text-foreground/60">General</p>
-            <nav className="space-y-1 relative flex flex-col">
-              {generalItems.map((item) => (
-                <NavItem key={item.name} item={item} isActive={pathname.startsWith(item.href)} />
-              ))}
+          <LayoutGroup>
+            {/* 📂 MENU SECTION */}
+            <div className="mb-8">
+              <p className="px-3 text-[11px] font-mono text-foreground/40 uppercase tracking-widest mb-3 transition-colors duration-300 hover:text-foreground/60">Menu</p>
+              <nav className="space-y-1 relative">
+                {menuItems.map((item) => (
+                  <NavItem key={item.name} item={item} isActive={pathname.startsWith(item.href)} />
+                ))}
+              </nav>
+            </div>
 
-              {/* Logout Button */}
-              <button 
-                onClick={() => signOut({ callbackUrl: '/login' })}
-                className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] text-foreground/60 hover:text-persimmon hover:bg-persimmon/10 hover:translate-x-1.5 text-left w-full group mt-1.5"
-              >
-                <LogOut size={18} className="transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-110 group-hover:-translate-x-0.5" />
-                <span className="text-sm tracking-wide">Logout</span>
-              </button>
+            <div className="flex-1">
+              <p className="px-3 text-[11px] font-mono text-foreground/40 uppercase tracking-widest mb-3 transition-colors duration-300 hover:text-foreground/60">General</p>
+              <nav className="space-y-1 relative flex flex-col">
+                {generalItems.map((item) => (
+                  <NavItem key={item.name} item={item} isActive={pathname.startsWith(item.href)} />
+                ))}
 
-              {/* Wallet Button & Callout Container (Immediately below Logout) */}
-              <div className="relative mt-3 mb-14 flex flex-col group/wallet">
-                <div className="transition-transform duration-300 ease-out group-hover/wallet:scale-[1.02]">
-                  <WalletMultiButtonDynamic 
-                    className="w-full! justify-start! px-3! h-10! min-h-[40px]! rounded-xl! bg-white/5! hover:bg-white/10! border! border-white/5! hover:border-white/10! hover:border-persimmon/30! hover:shadow-[0_0_15px_rgba(252,76,2,0.15)]! text-foreground! font-sans! font-medium! text-sm! tracking-wide transition-all duration-300 active:scale-[0.98]!" 
-                  />
+                <button 
+                  onClick={() => signOut({ callbackUrl: '/login' })}
+                  className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] text-foreground/60 hover:text-persimmon hover:bg-persimmon/10 hover:translate-x-1.5 text-left w-full group mt-1.5"
+                >
+                  <LogOut size={18} className="transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-110 group-hover:-translate-x-0.5" />
+                  <span className="text-sm tracking-wide">Logout</span>
+                </button>
+
+                <div className="relative mt-3 mb-14 flex flex-col group/wallet">
+                  <div className="transition-transform duration-300 ease-out group-hover/wallet:scale-[1.02]">
+                    <WalletMultiButtonDynamic 
+                      className="w-full! justify-start! px-3! h-10! min-h-[40px]! rounded-xl! bg-white/5! hover:bg-white/10! border! border-white/5! hover:border-white/10! hover:border-persimmon/30! hover:shadow-[0_0_15px_rgba(252,76,2,0.15)]! text-foreground! font-sans! font-medium! text-sm! tracking-wide transition-all duration-300 active:scale-[0.98]!" 
+                    />
+                  </div>
+                  
+                  <div className="absolute -bottom-[80px] right-[40px] pointer-events-none select-none opacity-60 dark:opacity-80 transition-all duration-500 ease-out group-hover/wallet:opacity-100 group-hover/wallet:translate-y-1 group-hover/wallet:-rotate-3 z-50">
+                    <Image 
+                      src="/walletwhite.svg" 
+                      alt="Connect Wallet Indicator" 
+                      width={60}   
+                      height={60} 
+                      className="object-contain drop-shadow-md" 
+                    />
+                  </div>
                 </div>
-                
-                {/* Hand-Drawn Arrow Callout */}
-                <div className="absolute -bottom-[80px] right-[40px] pointer-events-none select-none opacity-60 dark:opacity-80 transition-all duration-500 ease-out group-hover/wallet:opacity-100 group-hover/wallet:translate-y-1 group-hover/wallet:-rotate-3 z-50">
-                  <Image 
-                    src="/walletwhite.svg" 
-                    alt="Connect Wallet Indicator" 
-                    width={60}   
-                    height={60} 
-                    className="object-contain drop-shadow-md" 
-                  />
-                </div>
-              </div>
-            </nav>
-          </div>
+              </nav>
+            </div>
+          </LayoutGroup>
         </div>
 
-        {/* ⚡ REDESIGNED GITHUB BOT AD BLOCK */}
         <div className="relative p-5 shrink-0 rounded-2xl border border-black/5 dark:border-white/5 bg-carbon overflow-hidden group shadow-lg transition-all duration-500 hover:shadow-[0_15px_30px_rgba(0,0,0,0.3)] hover:border-white/10 hover:-translate-y-1 mt-4">
           <Image 
             src="/gback.jpg" 
@@ -182,17 +176,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
       </aside>
-
-      {/* ⚡ RIGHT SIDE COLUMN: Header + Main Content Stack */}
       <div className="flex-1 flex flex-col gap-3 min-w-0 h-full">
-        
-        {/* 1. Floating Header Card */}
-        <DashboardHeader />
-
-        {/* 2. Main Content Card */}
-        <main className="flex-1 bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-black/5 dark:border-white/5 overflow-y-auto no-scrollbar relative">
-          
-          {/* 🪄 Nori-Style Fast Page Transition */}
+        <DashboardHeader />    
+        <main className="flex-1 bg-background rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-black/5 dark:border-white/5 overflow-y-auto no-scrollbar relative">      
           <div 
             key={pathname} 
             className="p-8 max-w-7xl mx-auto min-h-full animate-in fade-in zoom-in-[0.98] slide-in-from-bottom-2 duration-300 ease-out fill-mode-both"
