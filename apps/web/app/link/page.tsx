@@ -34,7 +34,7 @@ function LinkContent() {
   // Fallback to session ID if URL parameter is missing
   const activeGithubId = githubIdFromUrl || sessionUser?.id;
 
-  // 🔄 THE FIX: Reset status when wallet changes so "Finalize" button unlocks for updates
+  // Reset status when wallet changes so "Finalize" button unlocks for updates
   useEffect(() => {
     if (status.type === 'success' || status.type === 'error') {
       setStatus({ type: null, msg: "" });
@@ -86,38 +86,84 @@ function LinkContent() {
 
   return (
     <div className="flex min-h-[100svh] w-full bg-[#000000] text-zinc-100 font-sans selection:bg-zinc-800 selection:text-white items-center justify-center relative p-4 sm:p-8 overflow-y-auto no-scrollbar">
-      
-      {/* 🛡️ THE FIX: Global CSS to force the Wallet Dropdown to stay solid and on top */}
+
+      {/* 🛡️ Global CSS for Wallet Dropdown */}
       <style jsx global>{`
         .wallet-adapter-dropdown {
-          width: auto;
-          display: flex;
+          position: relative !important;
+          display: inline-flex !important;
+          width: auto !important;
         }
+
+        .wallet-adapter-button {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+        }
+
+        /* 🔴 FIXED: Solid background, no transparency */
         .wallet-adapter-dropdown-list {
-          background: #0f0f0f !important;
-          border: 1px solid rgba(255, 255, 255, 0.15) !important;
+          position: absolute !important;
+          top: calc(100% + 10px) !important;
+          right: 0 !important;
+          left: auto !important;
+          background-color: #18181b !important; /* Solid zinc-900 */
+          background-image: none !important;
+          opacity: 1 !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
           border-radius: 16px !important;
           padding: 8px !important;
-          box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important;
-          z-index: 9999 !important;
-          top: 45px !important;
-          opacity: 1 !important;
+          min-width: 190px !important;
+          overflow: hidden !important;
+          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+          z-index: 99999 !important;
         }
+
+        .wallet-adapter-dropdown-list::before {
+          content: "";
+          position: absolute;
+          top: -6px;
+          right: 24px;
+          width: 12px;
+          height: 12px;
+          background-color: #18181b;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          border-left: 1px solid rgba(255, 255, 255, 0.1);
+          transform: rotate(45deg);
+          z-index: -1;
+        }
+
         .wallet-adapter-dropdown-list-item {
           background: transparent !important;
-          color: #a1a1aa !important;
+          color: #d4d4d8 !important;
           font-family: inherit !important;
           font-size: 13px !important;
-          padding: 10px 16px !important;
+          font-weight: 500 !important;
+          line-height: 1.2 !important;
+          padding: 10px 14px !important;
+          margin: 2px 0 !important;
           border-radius: 10px !important;
+          white-space: nowrap !important;
           transition: all 0.2s ease !important;
         }
+
         .wallet-adapter-dropdown-list-item:hover {
-          background: rgba(255, 255, 255, 0.08) !important;
-          color: white !important;
+          background-color: rgba(255, 255, 255, 0.1) !important;
+          color: #ffffff !important;
+        }
+
+        .wallet-adapter-dropdown-list-item:active {
+          transform: scale(0.98);
+        }
+
+        .wallet-adapter-dropdown-list,
+        .wallet-adapter-dropdown-list * {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
         }
       `}</style>
-
+      
       {/* Background Gradients */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.04] pointer-events-none" />
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000000_100%)] pointer-events-none" />
@@ -130,11 +176,11 @@ function LinkContent() {
         className="absolute top-4 left-4 sm:top-8 sm:left-8 z-50"
       >
         <Link 
-          href="/dashboard"
+          href="/"
           className="flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-white transition-all group p-2"
         >
           <ArrowRight className="rotate-180 transition-transform group-hover:-translate-x-1" size={18} />
-          <span className="hidden sm:inline">Back to Dashboard</span>
+          <span className="hidden sm:inline">Back home</span>
           <span className="sm:hidden">Back</span>
         </Link>
       </motion.div>
@@ -148,7 +194,7 @@ function LinkContent() {
       >
         
         {/* Animated Cat Header */}
-        <motion.div variants={itemVariants} className="flex flex-col items-center w-full">
+        <motion.div variants={itemVariants} className="flex flex-col items-center w-full relative z-10">
           <div className="w-36 h-36 -mt-12 mb-2 opacity-90 transition-opacity hover:opacity-100">
             <DotLottieReact 
               src="https://lottie.host/8cf4ba71-e5fb-44f3-8134-178c4d389417/0CCsdcgNIP.json" 
@@ -163,13 +209,14 @@ function LinkContent() {
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="text-center mb-10 w-full">
+        <motion.div variants={itemVariants} className="text-center mb-10 w-full relative z-10">
           <h1 className="text-2xl font-bold tracking-tight mb-2 text-white">Identity Bridge</h1>
           <p className="text-zinc-500 text-sm">Link GitHub to your settlement address.</p>
         </motion.div>
 
         {/* 🛠 Steps */}
-        <motion.div variants={itemVariants} className="space-y-4 mb-10 w-full">
+        {/* 🔴 FIXED: Added `relative z-50` to the Framer Motion container so it sits entirely above the action button below it */}
+        <motion.div variants={itemVariants} className="space-y-4 mb-10 w-full relative z-50">
           
           {/* Step 1: GitHub */}
           <div className="flex items-center justify-between p-4 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-white/10 transition-colors">
@@ -193,13 +240,32 @@ function LinkContent() {
               <Wallet size={18} className={publicKey ? 'text-white' : 'text-zinc-500'} />
               <div className="flex flex-col min-w-0">
                 <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Step 2</span>
-                <span className="text-sm font-bold truncate">{publicKey ? "Wallet Ready" : "Solana Wallet"}</span>
+                <span className="text-sm font-bold truncate">{publicKey ? "Wallet Linked" : "Solana Wallet"}</span>
               </div>
             </div>
+
             <div className="flex-shrink-0">
               {walletUiReady && (
-                <WalletMultiButton 
-                  className={`!bg-white/5 !text-white !border !border-white/10 !h-9 !px-4 !rounded-xl !text-xs !font-bold transition-all shadow-none ${!publicKey ? '!bg-white !text-black' : ''}`} 
+                <WalletMultiButton
+                  className={`
+                    !h-9
+                    !px-4
+                    !rounded-xl
+                    !text-xs
+                    !font-bold
+                    !shadow-none
+                    !border
+                    !border-white/10
+                    !transition-all
+                    !duration-200
+                    ${!publicKey
+                      ? '!bg-white !text-black hover:!bg-zinc-100'
+                      : '!bg-white/5 !text-white hover:!bg-white/10'}
+                  `}
+                  style={{
+                    backdropFilter: 'none',
+                    WebkitBackdropFilter: 'none',
+                  }}
                 />
               )}
             </div>
@@ -207,6 +273,7 @@ function LinkContent() {
         </motion.div>
 
         {/* 🎬 Action Area */}
+        {/* 🔴 FIXED: Given a lower z-index (z-10) so the dropdown in the div above safely overlaps this section */}
         <motion.div variants={itemVariants} className="w-full relative z-10">
           {status.type === 'success' && claimIdFromUrl ? (
             <Link 
@@ -253,7 +320,7 @@ function LinkContent() {
         </motion.div>
 
         {/* Ghost Footer */}
-        <motion.div variants={itemVariants} className="mt-8 text-center w-full">
+        <motion.div variants={itemVariants} className="mt-8 text-center w-full relative z-10">
           <p className="text-[10px] font-mono text-zinc-600 tracking-[0.2em] uppercase">
             Powered by <span className="text-[#9945FF]">SOLANA</span>
           </p>
