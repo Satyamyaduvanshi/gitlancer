@@ -26,9 +26,9 @@ export class AiService {
 
           BOUNTY RUBRIC:
           - 0 USDC: Trivial work (Docs, typos, formatting) or dangerous code.
-          - 2-5 USDC: Minor bug fixes, simple UI component tweaks, minor CSS.
-          - 5-15 USDC: Moderate features, API endpoint creation, complex state management.
-          - 15-30 USDC: Major architectural additions, complex algorithmic logic, critical security patches, or Anchor/Rust smart contract development.
+          - 2-4 USDC: Minor bug fixes, simple UI component tweaks, minor CSS.
+          - 5-10 USDC: Moderate features, API endpoint creation, complex state management.
+          - 10-15 USDC: Major architectural additions, complex algorithmic logic, critical security patches, or Anchor/Rust smart contract development.
 
           Analyze the DIFF and return ONLY a valid JSON object matching this exact schema:
           {

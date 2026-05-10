@@ -106,11 +106,6 @@ export default function DocsPage() {
     item.desc.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-  };
-
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a] text-[#1a1a1a] dark:text-gray-100 font-sans selection:bg-orange-500/20 selection:text-orange-900 transition-colors duration-300">
       
@@ -145,7 +140,7 @@ export default function DocsPage() {
             <span className="text-[10px] border border-gray-200 dark:border-white/10 rounded px-1.5 py-0.5">⌘K</span>
           </button>
 
-          {/* Theme Toggle */}
+          {/* Theme Toggle - ADDED onClick HANDLER */}
           <button 
             onClick={() => setIsDarkMode(!isDarkMode)}
             className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition-colors"
