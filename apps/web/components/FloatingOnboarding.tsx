@@ -2,79 +2,59 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowRight, CheckCircle2, Sparkles, Code2, FolderGit2, WalletCards, LayoutDashboard, HelpCircle } from 'lucide-react';
+// 🛡️ FIX: Removed 'Github' from lucide-react imports
+import { X, ArrowRight, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 
-const TOUR_STEPS = [
+const ONBOARDING_STEPS = [
   {
-    id: 'welcome',
-    icon: Sparkles,
-    title: "Welcome to SOLUX",
-    content: "Let's take a quick 30-second tour of your new command center.",
+    id: 'overview',
+    title: "Your Command Center",
+    content: "Monitor your entire ecosystem in real-time. Track distributed USDC, active repository vaults, and pending contributor claims.",
+    image: "/Screenshot_20260510_194049.png", 
   },
   {
-    id: 'wallet',
-    icon: WalletCards,
-    title: "Secure Settlement",
-    content: "Attach your wallet to the platform in the sidebar. SOLUX requires an active connection to manage your treasury—otherwise, nothing works!",
-  },
-  {
-    id: 'bot',
-    icon: Code2,
-    title: "Automated Audits",
-    content: "Install the GitHub app from the bottom left. You need this to initialize blinky-solux so it can autonomously audit your repositories.",
-  },
-  {
-    id: 'repos',
-    icon: FolderGit2,
-    title: "Vault Management",
-    content: "Head to Repositories. This is where the magic happens. Initialize your repo vaults here and keep an eye on active bounties.",
+    id: 'deploy',
+    title: "Deploy AI Guardians",
+    content: "Select a GitHub repository to anchor to the Solana blockchain. We automatically generate a unique Smart Contract PDA for each vault.",
+    image: "/Screenshot_20260510_194120.png",
   },
   {
     id: 'recharge',
-    icon: WalletCards,
-    title: "Fuel the Treasury",
-    content: "Keep operations running smoothly. Use the Recharge section to fund your repository vaults directly from your connected wallet.",
+    title: "Treasury Management",
+    content: "Fuel your smart contracts with USDC. Your connected wallet acts as the master liquidity source for automated contributor payouts.",
+    image: "/Screenshot_20260510_194130.png",
   },
   {
-    id: 'overview',
-    icon: LayoutDashboard,
-    title: "Command Center",
-    content: "Your Overview gives you real-time, high-level analytics of your entire board, treasury stats, and active vaults.",
-  },
-  {
-    id: 'help',
-    icon: HelpCircle,
-    title: "We're Here",
-    content: "Lost? Click Help in the sidebar to learn how to navigate the platform or get direct assistance from the team.",
+    id: 'bot',
+    title: "Mandatory: GitHub Integration",
+    content: "To autonomously audit code and execute payouts on-chain, you MUST install the Blinky-Solux GitHub app on your repositories.",
+    image: "custom-bot-ui", 
   }
 ];
 
-export default function FloatingOnboarding() {
+export default function MaintainerOnboarding() {
   const [isVisible, setIsVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
     setHasMounted(true);
-    // 🛡️ THE FIX: Check local storage so it ONLY runs the first time
-    const isCompleted = localStorage.getItem('solux_onboarding_complete');
+    const isCompleted = localStorage.getItem('solux_maintainer_onboarding_complete');
     
-    // Wait for initial dashboard entrance animations to finish (1.5s) before popping up
     if (!isCompleted) {
-      const timer = setTimeout(() => setIsVisible(true), 1500);
+      const timer = setTimeout(() => setIsVisible(true), 1000);
       return () => clearTimeout(timer);
     }
   }, []);
 
   const handleClose = () => {
     setIsVisible(false);
-    // 🛡️ THE FIX: Set local storage so it never runs again
-    localStorage.setItem('solux_onboarding_complete', 'true');
+    localStorage.setItem('solux_maintainer_onboarding_complete', 'true');
   };
 
   const handleNext = () => {
-    if (currentStep === TOUR_STEPS.length - 1) {
+    if (currentStep === ONBOARDING_STEPS.length - 1) {
       handleClose();
     } else {
       setCurrentStep((prev) => prev + 1);
@@ -83,79 +63,162 @@ export default function FloatingOnboarding() {
 
   if (!hasMounted) return null;
 
-  const stepData = TOUR_STEPS[currentStep];
-  const StepIcon = stepData.icon;
+  const stepData = ONBOARDING_STEPS[currentStep];
 
   return (
     <AnimatePresence>
       {isVisible && (
-        <motion.div
-          initial={{ opacity: 0, y: 50, scale: 0.9, rotateX: 10 }}
-          animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-          exit={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(5px)" }}
-          transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 z-[9999] w-[calc(100vw-32px)] sm:w-[380px]"
-          style={{ perspective: "1000px" }}
-        >
-          <div className="bg-[#111111]/95 backdrop-blur-2xl border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.6)] rounded-[2rem] p-6 sm:p-8 relative overflow-hidden">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
+          
+          {/* 🌌 Dark Blur Overlay */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            onClick={handleClose}
+          />
+
+          {/* 📦 Centered Modal Card */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-4xl bg-[#0a0a0a] border border-white/10 rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()} 
+          >
             
-            <div className="absolute -top-20 -right-20 w-40 h-40 bg-persimmon/20 blur-[50px] rounded-full pointer-events-none" />
+            {/* Close Button */}
+            <button 
+              onClick={handleClose}
+              className="absolute top-4 right-4 z-50 p-2 bg-black/40 hover:bg-white/10 backdrop-blur-md rounded-full text-white/50 hover:text-white transition-all"
+            >
+              <X size={20} />
+            </button>
 
-            <div className="flex justify-between items-start mb-6 relative z-10">
-              <div className="p-3 bg-white/5 border border-white/10 rounded-2xl text-persimmon">
-                <StepIcon size={24} />
-              </div>
-              <button 
-                onClick={handleClose}
-                className="p-2 bg-black/20 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-colors"
-              >
-                <X size={16} />
-              </button>
+            {/* 🖼️ Top Half: Image Showcase Area */}
+            <div className="w-full bg-[#111] relative border-b border-white/5 overflow-hidden group">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentStep}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -50 }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  className="w-full aspect-video sm:aspect-[21/9] relative flex items-center justify-center p-8"
+                >
+                  
+                  {/* Subtle Background Glow */}
+                  <div className="absolute inset-0 bg-persimmon/5 blur-3xl" />
+
+                  {stepData.image === 'custom-bot-ui' ? (
+                    
+                    /* 🤖 STEP 4: Custom GitHub Bot UI with Arrow */
+                    <div className="relative flex flex-col items-center z-10 w-full max-w-xs">
+                      
+                      <motion.div 
+                        initial={{ opacity: 0, y: -20, rotate: 10 }}
+                        animate={{ opacity: 1, y: 0, rotate: 0 }}
+                        transition={{ delay: 0.5, type: "spring" }}
+                        className="absolute -top-16 -right-12 sm:-right-20 z-50 animate-pulse drop-shadow-xl"
+                      >
+                        <Image src="/arrow3.svg" alt="Look here" width={60} height={60} className="rotate-[45deg] scale-x-[-1]" />
+                      </motion.div>
+
+                      <div className="w-full p-6 rounded-2xl border border-white/10 bg-carbon shadow-2xl relative overflow-hidden">
+                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+                         <div className="flex flex-col items-center text-center relative z-10">
+                            {/* 🛡️ FIX: Replaced lucide Github with the native Image component */}
+                            <div className="p-3 bg-white/5 rounded-xl mb-4 flex items-center justify-center">
+                              <Image src="/logos/github.svg" alt="GitHub" width={24} height={24} className="invert" />
+                            </div>
+                            <h4 className="font-bold text-lg text-white tracking-tight mb-2">GitHub Bot</h4>
+                            <p className="text-xs text-white/60 leading-relaxed mb-6">
+                              Add Solux to your repo for AI audits & payouts.
+                            </p>
+                            <div className="w-full py-3 rounded-xl bg-persimmon text-white font-bold text-sm shadow-[0_0_30px_rgba(252,76,2,0.4)] flex justify-center items-center gap-2">
+                              Add to Repo <ArrowRight size={16} />
+                            </div>
+                         </div>
+                      </div>
+                    </div>
+
+                  ) : (
+                    /* 📸 STEPS 1-3: High Quality Screenshots */
+                    <div className="relative w-[90%] h-[90%] rounded-xl overflow-hidden border border-white/10 shadow-2xl group-hover:scale-[1.02] transition-transform duration-700">
+                      <Image 
+                        src={stepData.image} 
+                        alt={stepData.title}
+                        fill
+                        className="object-cover object-top opacity-90"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent opacity-60" />
+                    </div>
+                  )}
+
+                </motion.div>
+              </AnimatePresence>
             </div>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 min-h-[110px]"
-              >
-                <h3 className="text-xl font-bold text-white tracking-tight mb-2">
-                  {stepData.title}
-                </h3>
-                <p className="text-sm text-zinc-400 leading-relaxed">
-                  {stepData.content}
-                </p>
-              </motion.div>
-            </AnimatePresence>
-
-            <div className="mt-8 flex items-center justify-between relative z-10">
-              <div className="flex gap-1.5">
-                {TOUR_STEPS.map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`h-1.5 rounded-full transition-all duration-500 ${
-                      i === currentStep ? 'w-6 bg-persimmon' : i < currentStep ? 'w-2 bg-white/20' : 'w-2 bg-white/5'
-                    }`}
-                  />
-                ))}
+            {/* 📝 Bottom Half: Text & Controls */}
+            <div className="p-6 sm:p-10 flex flex-col sm:flex-row gap-6 sm:gap-10 items-start sm:items-center justify-between">
+              
+              <div className="flex-1">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentStep}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="text-[10px] font-mono text-persimmon uppercase tracking-widest mb-2">
+                      Step {currentStep + 1} of {ONBOARDING_STEPS.length}
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-3">
+                      {stepData.title}
+                    </h2>
+                    <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-xl">
+                      {stepData.content}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
               </div>
 
-              <button
-                onClick={handleNext}
-                className="py-2.5 px-6 bg-white text-black text-sm font-bold rounded-xl hover:bg-persimmon hover:text-white hover:shadow-[0_0_20px_rgba(252,76,2,0.3)] transition-all duration-300 active:scale-95 flex items-center gap-2 group"
-              >
-                {currentStep === TOUR_STEPS.length - 1 ? (
-                  <>Finish <CheckCircle2 size={16} /></>
-                ) : (
-                  <>Next <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
-                )}
-              </button>
+              {/* Controls */}
+              <div className="flex flex-row sm:flex-col items-center sm:items-end gap-6 sm:gap-4 w-full sm:w-auto mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-white/5">
+                
+                {/* Progress Indicators */}
+                <div className="flex gap-2">
+                  {ONBOARDING_STEPS.map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`h-1.5 rounded-full transition-all duration-500 ${
+                        i === currentStep ? 'w-8 bg-persimmon' : 'w-2 bg-white/10'
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                {/* Primary Button */}
+                <button
+                  onClick={handleNext}
+                  className="py-3 sm:py-4 px-8 sm:px-10 bg-white text-black text-sm font-bold rounded-2xl hover:bg-persimmon hover:text-white transition-all duration-300 active:scale-95 flex items-center gap-2 group whitespace-nowrap ml-auto sm:ml-0"
+                >
+                  {currentStep === ONBOARDING_STEPS.length - 1 ? (
+                    <>Finish Setup <CheckCircle2 size={18} /></>
+                  ) : (
+                    <>Next Step <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" /></>
+                  )}
+                </button>
+              </div>
+
             </div>
-          </div>
-        </motion.div>
+
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );
