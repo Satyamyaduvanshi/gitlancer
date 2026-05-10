@@ -1,59 +1,65 @@
-# SOLUX
+<p align="center">
+  <img src="./apps/web/public/logo-orange.svg" alt="SOLUX logo" width="200"/>
+</p>
 
-### Merge code, get paid. The autonomous Web3 bounty hunter.
+SOLUX
 
-**SOLUX** is a decentralized protocol designed to bridge the gap between open-source contributions and instant financial incentives. By combining **AI-driven code audits** with the **Solana blockchain**, SOLUX automates the entire lifecycle of a developer bounty: from PR submission to verified USDC settlement.
+**Merge Code. Get Paid. The Autonomous Web3 Bounty Hunter.**
 
-- **Website:** [solux.website](https://www.solux.website)
-- **X:** [@SOLUXdev](https://x.com/SOLUXdev)
+[![Next.js](https://img.shields.io/badge/Next.js-15+-black?style=flat&logo=next.js)](https://nextjs.org/)
+[![Solana](https://imgshields.io/badge/Solana-Anchor-14F195?style=flat&logo=solana&logoColor=white)](https://solana.com/)
+[![NestJS](https://img.shields.io/badge/NestJS-Oracle-E0234E?style=flat&logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 
----
+SOLUX is a decentralized protocol engineered to bridge the gap between open-source contributions and instant financial settlement. By combining **Agentic AI code audits (Llama 3)** with the **Solana blockchain**, SOLUX fully automates the developer bounty lifecycle—from PR submission to verified USDC payout.
 
-##  The Workflow
-
-1. **Fund**: A maintainer initializes a Vault for their repository on the Solana devnet and deposits USDC.
-2. **Code**: A contributor submits a Pull Request (PR) to the GitHub repository.
-3. **Audit**: The SOLUX Bot (Blinky AI), triggered via NestJS webhooks, analyzes the code for quality and security.
-4. **Merge & Pay**: Upon merging, the SOLUX Oracle verifies the contribution and triggers the smart contract to release USDC directly from the Vault to the contributor's wallet.
+🌍 **Platform:** [solux.website](https://www.solux.website) | 𝕏 **Twitter:** [@SOLUXdev](https://x.com/SOLUXdev)
 
 ---
 
 ## System Architecture
-<img src="./system.svg" alt="arc"/>
 
+SOLUX operates on a continuous, autonomous loop between GitHub, a centralized Oracle, and Solana Smart Contracts:
 
+1. **Treasury Initialization:** Maintainers create a Vault (PDA) for their repository on Solana Devnet and fund it with USDC.
+2. **Contribution:** A developer submits a Pull Request to the anchored GitHub repository.
+3. **Agentic Audit:** GitHub Webhooks trigger the SOLUX Oracle (NestJS). The Oracle spins up an AI Agent (Llama 3) to analyze the code diff for quality, security, and bounty requirements.
+4. **Autonomous Settlement:** Upon merging, the Oracle verifies the PR, signs a cryptographic payload, and instructs the smart contract to release USDC directly to the contributor's linked Solana wallet.
+
+<p align="center">
+  <img src="./system.svg" alt="SOLUX Architecture Flow" width="800"/>
+</p>
+
+---
+
+## Core Features
+
+* **Instant Payouts:** Zero manual processing. USDC is transferred on-chain the exact second code is merged.
+* **Agentic PR Auditing:** Blinky AI acts as an autonomous reviewer, posting real-time feedback and security audits directly to GitHub PRs.
+* **Double-Spend Protection:** Every merged PR ID is permanently recorded on-chain in a `BountyRecord`, cryptographically ensuring a bounty can only be claimed once.
+* **Vault Isolation:** Every repository gets a dedicated, isolated Smart Contract PDA to prevent fund bleeding.
+* **Identity Bridging:** Seamless pairing of GitHub accounts to Solana Wallets via a secure, signed OAuth flow.
 
 ---
 
 ## Technical Stack
 
-- **Blockchain**: Solana (Anchor Framework, Rust).
-- **Backend**: NestJS (Oracle Service & GitHub Webhook Listener).
-- **Frontend**: Next.js 15+ (Turbopack), TypeScript, Tailwind CSS, Framer Motion.
-- **3D Visuals**: Three.js, React Three Fiber (The "Monolith" Execution Core).
-- **Database**: PostgreSQL with Prisma ORM.
-- **Infrastructure**: Docker, Turborepo, Vercel.
-- **Development Environment**: Developed and tested on Arch Linux.
-
----
-
-## Key Features
-
-- **Autonomous Audits**: Blinky AI provides real-time feedback on Pull Requests.
-- **Instant Settlement**: No manual payout delays; USDC is transferred the moment code is merged.
-- **Double-Spend Prevention**: Every PR ID is recorded on-chain in a `BountyRecord` to ensure one-time payment.
-- **Secure Oracle**: Only the verified SOLUX Oracle signature can authorize bounty distributions.
-- **Maintainer Controls**: Secure withdrawal functions for idle funds and easy "Uninstall" mechanics.
+* **Blockchain:** Solana, Anchor Framework, Rust, SPL-Tokens.
+* **Oracle Backend:** NestJS, Prisma ORM, PostgreSQL, Docker.
+* **Frontend:** Next.js 15+ (App Router), TypeScript, Tailwind CSS, Framer Motion.
+* **AI Integration:** Agentic workflows via Llama 3.
+* **Infrastructure:** Turborepo, Vercel, Dockerized Oracle.
+* **Environment:** Built and optimized for Arch Linux.
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
-
-- **Node.js & pnpm**
-- **Rust & Anchor CLI**
-- **Solana CLI** (configured to devnet)
+* Node.js & `pnpm`
+* Rust & Anchor CLI
+* Solana CLI (Targeting Devnet)
+* Docker & Docker Compose (For Oracle Deployment)
 
 ### Installation
 
@@ -61,32 +67,43 @@
   ```bash
     git clone https://github.com/Satyamyaduvanshi/gitlancer.git
     cd gitlancer
-  ```
-2. **Install Dependencies:**
-  ```bash
     pnpm install
   ```
-3. **Smart Contract Deployment:**
+2. **Smart Contract:**
   ```bash
     cd solux_program
     anchor build
     anchor deploy
   ```
-4. **Run the Web and oracle:(in different terminal)**
+  Note: Ensure you update your declare_id! in the Rust program and your Anchor.toml with the newly generated program ID.
+3. **Oracle(Docker):**
+  ```bash
+    docker build -t solux-oracle .
+    docker run -p 3000:3000 --env-file .env solux-oracl
+  ```
+4. **Frontend Execution**
   ```bash
     pnpm --filter web dev
+    pnpm --filter oracle dev
+  ```
+5. **Oracle (without Docker):**
+  ```bash
     pnpm --filter oracle dev
   ```
 
 ---
 
-## Security Architecture
+## Security Model
 
 SOLUX implements a **Trust-But-Verify** model:
 
-- **Vault Isolation**: Each repository has its own isolated PDA (Program Derived Address) vault.
-- **Oracle Validation**: The smart contract strictly enforces that only the official SOLUX Oracle key can authorize payouts.
-- **On-Chain State**: All payout statuses are immutable and verifiable on the Solana ledger.
+SOLUX relies on a strict Trust-But-Verify execution environment:
+
+    Guardian Signatures: The Solana smart contract is hardcoded to reject any payout that does not contain a verified cryptographic signature from the SOLUX Oracle's private key.
+
+    Maintainer Authority: Maintainers retain absolute control over their Vaults and can execute emergency withdrawals of idle USDC at any time.
+
+    Stateless PRs: The Oracle maintains minimal state. The source of truth for payment resolution always resides on the Solana ledger.
 
 ---
 
@@ -96,4 +113,4 @@ SOLUX implements a **Trust-But-Verify** model:
 
 ---
 
-**Developed with ❤️ by [Satyam Yadav](https://github.com/Satyamyaduvanshi)**
+**Developed by [Satyam Yadav](https://github.com/Satyamyaduvanshi)**
