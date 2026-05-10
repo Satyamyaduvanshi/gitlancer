@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GitPullRequest, ShieldCheck, Zap, Bot, MailOpen } from "lucide-react";
+import { GitPullRequest, ShieldCheck, Zap, Bot, MailOpen, BookOpen } from "lucide-react";
+import Link from "next/link";
 
 const steps = [
   {
@@ -40,7 +41,7 @@ export default function SoluxStoryFlow() {
   return (
     <section id="how-it-works" className="bg-[#fafafa] pt-24 pb-32">
       
-      {/* 1. THE "OPEN LETTER" SECTION (From Screenshot_20260511_002411) */}
+      {/* 1. THE "OPEN LETTER" SECTION */}
       <div className="max-w-6xl mx-auto px-6 mb-40">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
           
@@ -85,9 +86,9 @@ export default function SoluxStoryFlow() {
         </div>
       </div>
 
-      {/* 2. THE "WHY COLLECT INSIGHTS" GRID (From Screenshot_20260511_002357) */}
+      {/* 2. THE "WHY COLLECT INSIGHTS" GRID */}
       <div className="max-w-[1200px] mx-auto px-4 md:px-6">
-        <div className="bg-[#1c1c1c] rounded-[3rem] md:rounded-[4.5rem] px-2 py-20 md:p-24 text-center overflow-hidden relative shadow-2xl">
+        <div className="bg-[#1c1c1c] rounded-[3rem] md:rounded-[4.5rem] px-6 py-20 md:p-24 text-center overflow-hidden relative shadow-2xl">
           
           <motion.div 
             initial="hidden" 
@@ -99,7 +100,7 @@ export default function SoluxStoryFlow() {
             <h3 className="text-3xl md:text-5xl font-bold text-white mt-4 mb-6 tracking-tight">
               Why Automate Payouts?
             </h3>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-20 font-medium">
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-16 md:mb-20 font-medium">
               Because understanding your contributors isn't optional — it's everything.
             </p>
           </motion.div>
@@ -131,6 +132,27 @@ export default function SoluxStoryFlow() {
               </motion.div>
             ))}
           </div>
+
+          {/* 3. DOCS BUTTON */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { delay: 0.6, duration: 0.5 } }
+            }}
+            className="mt-16 md:mt-20 flex justify-center"
+          >
+            <Link 
+              href="/docs" 
+              className="group flex items-center justify-center gap-2 bg-white text-[#1a1a1a] px-8 py-4 rounded-full font-bold text-sm md:text-base hover:bg-gray-100 hover:scale-105 transition-all shadow-xl"
+            >
+              <BookOpen size={18} className="text-gray-500 group-hover:text-[#1a1a1a] transition-colors" />
+              Read the Documentation
+            </Link>
+          </motion.div>
+
         </div>
       </div>
 

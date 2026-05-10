@@ -51,7 +51,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ];
 
   const generalItems = [
-    { name: 'Help', href: '/help', icon: HelpCircle },
+    { name: 'Help', href: '/docs', icon: HelpCircle },
   ];
 
   const NavItem = ({ item, isActive }: { item: any, isActive: boolean }) => {
