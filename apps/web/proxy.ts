@@ -5,11 +5,11 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   
   // Define which paths require login
-  const isProtectedRoute = pathname.startsWith('/dd')
-    // pathname.startsWith('/dashboard') ||
-    // pathname.startsWith('/repos') ||
-    // pathname.startsWith('/recharge') ||
-    // pathname.startsWith('/settings');
+  const isProtectedRoute = 
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/repos') ||
+    pathname.startsWith('/recharge') ||
+    pathname.startsWith('/settings');
 
 
   // 1️⃣ If they are NOT logged in and trying to access a protected route ➡️ Kick to /login
