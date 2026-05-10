@@ -2,177 +2,97 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { FaGithub, FaXTwitter } from "react-icons/fa6";
-import { ArrowRight } from "lucide-react";
+import { FaGithub, FaXTwitter, FaLinkedinIn } from "react-icons/fa6";
 
 export default function SoluxFooter() {
-  const containerVars = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-    },
-  };
-
-  const letterVars = {
-    hidden: { opacity: 0, y: 50, scale: 0.8 },
-    visible: { 
-      opacity: 1, y: 0, scale: 1, 
-      transition: { type: "spring", stiffness: 100, damping: 15 } 
-    },
-  };
-
-  const flowerLogoVars = {
-    hidden: { scale: 0, rotate: -90, opacity: 0 },
-    visible: { 
-      scale: 1, 
-      rotate: 0, 
-      opacity: 1, 
-      transition: { type: "spring", stiffness: 80, damping: 12, delay: 0.6 } 
-    },
-  };
-
   return (
-    <footer id="#social-proof" className="w-full bg-black pt-24 pb-8 selection:bg-persimmon/30 selection:text-persimmon border-t border-white/5">
-      <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
-        
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 pb-24 border-b border-white/10">
-          
-          <div className="lg:col-span-5 flex flex-col gap-8 pr-0 lg:pr-8">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-bold tracking-tighter text-white leading-[1.1]"
-            >
-              Engineered for contributors. <br className="hidden md:block" />
-              Governed by <span className="text-persimmon">code.</span>
-            </motion.h2>
+    <div className="bg-[#fafafa] pt-10">
+      
+      {/* 1. Pre-Footer Waitlist Section (From Screenshot) */}
+      <div className="relative max-w-6xl mx-auto px-6 mb-24 flex flex-col items-center text-center">
+        <span className="font-serif italic text-gray-400 text-xl md:text-2xl mb-2">Join Now</span>
+        <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-6">
+          Initialize your Treasury
+        </h2>
+        <p className="text-gray-500 text-lg max-w-lg mb-8 leading-relaxed">
+          Your contributors are shipping — are you rewarding? <br className="hidden md:block" />
+          Initialize Solux today, and let's create a thriving open-source ecosystem, together.
+        </p>
+        <Link 
+          href="/login" 
+          className="bg-[#242424] text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-black hover:scale-105 transition-all z-10"
+        >
+          Login
+        </Link>
 
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="text-white/50 text-base max-w-md leading-relaxed font-medium"
-            >
-              The autonomous bridge between GitHub and Solana. Merge a pull request and get paid directly to your wallet in seconds.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-            >
-              <Link 
-                href="/login" 
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-bold text-white uppercase tracking-widest transition-all group"
-              >
-                Initialize Treasury 
-                <ArrowRight size={16} className="text-persimmon group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </motion.div>
-          </div>
-
-        
-          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-0 mt-4 lg:mt-0">
-            
-          
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="flex flex-col gap-6 sm:border-l sm:border-white/10 sm:pl-8 lg:pl-12"
-            >
-              <h4 className="text-lg font-bold text-white tracking-tight">Ecosystem</h4>
-              <div className="flex flex-col gap-4 text-[13px] text-white/50 font-medium">
-                <Link href="#blinky" className="hover:text-white transition-colors">Blinky Audit AI</Link>
-                <Link href="#vaults" className="hover:text-white transition-colors">Vault Orchestrator</Link>
-                <Link href="#guardian" className="hover:text-white transition-colors">Identity Guardian</Link>
-                <Link href="#settlement" className="hover:text-white transition-colors">USDC Settlement</Link>
-              </div>
-            </motion.div>
-
-         
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
-              className="flex flex-col gap-6 sm:border-l sm:border-white/10 sm:pl-8 lg:pl-12"
-            >
-              <h4 className="text-lg font-bold text-white tracking-tight">Resources</h4>
-              <div className="flex flex-col gap-4 text-[13px] text-white/50 font-medium">
-                <Link href="/docs" className="hover:text-white transition-colors">Developer Docs</Link>
-                <Link href="/help" className="hover:text-white transition-colors">Help Center</Link>
-              </div>
-            </motion.div>
-
-         
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-col gap-6 sm:border-l sm:border-white/10 sm:pl-8 lg:pl-12"
-            >
-              <h4 className="text-lg font-bold text-white tracking-tight">Connect</h4>
-              <div className="flex flex-col gap-4 text-[13px] text-white/50 font-medium">
-                <Link href="https://x.com/SOLUXdev" target="_blank" className="flex items-center gap-2 hover:text-white transition-colors">
-                  <FaXTwitter size={14} /> Twitter
-                </Link>
-                <Link href="https://github.com/Satyamyaduvanshi" target="_blank" className="flex items-center gap-2 hover:text-white transition-colors">
-                  <FaGithub size={14} /> GitHub
-                </Link>
-              </div>
-            </motion.div>
-
-          </div>
+        {/* The Illustration floating on the right side */}
+        <div className="absolute right-0 bottom-[-40px] hidden lg:block opacity-90 z-0">
+          <img 
+            src="https://cdn.prod.website-files.com/684d582f1c52bdf38cbb5c8d/68e8f2972828a2d4a51d274d_Portrait%20of%20a%20Thoughtful%20Young%20Man%20(2).avif" 
+            alt="Illustration" 
+            className="w-64 object-contain"
+          />
         </div>
-
-    
-        <div className="pt-16 pb-8 flex flex-col items-center justify-center">
-          <motion.div 
-            variants={containerVars}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="flex items-center justify-center gap-4 sm:gap-8 w-full overflow-hidden"
-          >
-        
-            {["S", "O", "L", "U", "X"].map((letter, i) => (
-              <motion.span 
-                key={i} 
-                variants={letterVars}
-                className="text-[15vw] md:text-[12vw] font-black tracking-tighter text-white leading-none font-mono"
-              >
-                {letter}
-              </motion.span>
-            ))}
-
-     
-            <motion.div variants={flowerLogoVars} className="relative w-[12vw] h-[12vw] md:w-[8vw] md:h-[8vw] flex-shrink-0 mt-4 md:mt-8">
-              <Image 
-                src="/logo-orange.svg" 
-                alt="SOLUX Logo" 
-                fill 
-                className="object-contain"
-              />
-            </motion.div>
-          </motion.div>
-        </div>
-
-
-        <div className="mt-8 flex justify-center text-center">
-          <p className="text-[11px] text-white/30 font-mono tracking-widest uppercase">
-            © {new Date().getFullYear()} Solux. Powered by Solana.
-          </p>
-        </div>
-
       </div>
-    </footer>
+
+      {/* 2. The Dark Premium Footer Box */}
+      <div className="px-3 pb-3">
+        <footer className="relative w-full bg-[#242424]  rounded-[2.5rem] md:rounded-[3.5rem] pt-24 pb-8 px-6 md:px-16 flex flex-col items-center text-center overflow-hidden">
+          
+          {/* Content Container (Needs z-10 so it stays above the huge faded text) */}
+          <div className="relative z-10 w-full flex flex-col items-center">
+            
+            {/* Logo */}
+            <div className=" p-4 rounded-2xl mb-10 backdrop-blur-sm">
+              <Image src="/logo-orange.svg" alt="Solux" width={50} height={50} />
+            </div>
+
+            {/* Tagline */}
+            <h2 className="text-2xl md:text-3xl font-medium text-gray-300 max-w-xl leading-relaxed mb-16">
+              Start rewarding your contributors today with real-time data from PR Merges!
+            </h2>
+
+            {/* Contact */}
+            <div className="flex flex-col items-center gap-1 mb-20 text-sm">
+              <span className="text-gray-500">Contact us on X</span>
+              <Link href="https://x.com/SOLUXdev" target="_blank" className="text-white hover:text-orange-500 underline underline-offset-4 transition-colors">
+                @SOLUXdev
+              </Link>
+            </div>
+
+            {/* Divider Line */}
+            <div className="w-full h-px bg-white/10 mb-8" />
+
+            {/* Bottom Links Row */}
+            <div className="w-full flex flex-col-reverse md:flex-row justify-between items-center text-sm text-gray-400 gap-6 md:gap-0">
+              <p>© {new Date().getFullYear()} Solux. All rights reserved.</p>
+              
+              <div className="flex items-center gap-6">
+                <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
+                <Link href="#" className="hover:text-white transition-colors">Cookie Policy</Link>
+                <Link href="/docs" className="hover:text-white transition-colors">Docs</Link>
+                
+                <div className="flex items-center gap-4 ml-2 border-l border-white/10 pl-6">
+                  <Link href="https://github.com/Satyamyaduvanshi" target="_blank" className="hover:text-white transition-colors">
+                    <FaGithub size={18} />
+                  </Link>
+                  <Link href="https://x.com/SOLUXdev" target="_blank" className="hover:text-white transition-colors">
+                    <FaXTwitter size={18} />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Massive Faded Premium Background Text */}
+          <div className="absolute bottom-[-15%] md:bottom-[-22%] left-0 w-full flex justify-center pointer-events-none select-none z-0">
+            <span className="text-[28vw] font-black tracking-tighter text-persimmon/10  leading-none">
+              SOLUX
+            </span>
+          </div>
+
+        </footer>
+      </div>
+    </div>
   );
 }

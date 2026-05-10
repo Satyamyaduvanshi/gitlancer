@@ -59,20 +59,19 @@ export default function SoluxNav() {
                 className="object-contain transition-transform group-hover:scale-110"
                 priority
               />
-              {/* Using mono font and wide tracking to match the "WINTERFELL" pixel vibe */}
-              <span className="text-lg font-mono font-bold tracking-[0.25em] text-white uppercase hidden sm:block">
+              <span className="text-lg font-mono font-bold tracking-[0.25em] text-[#0e0e0e] uppercase hidden sm:block">
                 SOLUX
               </span>
             </Link>
           </div>
 
-          {/* 2. Center: The Link Pill (Matches screenshot perfectly) */}
+          {/* 2. Center: The Link Pill */}
           <div className="hidden md:flex flex-1 justify-center">
-            <div className="flex items-center gap-8 rounded-2xl border border-white/10 bg-[#0e0e0e]/90 backdrop-blur-xl px-8 py-1.5 shadow-2xl">
+            <div className="flex items-center gap-8 rounded-2xl border border-zinc-400 bg-white/30 backdrop-blur-xl px-8 py-1.5 shadow-2xl transition-all duration-300  ">
               <NavItems
                 items={navItems}
                 className="gap-8"
-                linkClassName="text-[13px] font-medium text-white/60 hover:text-white transition-colors"
+                linkClassName="text-[13px] font-medium text-persimmon transition-all duration-300 hover:text-zinc-700 hover:drop-shadow-[0_0_8px_rgba(252,76,2,0.8)]"
               />
             </div>
           </div>
@@ -81,11 +80,11 @@ export default function SoluxNav() {
           <div className="hidden md:flex items-center justify-end gap-6 flex-1">
             
             {/* Quick Icons */}
-            <div className="flex items-center gap-4 text-white/40">
-              <Link href="/" className="hover:text-white transition-colors">
+            <div className="flex items-center gap-4 text-[#0e0e0e]/70">
+              <Link href="/" className="hover:text-persimmon/80 transition-colors">
                 <Home size={18} />
               </Link>
-              <Link href="/docs" className="hover:text-white transition-colors">
+              <Link href="/docs" className="hover:text-persimmon/80 transition-colors">
                 <TerminalSquare size={18} />
               </Link>
             </div>

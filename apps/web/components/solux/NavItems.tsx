@@ -12,7 +12,6 @@ type Props = {
   className?: string;
   linkClassName?: string;
   onNavigate?: () => void;
-  /** Vertical list (e.g. mobile sheet) */
   stack?: boolean;
 };
 
@@ -24,7 +23,6 @@ export default function NavItems({
   stack,
 }: Props) {
   return (
-    
     <ul
       className={cn(
         "flex gap-6",
@@ -40,10 +38,12 @@ export default function NavItems({
             href={item.link}
             onClick={onNavigate}
             className={cn(
-              "px-2 text-xs font-medium uppercase tracking-[0.18em] text-neutral-700 transition-colors duration-200 ease-in-out hover:text-[#FC4C02] dark:text-neutral-200",
+              // Kept your base layout and typography styling
+              "px-2 text-xs font-medium uppercase tracking-[0.18em]",
+              // Updated to the smooth glow transition
+              "transition-all duration-300 text-persimmon hover:text-black/90",
               linkClassName
             )}
-            
           >
             {item.name}
           </a>

@@ -1,190 +1,139 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { GitPullRequest, ShieldCheck, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import { GitPullRequest, ShieldCheck, Zap, Bot, MailOpen } from "lucide-react";
 
-// Updated colors to heavily feature Persimmon and match the brand
 const steps = [
   {
-    id: 1,
-    title: "Blinky Audit AI",
-    subtitle: "Instant static analysis",
-    description: "The moment a PR is merged, Blinky intercepts the webhook. It performs deep static analysis, checks for vulnerabilities, and verifies the contribution against bounty criteria in milliseconds.",
     icon: GitPullRequest,
-    color: "text-persimmon", // Brand Primary
+    iconBg: "bg-[#3B82F6]",
+    title: "Your Contributors are Your North Star",
+    desc: "They’ll show you what’s working and what’s not. Every merged PR is a map to your product’s best version. Reward that effort instantly.",
   },
   {
-    id: 2,
-    title: "Identity Guardian",
-    subtitle: "Cryptographic binding",
-    description: "Zero spoofing. The Guardian protocol cryptographically binds the contributor's GitHub handle to their verified Solana wallet, ensuring funds only flow to the legitimate author.",
     icon: ShieldCheck,
-    color: "text-amber-400",
+    iconBg: "bg-[#EF4444]",
+    title: "Security is a Shared Journey",
+    desc: "Vulnerabilities happen, but what matters is how quickly you fix them. Blinky AI ensures every line of code is audited before a single cent leaves the vault.",
   },
   {
-    id: 3,
-    title: "Vault Settlement",
-    subtitle: "Zero-friction payout",
-    description: "Upon audit success, the on-chain vault is triggered. USDC is instantly routed to the contributor's wallet with zero intermediary fees. PR merged, crypto minted.",
     icon: Zap,
-    color: "text-emerald-400",
+    iconBg: "bg-[#F59E0B]",
+    title: "Innovation Doesn't Live in the Boardroom",
+    desc: "Some of your most game-changing features will come straight from your community. Give them a voice, and they’ll help you iterate faster.",
+  },
+  {
+    icon: Bot,
+    iconBg: "bg-[#F3F4F6]",
+    iconColor: "text-gray-900",
+    title: "Success Feels Better Shared",
+    desc: "When you nail the contribution experience, your ratings soar, your community grows, and your vision becomes a reality through decentralized labor.",
   }
 ];
 
 export default function SoluxStoryFlow() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Track the scroll progress of the sticky section
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  // ================= SLEEK 3D GIMBAL ANIMATIONS =================
-  
-  // Outer Ring
-  const rotateX1 = useTransform(scrollYProgress, [0, 1], [45, 135]);
-  const rotateY1 = useTransform(scrollYProgress, [0, 1], [0, 180]);
-  
-  // Middle Ring (Counter-rotating)
-  const rotateX2 = useTransform(scrollYProgress, [0, 1], [135, 45]);
-  const rotateZ2 = useTransform(scrollYProgress, [0, 1], [0, -360]);
-
-  // Inner Ring
-  const rotateY3 = useTransform(scrollYProgress, [0, 1], [45, 360]);
-  const rotateZ3 = useTransform(scrollYProgress, [0, 1], [-45, 45]);
-
-  // Dynamic Glow that shifts colors slightly as you scroll through the phases
-  const coreGlow = useTransform(
-    scrollYProgress, 
-    [0, 0.5, 1], 
-    [
-      "rgba(252,76,2,0.4)",  // Persimmon
-      "rgba(251,191,36,0.3)", // Amber
-      "rgba(52,211,153,0.3)"  // Emerald
-    ]
-  );
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  };
 
   return (
-    <section id="story" className="bg-black  border-white/5 selection:bg-persimmon/30 selection:text-persimmon">
+    <section id="how-it-works" className="bg-[#fafafa] pt-24 pb-32">
       
-      {/* ================= INTRO HEADER ================= */}
-      <div className="relative pt-32 pb-20 px-6 text-center z-10 flex flex-col items-center">
-        <div className="flex items-center gap-2 rounded-full bg-persimmon/10 border border-persimmon/20 px-4 py-1.5 text-[10px] font-bold text-persimmon uppercase tracking-[0.2em] mb-6">
-          Autonomous Architecture
-        </div>
-        <h2 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white tracking-tighter mb-6">
-          The Solux <span className="text-transparent bg-clip-text bg-gradient-to-r from-persimmon to-orange-500">Flow.</span>
-        </h2>
-        <p className="text-lg text-white/50 max-w-xl mx-auto font-medium">
-          Watch how open-source code transforms into secure, on-chain USDC settlement in milliseconds.
-        </p>
-      </div>
-
-      {/* ================= SCROLLING ARCHITECTURE ================= */}
-      {/* Total height is 300vh (100vh per step) */}
-      <div ref={containerRef} className="relative w-full h-[300vh]">
-        
-        {/* ⚡ The Sticky Container - Locks to the screen while you scroll */}
-        <div className="sticky top-0 left-0 w-full h-screen flex flex-col lg:flex-row overflow-hidden">
+      {/* 1. THE "OPEN LETTER" SECTION (From Screenshot_20260511_002411) */}
+      <div className="max-w-6xl mx-auto px-6 mb-40">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
           
-          {/* ==== LEFT SIDE: The Persimmon Gimbal ==== */}
-          <div className="w-full lg:w-1/2 h-[40vh] lg:h-screen relative flex items-center justify-center bg-transparent lg:border-r border-white/5 overflow-hidden">
-            
-            {/* Subtle Grid Background */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
-            
-            {/* The 3D Object Rig */}
-            <div className="relative w-72 h-72 sm:w-96 sm:h-96 flex items-center justify-center perspective-[1000px]">
-              
-              {/* Ambient Dynamic Background Glow */}
-              <motion.div 
-                style={{ backgroundColor: coreGlow }}
-                className="absolute inset-0 m-auto w-48 h-48 blur-[100px] rounded-full transition-colors duration-300"
-              />
-
-              {/* Outer Data Ring */}
-              <motion.div 
-                style={{ rotateX: rotateX1, rotateY: rotateY1, transformStyle: "preserve-3d" }}
-                className="absolute inset-0 border-[2px] border-white/10 rounded-full flex items-center justify-center shadow-[inset_0_0_50px_rgba(255,255,255,0.02)]"
-              >
-                <div className="absolute top-0 w-3 h-3 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)] -translate-y-1.5" />
-              </motion.div>
-
-              {/* Middle Dashed Ring */}
-              <motion.div 
-                style={{ rotateX: rotateX2, rotateZ: rotateZ2, transformStyle: "preserve-3d" }}
-                className="absolute inset-8 border-[2px] border-persimmon/40 border-dashed rounded-full flex items-center justify-center"
-              />
-
-              {/* Inner Solid Persimmon Ring */}
-              <motion.div 
-                style={{ rotateY: rotateY3, rotateZ: rotateZ3, transformStyle: "preserve-3d" }}
-                className="absolute inset-16 border-[4px] border-persimmon/80 rounded-full shadow-[0_0_30px_rgba(252,76,2,0.3)] flex items-center justify-center"
-              >
-                <div className="absolute inset-0 rounded-full bg-persimmon/5 backdrop-blur-sm" />
-              </motion.div>
-
-              {/* Dead Center Core */}
-              <div className="absolute m-auto w-12 h-12 bg-black border border-persimmon/50 rounded-full shadow-[0_0_40px_rgba(252,76,2,0.6)] flex items-center justify-center z-10">
-                <div className="w-3 h-3 bg-persimmon rounded-full animate-ping opacity-80" />
-                <div className="absolute w-3 h-3 bg-persimmon rounded-full" />
+          {/* Left: Branding & Main Headline */}
+          <motion.div 
+            initial="hidden" 
+            whileInView="visible" 
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeIn}
+            className="lg:sticky lg:top-32"
+          >
+            <div className="flex items-center gap-3 mb-8">
+              <div className="text-black p-2 rounded-lg">
+                <MailOpen size={20} />
               </div>
-
+              <span className="font-serif italic text-persimmon text-xl">Open Letter</span>
             </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] leading-[1.1] tracking-tight">
+              Hey Maintainer! <br/>
+              Your Project's Success Lives in Your Community's Code.
+            </h2>
+          </motion.div>
 
-            {/* Solux Matrix Label */}
-            <div className="absolute bottom-10 left-10 hidden lg:block">
-              <h3 className="text-white font-mono font-bold text-xl tracking-tight mb-1">Execution Core</h3>
-              <p className="text-persimmon font-mono text-[11px] font-bold uppercase tracking-widest">
-                Live Protocol Status
-              </p>
-            </div>
-          </div>
-
-          {/* ==== RIGHT SIDE: The Scrolling Text ==== */}
-          <div className="w-full lg:w-1/2 h-[60vh] lg:h-screen relative overflow-hidden bg-black">
+          {/* Right: The Body Text (Scroll Reveal Paragraphs) */}
+          <div className="space-y-12 text-lg md:text-xl text-gray-500 leading-relaxed font-medium">
+            <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn}>
+              As a maintainer, you've poured your heart into this. Every late night, every tough code review — it's all for your vision to come alive.
+            </motion.p>
             
-            {/* Inner Absolute Container that slides UP exactly -200vh */}
-            <motion.div 
-              style={{ y: useTransform(scrollYProgress, [0, 1], ["0vh", "-200vh"]) }}
-              className="absolute top-0 left-0 w-full"
-            >
-              {steps.map((step) => (
-                <div 
-                  key={step.id} 
-                  className="h-screen flex flex-col justify-center px-8 sm:px-16 lg:px-24"
-                >
-                  {/* Phase Badge */}
-                  <div className="mb-6 flex items-start">
-                    <div className="inline-flex items-center gap-3 px-4 py-2 rounded-md bg-white/[0.03] border border-white/10 backdrop-blur-md">
-                      <step.icon size={16} className={step.color} />
-                      <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${step.color}`}>
-                        Phase 0{step.id}
-                      </span>
-                    </div>
-                  </div>
+            <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn}>
+              But let's face it: you're not building your project for yourself. You're building it for your users and the contributors who believe in you.
+            </motion.p>
+            
+            <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn}>
+              The truth is, you don't need to guess what they want. They're already telling you — through their PRs, ideas, and even their bug reports.
+            </motion.p>
 
-                  {/* Typography perfectly matched to the pixel/monospace vibe */}
-                  <h3 className="text-4xl sm:text-5xl lg:text-6xl font-mono tracking-tight text-white mb-6">
-                    {step.title}
-                  </h3>
-
-                  <h4 className={`text-sm sm:text-base font-bold uppercase tracking-widest mb-6 ${step.color}`}>
-                    {step.subtitle}
-                  </h4>
-
-                  <p className="text-lg sm:text-xl text-[#a1a1aa] leading-relaxed font-medium max-w-lg">
-                    {step.description}
-                  </p>
-                </div>
-              ))}
-            </motion.div>
+            <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="text-[#1a1a1a] font-bold">
+              All you have to do is reward them. That's where SOLUX comes in.
+            </motion.p>
           </div>
-
         </div>
       </div>
+
+      {/* 2. THE "WHY COLLECT INSIGHTS" GRID (From Screenshot_20260511_002357) */}
+      <div className="max-w-[1200px] mx-auto px-4 md:px-6">
+        <div className="bg-[#1c1c1c] rounded-[3rem] md:rounded-[4.5rem] px-2 py-20 md:p-24 text-center overflow-hidden relative shadow-2xl">
+          
+          <motion.div 
+            initial="hidden" 
+            whileInView="visible" 
+            viewport={{ once: true }} 
+            variants={fadeIn}
+          >
+            <span className="font-serif italic text-gray-400 text-lg md:text-xl">Hear it out</span>
+            <h3 className="text-3xl md:text-5xl font-bold text-white mt-4 mb-6 tracking-tight">
+              Why Automate Payouts?
+            </h3>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-20 font-medium">
+              Because understanding your contributors isn't optional — it's everything.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-left max-w-5xl mx-auto">
+            {steps.map((step, idx) => (
+              <motion.div 
+                key={idx}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.95 },
+                  visible: { opacity: 1, scale: 1, transition: { delay: idx * 0.1, duration: 0.5 } }
+                }}
+                className="bg-[#262626] rounded-[2.5rem] p-10 md:p-12 transition-all duration-300 hover:bg-[#2d2d2d] group border border-white/5"
+              >
+                <div className={`w-12 h-12 rounded-full ${step.iconBg} ${step.iconColor || "text-white"} flex items-center justify-center mb-8 transform group-hover:scale-110 transition-transform`}>
+                  <step.icon size={22} strokeWidth={2.5} />
+                </div>
+                
+                <h4 className="text-xl md:text-2xl font-bold text-white mb-4 tracking-tight">
+                  {step.title}
+                </h4>
+                
+                <p className="text-gray-400 leading-relaxed text-base md:text-lg font-medium">
+                  {step.desc}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
     </section>
   );
 }
