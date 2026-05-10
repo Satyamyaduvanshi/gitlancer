@@ -1,14 +1,26 @@
-<p align="center">
+<div align="center">
   <img src="./apps/web/public/logo-orange.svg" alt="SOLUX logo" width="200"/>
-</p>
 
-SOLUX
+  <h1>SOLUX</h1>
 
-**Merge Code. Get Paid. The Autonomous Web3 Bounty Hunter.**
-[![Next.js](https://img.shields.io/badge/Next.js-15+-black?style=flat&logo=next.js)](https://nextjs.org/)
-[![Solana](https://img.shields.io/badge/Solana-Anchor-14F195?style=flat&logo=solana&logoColor=white)](https://solana.com/)
-[![NestJS](https://img.shields.io/badge/NestJS-Oracle-E0234E?style=flat&logo=nestjs&logoColor=white)](https://nestjs.com/)
-[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+  <strong>Merge Code. Get Paid. The Autonomous Web3 Bounty Hunter.</strong>
+
+  <br />
+  <br />
+
+  <a href="https://nextjs.org/">
+    <img src="https://img.shields.io/badge/Next.js-15+-black?style=flat&logo=next.js" alt="Next.js" />
+  </a>
+  <a href="https://solana.com/">
+    <img src="https://img.shields.io/badge/Solana-Anchor-14F195?style=flat&logo=solana&logoColor=white" alt="Solana" />
+  </a>
+  <a href="https://nestjs.com/">
+    <img src="https://img.shields.io/badge/NestJS-Oracle-E0234E?style=flat&logo=nestjs&logoColor=white" alt="NestJS" />
+  </a>
+  <a href="https://www.docker.com/">
+    <img src="https://img.shields.io/badge/Docker-Containerized-2496ED?style=flat&logo=docker&logoColor=white" alt="Docker" />
+  </a>
+</div>
 
 SOLUX is a decentralized protocol engineered to bridge the gap between open-source contributions and instant financial settlement. By combining **Agentic AI code audits (Llama 3)** with the **Solana blockchain**, SOLUX fully automates the developer bounty lifecycle—from PR submission to verified USDC payout.
 
@@ -83,7 +95,6 @@ SOLUX operates on a continuous, autonomous loop between GitHub, a centralized Or
 4. **Frontend Execution**
   ```bash
     pnpm --filter web dev
-    pnpm --filter oracle dev
   ```
 5. **Oracle (without Docker):**
   ```bash
@@ -150,7 +161,7 @@ Stateless PRs: The Oracle maintains minimal state. The source of truth for payme
 
 ## License
 
-[LICENSE](LICENSE).
+[LICENSE](LICENSE)
 
 ---
 
