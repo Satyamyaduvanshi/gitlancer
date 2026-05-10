@@ -5,9 +5,8 @@
 SOLUX
 
 **Merge Code. Get Paid. The Autonomous Web3 Bounty Hunter.**
-
 [![Next.js](https://img.shields.io/badge/Next.js-15+-black?style=flat&logo=next.js)](https://nextjs.org/)
-[![Solana](https://imgshields.io/badge/Solana-Anchor-14F195?style=flat&logo=solana&logoColor=white)](https://solana.com/)
+[![Solana](https://img.shields.io/badge/Solana-Anchor-14F195?style=flat&logo=solana&logoColor=white)](https://solana.com/)
 [![NestJS](https://img.shields.io/badge/NestJS-Oracle-E0234E?style=flat&logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 
@@ -93,17 +92,59 @@ SOLUX operates on a continuous, autonomous loop between GitHub, a centralized Or
 
 ---
 
+## Oracle Node API (NestJS)
+
+The SOLUX Oracle bridges off-chain GitHub events with on-chain Solana smart contracts. It utilizes Agentic AI (Llama 3) to verify pull requests and triggers USDC settlements upon approval.
+
+### Base URL
+`http://localhost:3000/api/v1/oracle` 
+
+### Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :---: |
+| `GET` | `/health` | Returns the health status of the Oracle node and Solana RPC connection. | ❌ |
+| `POST` | `/webhook/github` | Listens for GitHub PR merge events to trigger the Blinky AI audit. | 🔐 (HMAC) |
+| `POST` | `/audit/verify` | Manually triggers the Llama 3 AI evaluation for a specific PR. | 🔐 (API Key)|
+| `GET` | `/audit/status/:prId` | Fetches the current audit status (Pending, Approved, Rejected) for a PR. | ❌ |
+| `POST` | `/settle/trigger` | Instructs the Smart Contract to unlock and transfer USDC to the contributor. | 🔐 (Internal)|
+| `GET` | `/vault/balance/:pda` | Queries the Solana Devnet for the current USDC balance of a repository's PDA. | 🔐 |
+
+---
+
+#### `POST /webhook/github`
+Intercepts GitHub webhooks when a Pull Request is merged.
+**Headers:**
+- `X-Hub-Signature-256`: GitHub webhook signature.
+
+**Payload:**
+```json
+{
+  "action": "closed",
+  "pull_request": {
+    "id": 104,
+    "state": "closed",
+    "merged": true,
+    "user": { "login": "contributor-handle" }
+  },
+  "repository": { "full_name": "organization/repo-name" }
+}
+```
+
+
+---
+
 ## Security Model
 
 SOLUX implements a **Trust-But-Verify** model:
 
 SOLUX relies on a strict Trust-But-Verify execution environment:
 
-    Guardian Signatures: The Solana smart contract is hardcoded to reject any payout that does not contain a verified cryptographic signature from the SOLUX Oracle's private key.
+Guardian Signatures: The Solana smart contract is hardcoded to reject any payout that does not contain a verified cryptographic signature from the SOLUX Oracle's private key.
 
-    Maintainer Authority: Maintainers retain absolute control over their Vaults and can execute emergency withdrawals of idle USDC at any time.
+Maintainer Authority: Maintainers retain absolute control over their Vaults and can execute emergency withdrawals of idle USDC at any time.
 
-    Stateless PRs: The Oracle maintains minimal state. The source of truth for payment resolution always resides on the Solana ledger.
+Stateless PRs: The Oracle maintains minimal state. The source of truth for payment resolution always resides on the Solana ledger.
 
 ---
 
