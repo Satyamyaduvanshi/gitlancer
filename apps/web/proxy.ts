@@ -5,7 +5,7 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   
   // Define which paths require login
-  const isProtectedRoute = ""
+  const isProtectedRoute = pathname.startsWith('/dd')
     // pathname.startsWith('/dashboard') ||
     // pathname.startsWith('/repos') ||
     // pathname.startsWith('/recharge') ||

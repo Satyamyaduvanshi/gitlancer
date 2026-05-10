@@ -20,10 +20,9 @@ import { signOut } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
 import DashboardHeader from './DashboardHeader';
-
+import FloatingOnboarding from './FloatingOnboarding'; // 🛡️ IMPORT THE TOUR
 
 let hasLoaded = false;
-
 
 const WalletMultiButtonDynamic = dynamic(
   async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
@@ -32,8 +31,6 @@ const WalletMultiButtonDynamic = dynamic(
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  
-
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const isFirstLoad = !hasLoaded;
@@ -41,12 +38,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     hasLoaded = true;
   }, []);
 
-
   useEffect(() => {
     setIsMobileOpen(false);
   }, [pathname]);
 
- 
   const menuItems = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Repositories', href: '/repos', icon: FolderGit2 },
@@ -55,11 +50,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Pending Claims', href: '/pending-claim', icon: HandCoins } 
   ];
 
-
   const generalItems = [
     { name: 'Help', href: '/help', icon: HelpCircle },
   ];
-
 
   const NavItem = ({ item, isActive }: { item: any, isActive: boolean }) => {
     const Icon = item.icon;
@@ -95,7 +88,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   };
 
-
   const premiumEase = [0.22, 1, 0.36, 1]; 
 
   const layoutVariants = {
@@ -121,7 +113,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       className="flex h-screen w-full bg-black/5 dark:bg-[#050505] text-foreground font-sans selection:bg-persimmon/20 selection:text-persimmon p-2 gap-2 overflow-hidden"
     >
       
- 
+      {/* 🛡️ RENDER THE TOUR HERE */}
+      <FloatingOnboarding />
+
       <AnimatePresence>
         {isMobileOpen && (
           <motion.div
@@ -148,7 +142,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col pb-2">
           
-
           <div className="flex items-center justify-between mb-6 px-2">
             <Link href="/dashboard" className="flex items-center gap-3 group w-fit" onClick={() => setIsMobileOpen(false)}>
               <Image 
@@ -197,17 +190,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <span className="text-sm tracking-wide">Logout</span>
                 </button>
 
-                <div className='relative flex items-center '>
-                <div className="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/wallet:scale-[1.02] relative z-10">
-                  <WalletMultiButtonDynamic 
-                    className="w-full! justify-start! px-3! h-10! min-h-[40px]! rounded-xl! bg-zinc-400/5! hover:bg-zinc-400/10! border! border-zinc-400/10! hover:border-zinc-400/30! hover:shadow-[0_0_20px_rgba(161,161,170,0.1)]! text-foreground! font-sans! font-bold! text-[13px]! tracking-wide transition-all duration-300 active:scale-[0.98]!" 
-                  />
-                </div>
+                {/* 🛡️ THE FIX: Cleanly centered wallet button matching the layout styling without SVGs */}
+                <div className='relative mt-3 w-full'>
+                  <div className="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] relative z-10 w-full">
+                    <WalletMultiButtonDynamic 
+                      className="w-full! justify-center! px-3! h-10! min-h-[40px]! rounded-xl! bg-zinc-400/5! hover:bg-zinc-400/10! border! border-zinc-400/10! hover:border-zinc-400/30! hover:shadow-[0_0_20px_rgba(161,161,170,0.1)]! text-foreground! font-sans! font-bold! text-[13px]! tracking-wide transition-all duration-300" 
+                    />
+                  </div>
                 </div>
                 
-  
-  
-
               </nav>
             </div>
           </LayoutGroup>
