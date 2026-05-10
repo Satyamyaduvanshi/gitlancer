@@ -9,9 +9,9 @@ import { useSession } from "next-auth/react";
 import NavItems, { type NavItemsType } from "./NavItems";
 
 const navItems: NavItemsType[] = [
-  { name: "Features", link: "#story" },
+  { name: "Features", link: "#features" },
   { name: "Faq", link: "#faq" },
-  { name: "About", link: "#social-proof" },
+  { name: "About", link: "#footer" },
 ];
 
 export default function SoluxNav() {

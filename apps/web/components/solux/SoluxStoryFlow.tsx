@@ -39,7 +39,7 @@ export default function SoluxStoryFlow() {
   };
 
   return (
-    <section id="how-it-works" className="bg-[#fafafa] pt-24 pb-32">
+    <section id="story" className="bg-[#fafafa] pt-24 pb-32">
       
       {/* 1. THE "OPEN LETTER" SECTION */}
       <div className="max-w-6xl mx-auto px-6 mb-40">

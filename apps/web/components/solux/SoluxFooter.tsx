@@ -6,7 +6,10 @@ import { FaGithub, FaXTwitter, FaLinkedinIn } from "react-icons/fa6";
 
 export default function SoluxFooter() {
   return (
-    <div className="bg-[#fafafa] pt-10">
+    <div className="bg-[#fafafa] pt-10 ">
+      <section id="footer">
+
+      
       
       {/* 1. Pre-Footer Waitlist Section (From Screenshot) */}
       <div className="relative max-w-6xl mx-auto px-6 mb-24 flex flex-col items-center text-center">
@@ -93,6 +96,7 @@ export default function SoluxFooter() {
 
         </footer>
       </div>
+      </section>
     </div>
   );
 }

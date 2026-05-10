@@ -143,7 +143,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col pb-2">
           
           <div className="flex items-center justify-between mb-6 px-2">
-            <Link href="/dashboard" className="flex items-center gap-3 group w-fit" onClick={() => setIsMobileOpen(false)}>
+            <Link href="/" className="flex items-center gap-3 group w-fit" onClick={() => setIsMobileOpen(false)}>
               <Image 
                 src="/logo-orange.svg" 
                 alt="Official SOLUX Logo" 
